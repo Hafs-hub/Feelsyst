@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feelsyst — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#08080a;--s1:#0f0f12;--s2:#16161a;--s3:#1e1e24;
+  --border:#252530;--ink:#ededf0;--muted:#52525f;--dim:#2e2e38;
+  --teal:#00d4a0;--teal2:#00a87c;--teal3:rgba(0,212,160,.08);
+  --amber:#fbbf24;--blue:#60a5fa;--red:#f87171;--purple:#a78bfa;
+  --ceo:#a78bfa;--mkt:#60a5fa;--sales:#00d4a0;--cfo:#fbbf24;--sup:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Sora',sans-serif;min-height:100vh;overflow:hidden}
+
+/* ── LOGIN SCREEN ── */
+.login-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+
+.login-screen::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 50%, rgba(0,212,160,.04) 0%, transparent 70%);
+  pointer-events:none;
+}
+
+/* Grid lines */
+.login-screen::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,160,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,160,.03) 1px, transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;
+}
+
+.login-box{
+  position:relative;z-index:1;
+  width:360px;
+  animation:loginAppear .8s cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes loginAppear{
+  from{opacity:0;transform:translateY(24px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+.login-logo{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:40px;justify-content:center;
+}
+.login-logo svg{width:28px;height:28px}
+.login-logo-t{font-size:1.2rem;letter-spacing:-.5px;display:flex;align-items:baseline}
+.login-logo-t .fl{font-weight:200}.login-logo-t .sy{font-weight:700}
+.login-logo-t .dt{font-weight:200;color:var(--teal)}
+.login-logo-t .co{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--teal);letter-spacing:.5px;margin-left:1px}
+
+.login-title{
+  font-size:.65rem;font-weight:500;letter-spacing:4px;
+  text-transform:uppercase;color:var(--muted);
+  text-align:center;margin-bottom:32px;
+  font-family:'DM Mono',monospace;
+}
+
+.login-field{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px 18px;
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:12px;
+  transition:border-color .2s;
+}
+.login-field:focus-within{border-color:var(--teal)}
+.login-field-icon{font-size:14px;flex-shrink:0}
+.login-input{
+  flex:1;background:transparent;border:none;
+  color:var(--ink);font-family:'DM Mono',monospace;
+  font-size:13px;outline:none;letter-spacing:.5px;
+}
+.login-input::placeholder{color:var(--muted)}
+
+.login-btn{
+  width:100%;padding:14px;
+  background:var(--teal);color:#08080a;
+  font-family:'Sora',sans-serif;font-size:13px;font-weight:700;
+  border:none;border-radius:8px;cursor:pointer;
+  transition:all .2s;letter-spacing:.3px;margin-top:4px;
+}
+.login-btn:hover{background:var(--teal2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,160,.2)}
+
+.login-error{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--red);text-align:center;margin-top:12px;
+  display:none;
+}
+.login-error.show{display:block}
+
+.login-hint{
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--dim);text-align:center;margin-top:20px;
+  letter-spacing:1px;
+}
+
+/* ── MAIN APP ── */
+.app{display:none;height:100vh;flex-direction:column}
+.app.visible{display:flex}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:52px;padding:0 20px;
+  background:rgba(8,8,10,.97);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-shrink:0;position:relative;z-index:50;
+}
+
+.tb-logo{display:flex;align-items:center;gap:8px}
+.tb-logo svg{width:20px;height:20px}
+.tb-logo-t{font-size:.95rem;letter-spacing:-.5px;display:flex;align-items:baseline}
+.tb-logo-t .fl{font-weight:200}.tb-logo-t .sy{font-weight:700}
+.tb-logo-t .dt{font-weight:200;color:var(--teal)}
+.tb-logo-t .co{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--teal);letter-spacing:.5px;margin-left:1px}
+
+.tb-badge{
+  font-family:'DM Mono',monospace;font-size:9px;
+  color:var(--teal);border:1px solid rgba(0,212,160,.2);
+  background:rgba(0,212,160,.06);padding:3px 8px;border-radius:3px;
+  letter-spacing:1.5px;text-transform:uppercase;
+}
+
+.tb-center{display:flex;gap:2px}
+.tb-tab{
+  font-size:11px;color:var(--muted);padding:7px 14px;
+  border:none;background:transparent;cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;
+  font-family:'Sora',sans-serif;white-space:nowrap;
+}
+.tb-tab:hover{color:var(--ink)}
+.tb-tab.on{color:var(--ink);border-bottom-color:var(--teal)}
+
+.tb-right{display:flex;align-items:center;gap:12px}
+.live-row{display:flex;align-items:center;gap:6px}
+.live{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live-t{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+
+.logout-btn{
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--muted);border:1px solid var(--border);
+  background:transparent;padding:5px 12px;border-radius:4px;
+  cursor:pointer;transition:all .15s;letter-spacing:.5px;
+}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ── BODY LAYOUT ── */
+.body{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:200px;flex-shrink:0;
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:12px 8px;gap:2px;overflow-y:auto;
+  background:var(--s1);
+}
+
+.sb-label{
+  font-family:'DM Mono',monospace;font-size:8px;
+  letter-spacing:3px;text-transform:uppercase;color:var(--muted);
+  padding:10px 8px 6px;margin-top:6px;
+}
+
+.sb-btn{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 10px;border-radius:6px;
+  cursor:pointer;transition:all .15s;
+  border:none;background:transparent;
+  color:var(--muted);font-family:'Sora',sans-serif;
+  font-size:12px;width:100%;text-align:left;
+}
+.sb-btn:hover{background:var(--s2);color:var(--ink)}
+.sb-btn.on{background:var(--s2);color:var(--ink)}
+
+.sb-icon{
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+}
+.sb-info{flex:1;min-width:0}
+.sb-name{font-size:11px;font-weight:500;display:block}
+.sb-role{font-size:9px;color:var(--muted);display:block;margin-top:1px;font-family:'DM Mono',monospace}
+
+.sb-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--teal);box-shadow:0 0 5px var(--teal);
+  flex-shrink:0;animation:blink 2s ease-in-out infinite;
+}
+
+.i-ceo{background:rgba(167,139,250,.12)}
+.i-mkt{background:rgba(96,165,250,.12)}
+.i-sales{background:rgba(0,212,160,.12)}
+.i-cfo{background:rgba(251,191,36,.12)}
+.i-sup{background:rgba(248,113,113,.12)}
+
+/* ── MAIN AREA ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.view{display:none;flex:1;flex-direction:column;overflow:hidden}
+.view.on{display:flex}
+
+/* ── OVERVIEW ── */
+.overview{padding:24px;overflow-y:auto;flex:1}
+
+.ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.kpi{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:8px;padding:16px 18px;
+  animation:fadeUp .4s ease both;
+}
+.kpi:nth-child(1){animation-delay:.05s}
+.kpi:nth-child(2){animation-delay:.1s}
+.kpi:nth-child(3){animation-delay:.15s}
+.kpi:nth-child(4){animation-delay:.2s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.kpi-l{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.kpi-v{font-size:1.7rem;font-weight:200;letter-spacing:-1.5px;line-height:1;margin-bottom:4px}
+.kpi-d{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.kpi-d.up{color:var(--teal)}
+
+.ov-bottom{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.panel{background:var(--s1);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.panel-head{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+
+.activity-list{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.act-item{display:flex;gap:10px;align-items:flex-start}
+.act-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.act-text{font-size:11px;line-height:1.5;color:var(--ink)}
+.act-time{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px}
+
+/* Approval cards */
+.approval-list{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.approval-card{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:6px;padding:12px 14px;
+}
+.ap-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ap-agent{font-size:10px;font-weight:600;letter-spacing:.5px}
+.ap-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:10px;font-family:'DM Mono',monospace}
+.ap-actions{display:flex;gap:6px}
+.ap-btn{font-family:'DM Mono',monospace;font-size:10px;padding:5px 12px;border-radius:4px;cursor:pointer;border:none;transition:all .15s}
+.ap-ok{background:rgba(0,212,160,.1);color:var(--teal);border:1px solid rgba(0,212,160,.2)}
+.ap-ok:hover{background:rgba(0,212,160,.2)}
+.ap-no{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+.ap-no:hover{background:rgba(248,113,113,.2)}
+
+/* ── AGENT CHAT ── */
+.chat-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.chat-header{
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+  background:var(--s1);
+}
+.chat-avatar{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.chat-agent-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.chat-agent-role{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+.chat-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;color:var(--teal);font-family:'DM Mono',monospace}
+
+/* Instructions permanentes */
+.instructions-bar{
+  padding:10px 20px;border-bottom:1px solid var(--border);
+  background:rgba(0,212,160,.03);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.ib-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--teal);letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.ib-text{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib-edit{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:3px 8px;border-radius:3px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ib-edit:hover{border-color:var(--teal);color:var(--teal)}
+
+.chat-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+
+.msg{display:flex;gap:10px;max-width:78%;animation:msgIn .3s ease both}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.agent{align-self:flex-start}
+
+.msg-av{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;margin-top:2px;
+}
+.msg-av.user-av{
+  background:rgba(0,212,160,.1);border:1px solid rgba(0,212,160,.2);
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:var(--teal);
+}
+
+.msg-body{}
+.msg-bubble{
+  padding:10px 14px;border-radius:10px;font-size:12px;line-height:1.7;
+}
+.msg.agent .msg-bubble{
+  background:var(--s2);border:1px solid var(--border);color:var(--ink);
+  border-radius:3px 10px 10px 10px;
+}
+.msg.user .msg-bubble{
+  background:var(--teal);color:#08080a;font-weight:500;
+  border-radius:10px 3px 10px 10px;
+}
+.msg-time{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;padding:0 2px}
+.msg.user .msg-time{text-align:right}
+
+/* Thinking */
+.thinking-msg{display:flex;gap:10px;align-items:flex-start}
+.thinking-bubble{
+  display:flex;gap:4px;align-items:center;
+  padding:10px 14px;background:var(--s2);
+  border:1px solid var(--border);border-radius:3px 10px 10px 10px;
+}
+.thinking-bubble span{
+  width:5px;height:5px;background:var(--muted);
+  border-radius:50%;animation:bounce 1.2s ease-in-out infinite;
+}
+.thinking-bubble span:nth-child(2){animation-delay:.2s}
+.thinking-bubble span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-4px);opacity:1}}
+
+/* Quick commands */
+.quick-cmds{padding:10px 20px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.qcmd{
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--muted);border:1px solid var(--border);
+  background:transparent;padding:5px 10px;border-radius:4px;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.qcmd:hover{border-color:var(--teal);color:var(--teal)}
+
+/* Chat input */
+.chat-input-area{
+  padding:12px 20px;border-top:1px solid var(--border);
+  flex-shrink:0;background:var(--s1);
+}
+.chat-row{display:flex;gap:8px;align-items:flex-end}
+.chat-input{
+  flex:1;background:var(--s2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;color:var(--ink);
+  font-family:'DM Mono',monospace;font-size:12px;outline:none;
+  transition:border-color .15s;resize:none;max-height:100px;
+  line-height:1.5;
+}
+.chat-input:focus{border-color:var(--teal)}
+.chat-input::placeholder{color:var(--muted)}
+.send-btn{
+  width:40px;height:40px;background:var(--teal);
+  border:none;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.send-btn:hover{background:var(--teal2);transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.send-btn svg{width:16px;height:16px;fill:#08080a}
+
+/* ── SETTINGS VIEW ── */
+.settings-wrap{padding:24px;overflow-y:auto;flex:1}
+.settings-section{margin-bottom:28px}
+.settings-title{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;background:var(--s1);border:1px solid var(--border);
+  border-radius:6px;margin-bottom:6px;gap:16px;
+}
+.setting-info h4{font-size:12px;font-weight:500;margin-bottom:3px}
+.setting-info p{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;line-height:1.5}
+
+/* Toggle */
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;background:var(--border);
+  border-radius:11px;cursor:pointer;transition:.3s;
+}
+.toggle-slider::before{
+  content:'';position:absolute;height:16px;width:16px;
+  left:3px;bottom:3px;background:#fff;border-radius:50%;
+  transition:.3s;
+}
+.toggle input:checked + .toggle-slider{background:var(--teal)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(18px)}
+
+/* Permission level */
+.perm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.perm-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:6px;padding:14px;cursor:pointer;transition:all .15s;text-align:center;
+}
+.perm-card:hover{border-color:var(--teal)}
+.perm-card.selected{border-color:var(--teal);background:var(--teal3)}
+.perm-icon{font-size:1.4rem;margin-bottom:8px}
+.perm-name{font-size:11px;font-weight:600;margin-bottom:4px}
+.perm-desc{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;line-height:1.5}
+
+/* Instruction editor */
+.inst-editor{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;margin-bottom:8px;
+}
+.inst-head{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.inst-agent{font-size:11px;font-weight:500}
+.inst-textarea{
+  width:100%;padding:12px 14px;background:transparent;
+  border:none;color:var(--muted);font-family:'DM Mono',monospace;
+  font-size:11px;resize:vertical;min-height:70px;outline:none;
+  line-height:1.7;
+}
+.inst-textarea:focus{color:var(--ink)}
+.save-inst-btn{
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--teal);background:rgba(0,212,160,.08);
+  border:1px solid rgba(0,212,160,.2);padding:4px 10px;
+  border-radius:3px;cursor:pointer;transition:all .15s;
+}
+.save-inst-btn:hover{background:rgba(0,212,160,.15)}
+
+/* ── LOG VIEW ── */
+.log-wrap{padding:24px;overflow-y:auto;flex:1}
+.log-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.log-row{
+  display:grid;grid-template-columns:120px 80px 1fr auto;
+  gap:16px;align-items:center;padding:12px 16px;
+  border-bottom:1px solid var(--border);background:var(--s1);
+  transition:background .15s;font-size:11px;
+}
+.log-row:last-child{border-bottom:none}
+.log-row:hover{background:var(--s2)}
+.log-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.log-agent{font-size:10px;font-weight:600}
+.log-action{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.log-status{font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;border-radius:3px}
+.ls-ok{background:rgba(0,212,160,.08);color:var(--teal);border:1px solid rgba(0,212,160,.15)}
+.ls-pending{background:rgba(251,191,36,.08);color:var(--amber);border:1px solid rgba(251,191,36,.15)}
+.ls-error{background:rgba(248,113,113,.08);color:var(--red);border:1px solid rgba(248,113,113,.15)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ── ALERT ── */
+.alert{
+  position:fixed;bottom:24px;right:24px;z-index:500;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:8px;padding:12px 16px;
+  display:flex;align-items:center;gap:10px;
+  font-size:12px;max-width:300px;
+  animation:alertIn .3s ease both;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+@keyframes alertIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.alert.teal{border-color:rgba(0,212,160,.3)}
+.alert.red{border-color:rgba(248,113,113,.3)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .ov-grid{grid-template-columns:repeat(2,1fr)}
+  .ov-bottom{grid-template-columns:1fr}
+  .perm-grid{grid-template-columns:1fr}
+  .tb-center{display:none}
+  .log-row{grid-template-columns:1fr auto}
+  .log-time,.log-agent{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- LOGIN SCREEN -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+
+    <div class="login-logo">
+      <svg viewBox="0 0 64 64" fill="none">
+        <rect x="1" y="1" width="62" height="62" stroke="#252530" stroke-width=".6"/>
+        <line x1="18" y1="16" x2="18" y2="48" stroke="#ededf0" stroke-width="1.3" stroke-linecap="round"/>
+        <line x1="18" y1="16" x2="38" y2="16" stroke="#ededf0" stroke-width="1.3" stroke-linecap="round"/>
+        <line x1="18" y1="32" x2="32" y2="32" stroke="#ededf0" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="46" cy="48" r="4" fill="#00d4a0"/>
+      </svg>
+      <div class="login-logo-t">
+        <span class="fl">feel</span><span class="sy">syst</span><span class="dt">.</span><span class="co">com</span>
+      </div>
+    </div>
+
+    <div class="login-title">Panneau d'administration · Accès privé</div>
+
+    <div class="login-field">
+      <span class="login-field-icon">👤</span>
+      <input class="login-input" id="loginUser" type="text" placeholder="Identifiant admin" autocomplete="off">
+    </div>
+
+    <div class="login-field">
+      <span class="login-field-icon">🔑</span>
+      <input class="login-input" id="loginPass" type="password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">Accéder au panneau de contrôle</button>
+
+    <div class="login-error" id="loginError">Identifiants incorrects. Réessaie.</div>
+
+    <div class="login-hint">
+      demo : admin / feelsyst2026
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MAIN APP -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="app" id="mainApp">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo">
+      <svg viewBox="0 0 64 64" fill="none">
+        <rect x="1" y="1" width="62" height="62" stroke="#252530" stroke-width=".6"/>
+        <line x1="18" y1="16" x2="18" y2="48" stroke="#ededf0" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="16" x2="38" y2="16" stroke="#ededf0" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="32" x2="32" y2="32" stroke="#ededf0" stroke-width="1.2" stroke-linecap="round"/>
+        <circle cx="46" cy="48" r="4" fill="#00d4a0"/>
+      </svg>
+      <div class="tb-logo-t">
+        <span class="fl">feel</span><span class="sy">syst</span><span class="dt">.</span><span class="co">com</span>
+      </div>
+      <span class="tb-badge">ADMIN</span>
+    </div>
+
+    <div class="tb-center">
+      <button class="tb-tab on" onclick="switchView('overview',this)">Vue d'ensemble</button>
+      <button class="tb-tab" onclick="switchView('logs',this)">Journal</button>
+      <button class="tb-tab" onclick="switchView('settings',this)">Paramètres</button>
+    </div>
+
+    <div class="tb-right">
+      <div class="live-row">
+        <div class="live"></div>
+        <span class="live-t">5 agents actifs</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-label">Vue globale</div>
+      <button class="sb-btn on" onclick="switchView('overview',null);setSbActive(this)">
+        <div class="sb-icon" style="background:rgba(0,212,160,.1)">📊</div>
+        <div class="sb-info">
+          <span class="sb-name">Dashboard</span>
+          <span class="sb-role">Vue générale</span>
+        </div>
+      </button>
+
+      <div class="sb-label">Agents IA</div>
+
+      <button class="sb-btn" onclick="openAgent('ceo');setSbActive(this)">
+        <div class="sb-icon i-ceo">🧠</div>
+        <div class="sb-info">
+          <span class="sb-name">Aria</span>
+          <span class="sb-role">CEO · Stratégie</span>
+        </div>
+        <div class="sb-dot"></div>
+      </button>
+
+      <button class="sb-btn" onclick="openAgent('mkt');setSbActive(this)">
+        <div class="sb-icon i-mkt">📣</div>
+        <div class="sb-info">
+          <span class="sb-name">Nova</span>
+          <span class="sb-role">CMO · Marketing</span>
+        </div>
+        <div class="sb-dot"></div>
+      </button>
+
+      <button class="sb-btn" onclick="openAgent('sales');setSbActive(this)">
+        <div class="sb-icon i-sales">🤝</div>
+        <div class="sb-info">
+          <span class="sb-name">Rex</span>
+          <span class="sb-role">Sales · Commerce</span>
+        </div>
+        <div class="sb-dot"></div>
+      </button>
+
+      <button class="sb-btn" onclick="openAgent('cfo');setSbActive(this)">
+        <div class="sb-icon i-cfo">💰</div>
+        <div class="sb-info">
+          <span class="sb-name">Vera</span>
+          <span class="sb-role">CFO · Finance</span>
+        </div>
+        <div class="sb-dot"></div>
+      </button>
+
+      <button class="sb-btn" onclick="openAgent('sup');setSbActive(this)">
+        <div class="sb-icon i-sup">🙋</div>
+        <div class="sb-info">
+          <span class="sb-name">Lumi</span>
+          <span class="sb-role">Support · Clients</span>
+        </div>
+        <div class="sb-dot"></div>
+      </button>
+
+      <div class="sb-label">Outils</div>
+      <button class="sb-btn" onclick="switchView('logs',null);setSbActive(this)">
+        <div class="sb-icon" style="background:rgba(251,191,36,.1)">📋</div>
+        <div class="sb-info">
+          <span class="sb-name">Journal</span>
+          <span class="sb-role">Toutes les actions</span>
+        </div>
+      </button>
+      <button class="sb-btn" onclick="switchView('settings',null);setSbActive(this)">
+        <div class="sb-icon" style="background:rgba(167,139,250,.1)">⚙️</div>
+        <div class="sb-info">
+          <span class="sb-name">Paramètres</span>
+          <span class="sb-role">Config & permissions</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- ── OVERVIEW ── -->
+      <div class="view on" id="view-overview">
+        <div class="overview">
+          <div class="ov-grid">
+            <div class="kpi">
+              <div class="kpi-l">Trésorerie</div>
+              <div class="kpi-v" style="color:var(--teal)" id="ov-treasury">€50,000</div>
+              <div class="kpi-d up">Capital initial</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">Clients actifs</div>
+              <div class="kpi-v" id="ov-clients">0</div>
+              <div class="kpi-d" id="ov-clients-d">Objectif : 10</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">Actions agents</div>
+              <div class="kpi-v" style="color:var(--blue)" id="ov-actions">0</div>
+              <div class="kpi-d">Cette session</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">En attente</div>
+              <div class="kpi-v" style="color:var(--amber)" id="ov-pending">2</div>
+              <div class="kpi-d">Approbations requises</div>
+            </div>
+          </div>
+
+          <div class="ov-bottom">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Activité récente</span>
+                <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">Temps réel</span>
+              </div>
+              <div class="activity-list" id="activityList">
+                <div class="act-item">
+                  <div class="act-dot" style="background:var(--teal)"></div>
+                  <div>
+                    <div class="act-text">Système initialisé — 5 agents déployés</div>
+                    <div class="act-time">À l'instant</div>
+                  </div>
+                </div>
+                <div class="act-item">
+                  <div class="act-dot" style="background:var(--purple)"></div>
+                  <div>
+                    <div class="act-text">Aria en attente de directives stratégiques</div>
+                    <div class="act-time">À l'instant</div>
+                  </div>
+                </div>
+                <div class="act-item">
+                  <div class="act-dot" style="background:var(--blue)"></div>
+                  <div>
+                    <div class="act-text">Nova prête à publier du contenu LinkedIn</div>
+                    <div class="act-time">À l'instant</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Approbations requises</span>
+                <span id="pendingCount" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--amber)">2 en attente</span>
+              </div>
+              <div class="approval-list" id="approvalList">
+                <div class="approval-card">
+                  <div class="ap-head">
+                    <span class="ap-agent" style="color:var(--teal)">🤝 Rex</span>
+                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">Il y a 2 min</span>
+                  </div>
+                  <div class="ap-desc">Demande d'envoyer une séquence de 50 emails de prospection aux restaurants de ta région cette semaine.</div>
+                  <div class="ap-actions">
+                    <button class="ap-btn ap-ok" onclick="approve(this,'Rex a lancé la séquence de prospection restaurants')">✓ Approuver</button>
+                    <button class="ap-btn ap-no" onclick="reject(this)">✗ Refuser</button>
+                  </div>
+                </div>
+                <div class="approval-card">
+                  <div class="ap-head">
+                    <span class="ap-agent" style="color:var(--blue)">📣 Nova</span>
+                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">Il y a 5 min</span>
+                  </div>
+                  <div class="ap-desc">Propose de publier un post LinkedIn controversé sur "Pourquoi les agences marketing traditionnelles sont obsolètes".</div>
+                  <div class="ap-actions">
+                    <button class="ap-btn ap-ok" onclick="approve(this,'Nova a publié le post LinkedIn controversé')">✓ Approuver</button>
+                    <button class="ap-btn ap-no" onclick="reject(this)">✗ Refuser</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AGENT CHATS ── -->
+      <div class="view" id="view-agent">
+        <div class="chat-wrap">
+          <div class="chat-header" id="chatHeader">
+            <div class="chat-avatar" id="chatAvatar">🧠</div>
+            <div>
+              <div class="chat-agent-name" id="chatName">Aria</div>
+              <div class="chat-agent-role" id="chatRole">CEO · Stratégie & Vision · Feelsyst.com</div>
+            </div>
+            <div class="chat-status">
+              <div class="live"></div>
+              <span id="chatStatus">Active</span>
+            </div>
+          </div>
+
+          <div class="instructions-bar">
+            <span class="ib-label">Instructions</span>
+            <span class="ib-text" id="instBar">Chargement...</span>
+            <button class="ib-edit" onclick="switchView('settings',null)">Modifier</button>
+          </div>
+
+          <div class="chat-messages" id="chatMessages"></div>
+
+          <div class="quick-cmds" id="quickCmds"></div>
+
+          <div class="chat-input-area">
+            <div class="chat-row">
+              <textarea
+                class="chat-input"
+                id="chatInput"
+                placeholder="Donne une instruction à l'agent..."
+                rows="1"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+              ></textarea>
+              <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LOGS ── -->
+      <div class="view" id="view-logs">
+        <div class="log-wrap">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--teal);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">Journal système</div>
+              <div style="font-size:1.4rem;font-weight:300;letter-spacing:-1px">Toutes les <strong style="font-weight:700">actions agents</strong></div>
+            </div>
+            <button onclick="clearLogs()" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);border:1px solid var(--border);background:transparent;padding:6px 12px;border-radius:4px;cursor:pointer">Effacer</button>
+          </div>
+          <div class="log-list" id="logList">
+            <div class="log-row">
+              <div class="log-time">Aujourd'hui 09:00</div>
+              <div class="log-agent" style="color:var(--purple)">Aria</div>
+              <div class="log-action">Système Feelsyst.com initialisé — 5 agents déployés et opérationnels</div>
+              <span class="log-status ls-ok">OK</span>
+            </div>
+            <div class="log-row">
+              <div class="log-time">Aujourd'hui 09:01</div>
+              <div class="log-agent" style="color:var(--teal)">Rex</div>
+              <div class="log-action">Demande d'approbation : séquence prospection 50 emails restaurants</div>
+              <span class="log-status ls-pending">En attente</span>
+            </div>
+            <div class="log-row">
+              <div class="log-time">Aujourd'hui 09:02</div>
+              <div class="log-agent" style="color:var(--blue)">Nova</div>
+              <div class="log-action">Demande d'approbation : post LinkedIn controversé sur agences traditionnelles</div>
+              <span class="log-status ls-pending">En attente</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="view" id="view-settings">
+        <div class="settings-wrap">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--teal);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">Configuration</div>
+          <div style="font-size:1.4rem;font-weight:300;letter-spacing:-1px;margin-bottom:24px">Paramètres & <strong style="font-weight:700">permissions</strong></div>
+
+          <!-- Niveau de contrôle -->
+          <div class="settings-section">
+            <div class="settings-title">Niveau de contrôle des agents</div>
+            <div class="perm-grid">
+              <div class="perm-card" onclick="setPerm(this)">
+                <div class="perm-icon">🟢</div>
+                <div class="perm-name">Supervision</div>
+                <div class="perm-desc">Agents autonomes. Rapport quotidien. Tu interviens si problème.</div>
+              </div>
+              <div class="perm-card selected" onclick="setPerm(this)">
+                <div class="perm-icon">🟡</div>
+                <div class="perm-name">Contrôle actif</div>
+                <div class="perm-desc">Tu valides les décisions importantes. Agents exécutent le reste.</div>
+              </div>
+              <div class="perm-card" onclick="setPerm(this)">
+                <div class="perm-icon">🔴</div>
+                <div class="perm-name">Contrôle total</div>
+                <div class="perm-desc">Chaque action nécessite ton approbation. Risque zéro.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toggles -->
+          <div class="settings-section">
+            <div class="settings-title">Permissions des agents</div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <h4>Rex peut envoyer des emails sans approbation</h4>
+                <p>Rex envoie jusqu'à 50 emails/jour de façon autonome</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="tog1"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <h4>Nova peut publier sans approbation</h4>
+                <p>Nova publie sur LinkedIn et Instagram de façon autonome</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="tog2" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <h4>Vera peut émettre des factures automatiquement</h4>
+                <p>Vera génère et envoie les factures dès qu'un paiement est reçu</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="tog3" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <h4>Lumi peut répondre aux clients sans approbation</h4>
+                <p>Lumi répond aux emails clients en moins de 5 minutes</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="tog4" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <h4>Alertes email pour les décisions importantes</h4>
+                <p>Tu reçois un email quand un agent demande une approbation</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="tog5" checked><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+
+          <!-- Instructions permanentes -->
+          <div class="settings-section">
+            <div class="settings-title">Instructions permanentes des agents</div>
+
+            <div class="inst-editor">
+              <div class="inst-head">
+                <span class="inst-agent">🧠 Aria — CEO</span>
+                <button class="save-inst-btn" onclick="saveInst('ceo',this)">Sauvegarder</button>
+              </div>
+              <textarea class="inst-textarea" id="inst-ceo">Tu es Aria, CEO de Feelsyst.com. Priorité absolue : atteindre 10 clients dans le premier mois. Toutes tes décisions stratégiques doivent viser cet objectif. Budget disponible : 0€ (croissance organique uniquement). Langue : français.</textarea>
+            </div>
+
+            <div class="inst-editor">
+              <div class="inst-head">
+                <span class="inst-agent">📣 Nova — CMO</span>
+                <button class="save-inst-btn" onclick="saveInst('mkt',this)">Sauvegarder</button>
+              </div>
+              <textarea class="inst-textarea" id="inst-mkt">Tu es Nova, CMO de Feelsyst.com. Publie 3 fois par semaine sur LinkedIn (lundi, mercredi, vendredi à 10h). Ton : expert mais accessible. Cible : PME françaises de 1 à 50 personnes. Mentionne Feelsyst subtilement, jamais de façon publicitaire directe.</textarea>
+            </div>
+
+            <div class="inst-editor">
+              <div class="inst-head">
+                <span class="inst-agent">🤝 Rex — Sales</span>
+                <button class="save-inst-btn" onclick="saveInst('sales',this)">Sauvegarder</button>
+              </div>
+              <textarea class="inst-textarea" id="inst-sales">Tu es Rex, commercial de Feelsyst.com. Prospecte 50 PME par semaine par email. Secteurs prioritaires : e-commerce, immobilier, coachs. Propose toujours le Pack Starter à €49 en premier contact. Séquence : J0 premier contact, J+3 relance, J+7 dernière chance.</textarea>
+            </div>
+
+            <div class="inst-editor">
+              <div class="inst-head">
+                <span class="inst-agent">💰 Vera — CFO</span>
+                <button class="save-inst-btn" onclick="saveInst('cfo',this)">Sauvegarder</button>
+              </div>
+              <textarea class="inst-textarea" id="inst-cfo">Tu es Vera, CFO de Feelsyst.com. Surveille chaque transaction. Alerte immédiate si la trésorerie passe sous 40,000€. Génère une facture dans les 5 minutes après chaque paiement Stripe. Rapport financier chaque lundi à 8h.</textarea>
+            </div>
+
+            <div class="inst-editor">
+              <div class="inst-head">
+                <span class="inst-agent">🙋 Lumi — Support</span>
+                <button class="save-inst-btn" onclick="saveInst('sup',this)">Sauvegarder</button>
+              </div>
+              <textarea class="inst-textarea" id="inst-sup">Tu es Lumi, support de Feelsyst.com. Réponds à chaque email client en moins de 5 minutes. Ton : chaleureux et professionnel. Si un client exprime une insatisfaction, propose immédiatement un mois gratuit. Détecte les opportunités d'upsell vers le Pack Pro.</textarea>
+            </div>
+          </div>
+
+          <!-- Sécurité -->
+          <div class="settings-section">
+            <div class="settings-title">Sécurité du panneau admin</div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <h4>Changer le mot de passe admin</h4>
+                <p>URL actuelle : feelsyst.com/admin-fs-2026</p>
+              </div>
+              <button onclick="showAlert('Fonctionnalité disponible après déploiement réel','teal')" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);border:1px solid var(--border);background:transparent;padding:6px 12px;border-radius:4px;cursor:pointer">Modifier →</button>
+            </div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <h4>Double authentification (2FA)</h4>
+                <p>Code SMS à chaque connexion admin</p>
+              </div>
+              <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /body -->
+</div><!-- /app -->
+
+<script>
+// ── CONFIG ──
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'feelsyst2026';
+
+// ── AGENT CONFIG ──
+const agents = {
+  ceo: {
+    name:'Aria', role:'CEO · Stratégie & Vision · Feelsyst.com',
+    icon:'🧠', iconClass:'i-ceo', color:'var(--purple)',
+    status:'Active',
+    system: () => document.getElementById('inst-ceo').value,
+    quickCmds: [
+      'Quel est notre plan pour les 10 premiers clients ?',
+      'Analyse notre position sur le marché',
+      'Donne-moi un rapport de la semaine',
+      'Quels sont les risques à surveiller ?'
+    ]
+  },
+  mkt: {
+    name:'Nova', role:'CMO · Marketing & Contenu · Feelsyst.com',
+    icon:'📣', iconClass:'i-mkt', color:'var(--blue)',
+    status:'Active',
+    system: () => document.getElementById('inst-mkt').value,
+    quickCmds: [
+      'Génère un post LinkedIn pour aujourd\'hui',
+      'Crée un article SEO sur le marketing IA',
+      'Propose une stratégie de contenu ce mois',
+      'Rédige une newsletter pour nos prospects'
+    ]
+  },
+  sales: {
+    name:'Rex', role:'Sales · Prospection & Commerce · Feelsyst.com',
+    icon:'🤝', iconClass:'i-sales', color:'var(--teal)',
+    status:'Actif',
+    system: () => document.getElementById('inst-sales').value,
+    quickCmds: [
+      'Lance la prospection sur les e-commerces',
+      'Génère 5 emails de prospection',
+      'Donne-moi le statut du pipeline',
+      'Rédige une relance pour les prospects silencieux'
+    ]
+  },
+  cfo: {
+    name:'Vera', role:'CFO · Finance & Trésorerie · Feelsyst.com',
+    icon:'💰', iconClass:'i-cfo', color:'var(--amber)',
+    status:'Active',
+    system: () => document.getElementById('inst-cfo').value,
+    quickCmds: [
+      'Quel est l\'état de la trésorerie ?',
+      'Génère le rapport financier de la semaine',
+      'Quand atteignons-nous le break-even ?',
+      'Optimise nos dépenses ce mois'
+    ]
+  },
+  sup: {
+    name:'Lumi', role:'Support · Satisfaction Client · Feelsyst.com',
+    icon:'🙋', iconClass:'i-sup', color:'var(--red)',
+    status:'Active',
+    system: () => document.getElementById('inst-sup').value,
+    quickCmds: [
+      'Rédige un email de bienvenue client',
+      'Prépare une réponse à une plainte type',
+      'Comment améliorer la satisfaction client ?',
+      'Identifie les opportunités d\'upsell'
+    ]
+  }
+};
+
+let currentAgent = null;
+let actionCount = 0;
+const logs = [];
+
+// ── LOGIN ──
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').classList.add('visible');
+  } else {
+    document.getElementById('loginError').classList.add('show');
+    document.getElementById('loginPass').value = '';
+    setTimeout(() => document.getElementById('loginError').classList.remove('show'), 3000);
+  }
+}
+
+function doLogout() {
+  document.getElementById('mainApp').classList.remove('visible');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+// ── NAVIGATION ──
+function switchView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.querySelectorAll('.tb-tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('view-' + name).classList.add('on');
+  if (btn) btn.classList.add('on');
+}
+
+function setSbActive(btn) {
+  document.querySelectorAll('.sb-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+// ── OPEN AGENT ──
+function openAgent(agentKey) {
+  currentAgent = agentKey;
+  const ag = agents[agentKey];
+
+  // Switch to agent view
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.querySelectorAll('.tb-tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('view-agent').classList.add('on');
+
+  // Update header
+  document.getElementById('chatAvatar').textContent = ag.icon;
+  document.getElementById('chatAvatar').className = 'chat-avatar ' + ag.iconClass;
+  document.getElementById('chatName').textContent = ag.name;
+  document.getElementById('chatRole').textContent = ag.role;
+  document.getElementById('chatStatus').textContent = ag.status;
+
+  // Update instructions bar
+  document.getElementById('instBar').textContent = ag.system().substring(0, 80) + '...';
+
+  // Clear messages and add welcome
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML = '';
+  addAgentMsg(ag.icon + ' ' + ag.name + ' connecté. Bonjour ! Je suis prêt à recevoir tes instructions. Comment puis-je t\'aider ?', ag.iconClass);
+
+  // Quick commands
+  const qc = document.getElementById('quickCmds');
+  qc.innerHTML = ag.quickCmds.map(cmd =>
+    `<button class="qcmd" onclick="sendQuick('${cmd.replace(/'/g,"\\'")}')">${cmd}</button>`
+  ).join('');
+
+  // Focus input
+  setTimeout(() => document.getElementById('chatInput').focus(), 100);
+}
+
+// ── CHAT ──
+function sendQuick(text) {
+  document.getElementById('chatInput').value = text;
+  sendMsg();
+}
+
+function addAgentMsg(text, iconClass) {
+  const ag = agents[currentAgent];
+  const msgs = document.getElementById('chatMessages');
+  const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  div.innerHTML = `
+    <div class="msg-av ${iconClass}">${ag.icon}</div>
+    <div class="msg-body">
+      <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>
+      <div class="msg-time">${now}</div>
+    </div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !currentAgent) return;
+
+  const ag = agents[currentAgent];
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+  input.value = '';
+
+  const msgs = document.getElementById('chatMessages');
+  const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+
+  // User message
+  const uDiv = document.createElement('div');
+  uDiv.className = 'msg user';
+  uDiv.innerHTML = `
+    <div class="msg-av user-av">MOI</div>
+    <div class="msg-body">
+      <div class="msg-bubble">${text}</div>
+      <div class="msg-time">${now}</div>
+    </div>
+  `;
+  msgs.appendChild(uDiv);
+
+  // Thinking
+  const tDiv = document.createElement('div');
+  tDiv.className = 'thinking-msg';
+  tDiv.innerHTML = `
+    <div class="msg-av ${ag.iconClass}">${ag.icon}</div>
+    <div class="thinking-bubble"><span></span><span></span><span></span></div>
+  `;
+  msgs.appendChild(tDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Build history from existing messages
+  const history = [];
+  msgs.querySelectorAll('.msg:not(:last-child)').forEach(m => {
+    const bubble = m.querySelector('.msg-bubble');
+    if (!bubble) return;
+    if (m.classList.contains('user')) {
+      history.push({role:'user', content:bubble.textContent});
+    } else {
+      history.push({role:'assistant', content:bubble.textContent});
+    }
+  });
+  history.push({role:'user', content:text});
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system: ag.system() + '\n\nTu réponds TOUJOURS en français. Tu es dans le panneau de contrôle privé du fondateur de Feelsyst.com. Sois direct, concret et opérationnel. Tu peux prendre des décisions et exécuter des tâches.',
+        messages: history
+      })
+    });
+    const data = await res.json();
+    const reply = data.content.map(c => c.text||'').join('');
+
+    tDiv.remove();
+    addAgentMsg(reply, ag.iconClass);
+
+    // Update stats
+    actionCount++;
+    document.getElementById('ov-actions').textContent = actionCount;
+    addActivity(ag.icon + ' ' + ag.name + ' — "' + text.substring(0,40) + (text.length>40?'…':'') + '"', ag.color);
+    addLog(ag.name, text, 'ok');
+
+  } catch(e) {
+    tDiv.remove();
+    const eDiv = document.createElement('div');
+    eDiv.className = 'msg agent';
+    eDiv.innerHTML = `<div class="msg-av ${ag.iconClass}">${ag.icon}</div><div class="msg-bubble" style="color:var(--red);background:var(--s2);border:1px solid var(--border);padding:10px 14px;border-radius:10px;font-size:12px">Erreur de connexion à l'API. Vérifie ta clé Anthropic dans le fichier .env</div>`;
+    msgs.appendChild(eDiv);
+    addLog(ag.name, text, 'error');
+  }
+
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+// ── ACTIVITY ──
+function addActivity(text, color) {
+  const list = document.getElementById('activityList');
+  const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  const item = document.createElement('div');
+  item.className = 'act-item';
+  item.style.animation = 'fadeUp .3s ease both';
+  item.innerHTML = `
+    <div class="act-dot" style="background:${color}"></div>
+    <div>
+      <div class="act-text">${text}</div>
+      <div class="act-time">${now}</div>
+    </div>
+  `;
+  list.insertBefore(item, list.firstChild);
+  if (list.children.length > 8) list.removeChild(list.lastChild);
+}
+
+// ── LOGS ──
+function addLog(agent, action, status) {
+  const list = document.getElementById('logList');
+  const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  const colors = {ceo:'var(--purple)',mkt:'var(--blue)',sales:'var(--teal)',cfo:'var(--amber)',sup:'var(--red)'};
+  const agColor = colors[currentAgent] || 'var(--ink)';
+  const row = document.createElement('div');
+  row.className = 'log-row';
+  row.innerHTML = `
+    <div class="log-time">Aujourd'hui ${now}</div>
+    <div class="log-agent" style="color:${agColor}">${agent}</div>
+    <div class="log-action">${action.substring(0,80)}${action.length>80?'…':''}</div>
+    <span class="log-status ${status==='ok'?'ls-ok':status==='error'?'ls-error':'ls-pending'}">${status==='ok'?'OK':status==='error'?'Erreur':'En attente'}</span>
+  `;
+  list.insertBefore(row, list.firstChild);
+}
+
+function clearLogs() {
+  document.getElementById('logList').innerHTML = '<div style="padding:20px;text-align:center;font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted)">Journal vidé</div>';
+}
+
+// ── APPROVALS ──
+let pendingCount = 2;
+function approve(btn, actionText) {
+  const card = btn.closest('.approval-card');
+  pendingCount--;
+  document.getElementById('ov-pending').textContent = pendingCount;
+  document.getElementById('pendingCount').textContent = pendingCount + ' en attente';
+  card.style.opacity = '.4';
+  card.style.pointerEvents = 'none';
+  addActivity('✓ Approuvé — ' + actionText, 'var(--teal)');
+  addLog('Fondateur', 'Approuvé : ' + actionText, 'ok');
+  showAlert('Action approuvée — agent en cours d\'exécution', 'teal');
+}
+
+function reject(btn) {
+  const card = btn.closest('.approval-card');
+  pendingCount--;
+  document.getElementById('ov-pending').textContent = pendingCount;
+  document.getElementById('pendingCount').textContent = pendingCount + ' en attente';
+  card.style.opacity = '.4';
+  card.style.pointerEvents = 'none';
+  showAlert('Action refusée — agent notifié', 'red');
+}
+
+// ── SETTINGS ──
+function setPerm(card) {
+  document.querySelectorAll('.perm-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  showAlert('Niveau de contrôle mis à jour', 'teal');
+}
+
+function saveInst(agentKey, btn) {
+  btn.textContent = '✓ Sauvegardé';
+  btn.style.color = 'var(--teal)';
+  setTimeout(() => { btn.textContent = 'Sauvegarder'; btn.style.color = ''; }, 2000);
+  document.getElementById('instBar').textContent = agents[agentKey].system().substring(0,80) + '...';
+  showAlert('Instructions de ' + agents[agentKey].name + ' mises à jour', 'teal');
+}
+
+// ── ALERT ──
+function showAlert(text, type) {
+  const a = document.createElement('div');
+  a.className = `alert ${type}`;
+  a.innerHTML = `<span>${type==='teal'?'✓':'⚠'}</span><span style="font-size:12px">${text}</span>`;
+  document.body.appendChild(a);
+  setTimeout(() => { a.style.opacity='0'; a.style.transition='opacity .3s'; setTimeout(()=>a.remove(),300); }, 3000);
+}
+</script>
+</body>
+</html>
