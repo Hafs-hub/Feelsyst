@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin-fs-2026.html
+
+Sitemap: https://feelsyst.com/sitemap.xml
