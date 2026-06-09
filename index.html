@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Feelsyst — Agence IA Marketing & Communication</title>
+<meta name="description" content="5 agents IA autonomes pour piloter votre marketing, vos ventes et votre communication. Testez gratuitement 7 jours."/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237C3AED'/%3E%3Cpath d='M16 6L6 11l10 5 10-5-10-5zM6 21l10 5 10-5M6 16l10 5 10-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
+<link rel="shortcut icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237C3AED'/%3E%3Cpath d='M16 6L6 11l10 5 10-5-10-5zM6 21l10 5 10-5M6 16l10 5 10-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --black: #0A0A0F;
+  --dark: #111118;
+  --card: #16161F;
+  --border: #222230;
+  --muted: #2A2A3A;
+  --text: #E8E8F0;
+  --subtle: #888899;
+  --white: #FFFFFF;
+  --violet: #7C3AED;
+  --violet-light: #9D6FF8;
+  --violet-dim: rgba(124,58,237,0.15);
+  --cyan: #06B6D4;
+  --green: #10B981;
+  --amber: #F59E0B;
+  --red: #EF4444;
+  --glow: 0 0 60px rgba(124,58,237,0.25);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+img{max-width:100%}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:16px 0;border-bottom:1px solid transparent;transition:all .3s}
+nav.scrolled{background:rgba(10,10,15,.95);backdrop-filter:blur(20px);border-bottom-color:var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:36px;height:36px;background:var(--violet);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:20px;height:20px;fill:white}
+.logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.5px}
+.logo-text span{color:var(--violet-light)}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{font-size:14px;font-weight:500;color:var(--subtle);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{display:flex;align-items:center;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--violet);color:var(--violet-light)}
+.btn-primary{background:var(--violet);color:white}
+.btn-primary:hover{background:var(--violet-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,.4)}
+.btn-lg{padding:14px 28px;font-size:15px;border-radius:10px}
+.btn-free{background:var(--green);color:white}
+.btn-free:hover{background:#0ea572;transform:translateY(-1px);box-shadow:0 8px 24px rgba(16,185,129,.4)}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.35}
+.orb-1{width:600px;height:600px;background:var(--violet);top:-100px;left:-200px}
+.orb-2{width:400px;height:400px;background:var(--cyan);bottom:-100px;right:-100px}
+.orb-3{width:300px;height:300px;background:#EC4899;top:40%;left:50%;transform:translate(-50%,-50%)}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--violet-dim);border:1px solid rgba(124,58,237,.3);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--violet-light);margin-bottom:24px;letter-spacing:.5px;text-transform:uppercase}
+.hero-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+h1{font-family:'Syne',sans-serif;font-size:clamp(36px,5vw,64px);font-weight:800;line-height:1.1;letter-spacing:-2px;margin-bottom:24px}
+h1 .accent{color:var(--violet-light)}
+h1 .line2{display:block}
+.hero-sub{font-size:18px;color:var(--subtle);line-height:1.7;margin-bottom:36px;max-width:520px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:32px;margin-top:40px;padding-top:40px;border-top:1px solid var(--border)}
+.stat-item .num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--text)}
+.stat-item .lbl{font-size:12px;color:var(--subtle);margin-top:2px}
+.hero-visual{position:relative}
+.agent-grid-display{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.agent-card-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;transition:all .3s}
+.agent-card-mini:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:var(--glow)}
+.agent-card-mini.featured{grid-column:1/-1;border-color:rgba(124,58,237,.4);background:linear-gradient(135deg,var(--card),rgba(124,58,237,.1))}
+.agent-avatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px}
+.agent-name-mini{font-weight:700;font-size:14px;margin-bottom:4px}
+.agent-role-mini{font-size:12px;color:var(--subtle)}
+.agent-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);margin-top:8px}
+.agent-status .dot-green{width:5px;height:5px;background:var(--green);border-radius:50%}
+.agent-activity{font-size:11px;color:var(--subtle);margin-top:6px;font-style:italic}
+
+/* ─── SECTION BASE ─── */
+section{padding:100px 0}
+.section-eyebrow{display:inline-block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--violet-light);margin-bottom:16px}
+h2{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1.5px;line-height:1.15;margin-bottom:20px}
+.section-sub{font-size:18px;color:var(--subtle);max-width:600px;margin-bottom:60px}
+.center{text-align:center}
+.center .section-sub{margin:0 auto 60px}
+
+/* ─── AGENTS ─── */
+.agents-section{background:var(--dark)}
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+.agent-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;transition:all .3s;cursor:pointer;position:relative;overflow:hidden}
+.agent-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 0 0,var(--agent-color,rgba(124,58,237,.1)),transparent 60%);opacity:0;transition:opacity .3s}
+.agent-card:hover::before{opacity:1}
+.agent-card:hover{border-color:var(--agent-color,var(--violet));transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.agent-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
+.agent-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.agent-meta h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px}
+.agent-role{font-size:13px;font-weight:600;color:var(--violet-light)}
+.agent-desc{font-size:14px;color:var(--subtle);line-height:1.7;margin-bottom:20px}
+.agent-capabilities{display:flex;flex-direction:column;gap:8px}
+.cap-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text)}
+.cap-icon{color:var(--green);flex-shrink:0;margin-top:2px}
+.agent-tag{display:inline-flex;align-items:center;gap:6px;background:var(--muted);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;margin-top:16px}
+.online-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);margin-top:12px}
+.online-badge::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block;animation:pulse 2s infinite}
+
+/* ─── FONCTIONNEMENT ─── */
+.how-section{background:var(--black)}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;counter-reset:steps}
+.step-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;position:relative;counter-increment:steps}
+.step-card::before{content:counter(steps,'01' '02' '03' '04');font-family:'Syne',sans-serif;font-size:64px;font-weight:800;color:var(--muted);position:absolute;top:16px;right:20px;line-height:1}
+.step-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--violet-light);text-transform:uppercase;margin-bottom:16px}
+.step-card h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:12px}
+.step-card p{font-size:14px;color:var(--subtle);line-height:1.7}
+
+/* ─── FREE TRIAL ─── */
+.trial-section{background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(6,182,212,.05));border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.trial-box{background:var(--card);border:1px solid rgba(124,58,237,.3);border-radius:24px;padding:60px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.trial-badge{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:var(--green);display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:20px}
+.trial-features{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.trial-feat{display:flex;align-items:center;gap:12px;font-size:14px}
+.trial-feat .icon{color:var(--green);flex-shrink:0}
+.trial-form{background:var(--dark);border:1px solid var(--border);border-radius:16px;padding:32px}
+.trial-form h3{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px}
+.trial-form p{font-size:14px;color:var(--subtle);margin-bottom:24px}
+.form-row{display:flex;flex-direction:column;gap:4px;margin-bottom:16px}
+.form-row label{font-size:12px;font-weight:600;color:var(--subtle);letter-spacing:.5px;text-transform:uppercase}
+.form-row input,.form-row select{background:var(--muted);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:14px;color:var(--text);width:100%;transition:border .2s;font-family:inherit}
+.form-row input:focus,.form-row select:focus{outline:none;border-color:var(--violet)}
+.form-row select option{background:var(--dark)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-hint{font-size:11px;color:var(--subtle);margin-top:8px;text-align:center}
+
+/* ─── PRICING ─── */
+.pricing-section{background:var(--dark)}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;position:relative;transition:all .3s}
+.plan-card:hover{border-color:var(--violet);transform:translateY(-4px)}
+.plan-card.popular{border-color:var(--violet);background:linear-gradient(160deg,rgba(124,58,237,.15),var(--card))}
+.plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--violet);color:white;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap;letter-spacing:.5px;text-transform:uppercase}
+.plan-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:4px}
+.plan-desc{font-size:13px;color:var(--subtle);margin-bottom:24px}
+.plan-price{display:flex;align-items:flex-end;gap:4px;margin-bottom:8px}
+.plan-price .amount{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;line-height:1}
+.plan-price .period{font-size:14px;color:var(--subtle);padding-bottom:6px}
+.plan-price .free-badge{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--green)}
+.plan-note{font-size:12px;color:var(--subtle);margin-bottom:24px}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;min-height:200px}
+.plan-features li{display:flex;align-items:flex-start;gap:10px;font-size:13px}
+.plan-features li .check{color:var(--green);flex-shrink:0;margin-top:2px}
+.plan-features li .cross{color:var(--muted);flex-shrink:0;margin-top:2px}
+.plan-features li.disabled{color:var(--subtle)}
+.plan-cta{width:100%;text-align:center;justify-content:center}
+.plan-cta.outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.plan-cta.outline:hover{border-color:var(--violet);color:var(--violet-light)}
+
+/* ─── CTA FINAL ─── */
+.cta-section{background:var(--dark);text-align:center}
+.cta-box{background:radial-gradient(ellipse at center,rgba(124,58,237,.2),transparent 70%);border:1px solid rgba(124,58,237,.2);border-radius:32px;padding:80px 40px}
+.cta-box h2{font-size:clamp(32px,4vw,52px);margin-bottom:16px}
+.cta-box p{font-size:18px;color:var(--subtle);margin-bottom:40px}
+.cta-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+
+/* ─── FOOTER ─── */
+footer{background:var(--black);border-top:1px solid var(--border);padding:60px 0 32px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.footer-brand p{font-size:14px;color:var(--subtle);line-height:1.7;margin-top:16px;max-width:280px}
+.footer-col h4{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--subtle);margin-bottom:16px}
+.footer-col a{display:block;font-size:14px;color:var(--subtle);margin-bottom:10px;transition:color .2s}
+.footer-col a:hover{color:var(--text)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--subtle)}
+
+/* ─── CHAT WIDGET ─── */
+#chat-widget{position:fixed;bottom:24px;right:24px;z-index:9000}
+.chat-btn{width:56px;height:56px;background:var(--violet);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(124,58,237,.5);transition:all .3s;border:none}
+.chat-btn:hover{transform:scale(1.1)}
+.chat-btn svg{width:24px;height:24px;fill:white}
+.chat-bubble{position:absolute;bottom:68px;right:0;width:340px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6);display:none}
+.chat-bubble.open{display:flex;flex-direction:column}
+.chat-header{background:linear-gradient(135deg,var(--violet),var(--violet-light));padding:16px 20px;display:flex;align-items:center;gap:12px}
+.chat-header-avatar{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+.chat-header-info{flex:1}
+.chat-header-name{font-weight:700;font-size:14px;color:white}
+.chat-header-status{font-size:11px;color:rgba(255,255,255,.7)}
+.chat-close{background:none;border:none;color:white;cursor:pointer;font-size:18px;opacity:.7;transition:opacity .2s}
+.chat-close:hover{opacity:1}
+.chat-messages{height:280px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.chat-messages::-webkit-scrollbar{width:4px}
+.chat-messages::-webkit-scrollbar-track{background:transparent}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--muted);border-radius:2px}
+.msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg.bot{background:var(--muted);color:var(--text);align-self:flex-start;border-radius:4px 12px 12px 12px}
+.msg.user{background:var(--violet);color:white;align-self:flex-end;border-radius:12px 4px 12px 12px}
+.msg.thinking{color:var(--subtle);font-style:italic}
+.chat-input-area{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.chat-input-area input{flex:1;background:var(--muted);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);font-family:inherit}
+.chat-input-area input:focus{outline:none;border-color:var(--violet)}
+.chat-send{background:var(--violet);border:none;border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.chat-send svg{width:16px;height:16px;fill:white}
+
+/* ─── NOTIFICATIONS ─── */
+.notif{position:fixed;top:80px;right:20px;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;font-size:14px;box-shadow:0 16px 48px rgba(0,0,0,.5);transform:translateX(120%);transition:transform .3s;max-width:320px}
+.notif.show{transform:translateX(0)}
+.notif.success{border-left:3px solid var(--green)}
+.notif.error{border-left:3px solid var(--red)}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .hero-grid,.trial-box{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .steps-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+}
+@media(max-width:600px){
+  .plans-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .agents-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .cta-actions{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="logo-text">feel<span>syst</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#agents">Agents IA</a>
+        <a href="#comment">Fonctionnement</a>
+        <a href="#pricing">Tarifs</a>
+        <a href="#trial">Essai gratuit</a>
+      </div>
+      <div class="nav-cta">
+        <a href="auth.html" class="btn btn-ghost">Connexion</a>
+        <a href="auth.html?plan=free" class="btn btn-primary">Tester gratuitement</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-badge">
+          <span class="dot"></span>
+          5 agents IA actifs 24h/7j
+        </div>
+        <h1>Votre agence IA <span class="accent">toujours active,</span> <span class="line2">jamais à l'arrêt</span></h1>
+        <p class="hero-sub">Aria, Nova, Rex, Vera et Lumi travaillent pour vous en continu. Stratégie, marketing, ventes, finance, support — tout est automatisé, connecté aux actualités, personnalisé à votre business.</p>
+        <div class="hero-actions">
+          <a href="auth.html?plan=free" class="btn btn-free btn-lg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Essai gratuit 7 jours
+          </a>
+          <a href="#agents" class="btn btn-ghost btn-lg">Découvrir les agents</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item"><div class="num">5</div><div class="lbl">Agents IA spécialisés</div></div>
+          <div class="stat-item"><div class="num">24/7</div><div class="lbl">Disponibilité totale</div></div>
+          <div class="stat-item"><div class="num">100%</div><div class="lbl">Automatisé</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="agent-grid-display">
+          <div class="agent-card-mini featured">
+            <div class="agent-avatar" style="background:rgba(124,58,237,.2)">🧠</div>
+            <div class="agent-name-mini">Aria</div>
+            <div class="agent-role-mini">Directrice Stratégie IA</div>
+            <div class="agent-status"><span class="dot-green"></span>En ligne — analyse marché en cours</div>
+            <div class="agent-activity">↗ Veille sectorielle tech · Rapport dans 12min</div>
+          </div>
+          <div class="agent-card-mini">
+            <div class="agent-avatar" style="background:rgba(236,72,153,.2)">✨</div>
+            <div class="agent-name-mini">Nova</div>
+            <div class="agent-role-mini">Marketing & Contenu</div>
+            <div class="agent-status"><span class="dot-green"></span>Active</div>
+            <div class="agent-activity">Rédaction campagne email</div>
+          </div>
+          <div class="agent-card-mini">
+            <div class="agent-avatar" style="background:rgba(245,158,11,.2)">💼</div>
+            <div class="agent-name-mini">Rex</div>
+            <div class="agent-role-mini">Ventes & Prospection</div>
+            <div class="agent-status"><span class="dot-green"></span>Active</div>
+            <div class="agent-activity">12 prospects contactés</div>
+          </div>
+          <div class="agent-card-mini">
+            <div class="agent-avatar" style="background:rgba(16,185,129,.2)">📊</div>
+            <div class="agent-name-mini">Vera</div>
+            <div class="agent-role-mini">Finance & Admin</div>
+            <div class="agent-status"><span class="dot-green"></span>Active</div>
+          </div>
+          <div class="agent-card-mini">
+            <div class="agent-avatar" style="background:rgba(6,182,212,.2)">💬</div>
+            <div class="agent-name-mini">Lumi</div>
+            <div class="agent-role-mini">Support Client</div>
+            <div class="agent-status"><span class="dot-green"></span>Active</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENTS -->
+<section class="agents-section" id="agents">
+  <div class="container">
+    <div class="center">
+      <span class="section-eyebrow">Votre équipe IA</span>
+      <h2>5 agents spécialisés,<br>connectés & autonomes</h2>
+      <p class="section-sub">Chaque agent dispose d'une expertise métier, d'un accès en temps réel aux actualités et d'une mémoire des échanges avec votre entreprise.</p>
+    </div>
+    <div class="agents-grid">
+
+      <!-- ARIA -->
+      <div class="agent-card" style="--agent-color:rgba(124,58,237,.5)">
+        <div class="agent-head">
+          <div class="agent-icon" style="background:rgba(124,58,237,.15)">🧠</div>
+          <div class="agent-meta">
+            <h3>Aria</h3>
+            <div class="agent-role">Directrice Stratégie & Veille</div>
+          </div>
+        </div>
+        <p class="agent-desc">Aria analyse votre marché, surveille vos concurrents et élabore des stratégies de croissance fondées sur les dernières tendances sectorielles en temps réel.</p>
+        <div class="agent-capabilities">
+          <div class="cap-item"><span class="cap-icon">✓</span>Veille concurrentielle automatique quotidienne</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Analyse des tendances sectorielles (actualités live)</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Recommandations stratégiques personnalisées</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Rapports de positionnement mensuel</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>SWOT automatisé avec données marché actuelles</div>
+        </div>
+        <div class="online-badge">En ligne maintenant</div>
+      </div>
+
+      <!-- NOVA -->
+      <div class="agent-card" style="--agent-color:rgba(236,72,153,.5)">
+        <div class="agent-head">
+          <div class="agent-icon" style="background:rgba(236,72,153,.15)">✨</div>
+          <div class="agent-meta">
+            <h3>Nova</h3>
+            <div class="agent-role">Marketing & Création de Contenu</div>
+          </div>
+        </div>
+        <p class="agent-desc">Nova crée, planifie et publie votre contenu marketing sur tous les canaux. Elle s'adapte aux tendances actuelles pour maximiser l'engagement.</p>
+        <div class="agent-capabilities">
+          <div class="cap-item"><span class="cap-icon">✓</span>Rédaction posts réseaux sociaux (LinkedIn, Instagram, X)</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Campagnes email marketing automatisées</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Blog & articles SEO optimisés</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Calendrier éditorial mensuel</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Adaptation contenu aux tendances du moment</div>
+        </div>
+        <div class="online-badge">En ligne maintenant</div>
+      </div>
+
+      <!-- REX -->
+      <div class="agent-card" style="--agent-color:rgba(245,158,11,.5)">
+        <div class="agent-head">
+          <div class="agent-icon" style="background:rgba(245,158,11,.15)">💼</div>
+          <div class="agent-meta">
+            <h3>Rex</h3>
+            <div class="agent-role">Ventes & Prospection Automatisée</div>
+          </div>
+        </div>
+        <p class="agent-desc">Rex identifie, contacte et suit les prospects de manière autonome. Il envoie des emails ultra-personnalisés et assure la relance intelligente.</p>
+        <div class="agent-capabilities">
+          <div class="cap-item"><span class="cap-icon">✓</span>Prospection automatique 100 entreprises/semaine</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Emails personnalisés selon le secteur ciblé</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Relances automatiques intelligentes</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Suivi pipeline commercial en temps réel</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Email de bienvenue à chaque nouvelle inscription</div>
+        </div>
+        <div class="online-badge">En ligne maintenant</div>
+      </div>
+
+      <!-- VERA -->
+      <div class="agent-card" style="--agent-color:rgba(16,185,129,.5)">
+        <div class="agent-head">
+          <div class="agent-icon" style="background:rgba(16,185,129,.15)">📊</div>
+          <div class="agent-meta">
+            <h3>Vera</h3>
+            <div class="agent-role">Finance, Admin & Facturation</div>
+          </div>
+        </div>
+        <p class="agent-desc">Vera gère la facturation, le suivi financier et la documentation administrative. Elle envoie automatiquement les factures après chaque achat.</p>
+        <div class="agent-capabilities">
+          <div class="cap-item"><span class="cap-icon">✓</span>Envoi automatique des factures après achat</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Suivi des paiements et abonnements</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Rapports financiers mensuels</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Alertes budgétaires personnalisées</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Documentation administrative automatisée</div>
+        </div>
+        <div class="online-badge">En ligne maintenant</div>
+      </div>
+
+      <!-- LUMI -->
+      <div class="agent-card" style="--agent-color:rgba(6,182,212,.5)">
+        <div class="agent-head">
+          <div class="agent-icon" style="background:rgba(6,182,212,.15)">💬</div>
+          <div class="agent-meta">
+            <h3>Lumi</h3>
+            <div class="agent-role">Support Client & Relations</div>
+          </div>
+        </div>
+        <p class="agent-desc">Lumi répond instantanément aux questions, gère les demandes clients et assure un support de qualité 24h/24, 7j/7, avec mémoire de chaque conversation.</p>
+        <div class="agent-capabilities">
+          <div class="cap-item"><span class="cap-icon">✓</span>Chat en temps réel 24h/7j</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Mémoire des échanges clients</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Réponses contextuelles et personnalisées</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Escalade intelligente vers humain si besoin</div>
+          <div class="cap-item"><span class="cap-icon">✓</span>Rapports satisfaction hebdomadaires</div>
+        </div>
+        <div class="online-badge">En ligne maintenant</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- COMMENT ÇA MARCHE -->
+<section class="how-section" id="comment">
+  <div class="container">
+    <div class="center">
+      <span class="section-eyebrow">Fonctionnement</span>
+      <h2>Opérationnel en 3 étapes</h2>
+      <p class="section-sub">Pas de configuration technique. Vos agents IA sont prêts à travailler dès votre inscription.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">Étape 01</div>
+        <h3>Inscription & Configuration</h3>
+        <p>Créez votre compte en 2 minutes. Renseignez votre secteur d'activité et vos objectifs. Rex vous envoie un email de bienvenue personnalisé immédiatement.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Étape 02</div>
+        <h3>Tableau de Bord Personnel</h3>
+        <p>Accédez à votre espace client avec les 5 chatbots agents. Discutez directement avec Aria, Nova, Rex, Vera ou Lumi selon vos besoins du moment.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Étape 03</div>
+        <h3>Les Agents Travaillent</h3>
+        <p>Vos agents exécutent leurs missions en autonomie : veille, contenu, prospection, facturation, support. Vous recevez les livrables directement.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ESSAI GRATUIT -->
+<section class="trial-section" id="trial">
+  <div class="container">
+    <div class="trial-box">
+      <div>
+        <div class="trial-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Essai gratuit 7 jours
+        </div>
+        <h2>Testez avant<br>de vous engager</h2>
+        <p style="color:var(--subtle);font-size:16px;margin-top:12px;line-height:1.7">Accédez à tous les agents IA pendant 7 jours complets, sans carte bancaire. Rex vous contacte dès votre inscription pour vous guider.</p>
+        <div class="trial-features">
+          <div class="trial-feat"><span class="icon">✓</span> Accès aux 5 agents IA (mode découverte)</div>
+          <div class="trial-feat"><span class="icon">✓</span> Tableau de bord client complet</div>
+          <div class="trial-feat"><span class="icon">✓</span> 20 messages par agent sur 7 jours</div>
+          <div class="trial-feat"><span class="icon">✓</span> 1 rapport stratégique par Aria</div>
+          <div class="trial-feat"><span class="icon">✓</span> Email de bienvenue personnalisé par Rex</div>
+          <div class="trial-feat"><span class="icon">✗</span> Sans carte bancaire requise</div>
+        </div>
+      </div>
+      <div class="trial-form">
+        <h3>Créer mon compte gratuit</h3>
+        <p>7 jours d'accès complet, sans engagement</p>
+        <div class="form-grid">
+          <div class="form-row">
+            <label>Prénom</label>
+            <input type="text" id="reg-firstname" placeholder="Jean"/>
+          </div>
+          <div class="form-row">
+            <label>Nom</label>
+            <input type="text" id="reg-lastname" placeholder="Dupont"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Email professionnel</label>
+          <input type="email" id="reg-email" placeholder="jean@entreprise.com"/>
+        </div>
+        <div class="form-row">
+          <label>Entreprise</label>
+          <input type="text" id="reg-company" placeholder="Nom de votre entreprise"/>
+        </div>
+        <div class="form-row">
+          <label>Secteur d'activité</label>
+          <select id="reg-sector">
+            <option value="">Choisissez votre secteur</option>
+            <option>Commerce & Retail</option>
+            <option>Tech & SaaS</option>
+            <option>Immobilier</option>
+            <option>Santé & Bien-être</option>
+            <option>Restauration & Hôtellerie</option>
+            <option>Formation & Éducation</option>
+            <option>Finance & Assurance</option>
+            <option>BTP & Artisanat</option>
+            <option>Conseil & Services B2B</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Mot de passe</label>
+          <input type="password" id="reg-password" placeholder="Minimum 8 caractères"/>
+        </div>
+        <button class="btn btn-free" style="width:100%;justify-content:center;padding:14px" onclick="registerFree()">
+          Créer mon compte gratuit →
+        </button>
+        <p class="form-hint">En vous inscrivant, vous acceptez nos <a href="legal.html" style="color:var(--violet-light)">CGU</a>. Sans carte bancaire.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <div class="center">
+      <span class="section-eyebrow">Tarifs</span>
+      <h2>Des prix accessibles<br>à toutes les entreprises</h2>
+      <p class="section-sub">Commencez gratuitement, évoluez selon vos besoins. Pas de frais cachés, résiliez quand vous voulez.</p>
+    </div>
+    <div class="plans-grid">
+
+      <!-- GRATUIT -->
+      <div class="plan-card">
+        <div class="plan-name">Découverte</div>
+        <div class="plan-desc">Tester les agents IA</div>
+        <div class="plan-price"><span class="free-badge">Gratuit</span></div>
+        <div class="plan-note">7 jours — sans carte bancaire</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Accès aux 5 agents IA</li>
+          <li><span class="check">✓</span> 20 messages/agent sur 7j</li>
+          <li><span class="check">✓</span> 1 rapport Aria</li>
+          <li><span class="check">✓</span> Email de bienvenue Rex</li>
+          <li><span class="check">✓</span> Tableau de bord client</li>
+          <li class="disabled"><span class="cross">✗</span> Prospection Rex</li>
+          <li class="disabled"><span class="cross">✗</span> Contenu Nova illimité</li>
+          <li class="disabled"><span class="cross">✗</span> Facturation Vera auto</li>
+        </ul>
+        <a href="auth.html?plan=free" class="btn plan-cta outline">Commencer gratuitement</a>
+      </div>
+
+      <!-- STARTER -->
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-desc">Idéal pour les TPE & indépendants</div>
+        <div class="plan-price"><span class="amount">29</span><span class="period">€/mois</span></div>
+        <div class="plan-note">Engagement mensuel, résiliable à tout moment</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Accès Aria (stratégie de base)</li>
+          <li><span class="check">✓</span> Nova : 10 contenus/mois</li>
+          <li><span class="check">✓</span> Rex : 20 prospects/semaine</li>
+          <li><span class="check">✓</span> Lumi : chat 24h/7j</li>
+          <li><span class="check">✓</span> 1 rapport mensuel</li>
+          <li><span class="check">✓</span> Tableau de bord complet</li>
+          <li class="disabled"><span class="cross">✗</span> Vera facturation auto</li>
+          <li class="disabled"><span class="cross">✗</span> Mémoire avancée</li>
+        </ul>
+        <a href="auth.html?plan=starter" class="btn plan-cta btn-primary">Choisir Starter</a>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan-card popular">
+        <div class="plan-badge">Le plus populaire</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-desc">Pour les PME en croissance</div>
+        <div class="plan-price"><span class="amount">79</span><span class="period">€/mois</span></div>
+        <div class="plan-note">Tout Starter + agents avancés</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Aria : veille quotidienne + SWOT</li>
+          <li><span class="check">✓</span> Nova : contenus illimités</li>
+          <li><span class="check">✓</span> Rex : 60 prospects/semaine</li>
+          <li><span class="check">✓</span> Vera : facturation automatique</li>
+          <li><span class="check">✓</span> Lumi : mémoire client avancée</li>
+          <li><span class="check">✓</span> Rapports hebdomadaires</li>
+          <li><span class="check">✓</span> Actualités temps réel</li>
+          <li><span class="check">✓</span> Support prioritaire</li>
+        </ul>
+        <a href="auth.html?plan=pro" class="btn plan-cta btn-primary">Choisir Pro</a>
+      </div>
+
+      <!-- ILLIMITÉ -->
+      <div class="plan-card">
+        <div class="plan-name">Illimité</div>
+        <div class="plan-desc">Agences & grandes entreprises</div>
+        <div class="plan-price"><span class="amount">179</span><span class="period">€/mois</span></div>
+        <div class="plan-note">Tout Pro + capacités maximales</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Tous les agents en illimité</li>
+          <li><span class="check">✓</span> Rex : 100 prospects/semaine</li>
+          <li><span class="check">✓</span> Mémoire historique complète</li>
+          <li><span class="check">✓</span> Rapports personnalisés</li>
+          <li><span class="check">✓</span> Onboarding dédié</li>
+          <li><span class="check">✓</span> Accès API (intégration)</li>
+          <li><span class="check">✓</span> Multi-utilisateurs (5 comptes)</li>
+          <li><span class="check">✓</span> Account manager dédié</li>
+        </ul>
+        <a href="auth.html?plan=unlimited" class="btn plan-cta btn-primary">Choisir Illimité</a>
+      </div>
+
+      <!-- AGENT CUSTOM -->
+      <div class="plan-card" style="grid-column:1/-1;background:linear-gradient(135deg,rgba(124,58,237,.1),var(--card));border-color:rgba(124,58,237,.3)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+          <div>
+            <div class="plan-name">Agent IA Personnalisé</div>
+            <div class="plan-desc" style="margin-bottom:16px">Un agent développé spécifiquement pour votre métier, vos processus internes et votre base de données.</div>
+            <div class="plan-price"><span class="amount">399</span><span class="period">€ (unique)</span></div>
+            <div class="plan-note">Développement + intégration + formation</div>
+          </div>
+          <div>
+            <ul class="plan-features" style="min-height:auto">
+              <li><span class="check">✓</span> Agent IA avec votre nom et persona</li>
+              <li><span class="check">✓</span> Connecté à votre base de données</li>
+              <li><span class="check">✓</span> Processus internes automatisés</li>
+              <li><span class="check">✓</span> Formation de votre équipe</li>
+            </ul>
+            <a href="auth.html?plan=custom" class="btn btn-primary" style="margin-top:20px">Demander un devis →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <span class="section-eyebrow">Prêt à démarrer ?</span>
+      <h2>Votre équipe IA vous attend</h2>
+      <p>7 jours gratuits pour mesurer l'impact réel sur votre business</p>
+      <div class="cta-actions">
+        <a href="auth.html?plan=free" class="btn btn-free btn-lg">
+          Essai gratuit 7 jours — sans CB
+        </a>
+        <a href="#pricing" class="btn btn-ghost btn-lg">Voir les tarifs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="white" stroke-width="2"/></svg></div>
+          <span class="logo-text">feel<span>syst</span></span>
+        </div>
+        <p>Agence marketing IA nouvelle génération. 5 agents autonomes pour votre croissance, disponibles 24h/7j.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Agents</h4>
+        <a href="#agents">Aria — Stratégie</a>
+        <a href="#agents">Nova — Marketing</a>
+        <a href="#agents">Rex — Ventes</a>
+        <a href="#agents">Vera — Finance</a>
+        <a href="#agents">Lumi — Support</a>
+      </div>
+      <div class="footer-col">
+        <h4>Produit</h4>
+        <a href="#pricing">Tarifs</a>
+        <a href="#trial">Essai gratuit</a>
+        <a href="auth.html">Connexion</a>
+        <a href="dashboard.html">Mon tableau de bord</a>
+      </div>
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <a href="legal.html">Mentions légales</a>
+        <a href="legal.html#cgv">CGV</a>
+        <a href="legal.html#privacy">Confidentialité</a>
+        <a href="mailto:contact@feelsyst.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Feelsyst. Tous droits réservés.</span>
+      <span>contact@feelsyst.com</span>
+    </div>
+  </div>
+</footer>
+
+<!-- CHAT WIDGET (Lumi) -->
+<div id="chat-widget">
+  <div class="chat-bubble" id="chatBubble">
+    <div class="chat-header">
+      <div class="chat-header-avatar">💬</div>
+      <div class="chat-header-info">
+        <div class="chat-header-name">Lumi — Support IA</div>
+        <div class="chat-header-status">● En ligne maintenant</div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg bot">Bonjour ! Je suis Lumi 👋 Comment puis-je vous aider aujourd'hui ? Je peux vous renseigner sur nos services, nos tarifs ou vous guider vers le bon plan.</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Votre message..." onkeypress="if(event.key==='Enter')sendChat()"/>
+      <button class="chat-send" onclick="sendChat()"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22 11 13M22 2L2 9l9 4"/></svg></button>
+    </div>
+  </div>
+  <button class="chat-btn" onclick="toggleChat()" id="chatBtn">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+  </button>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notification"></div>
+
+<script>
+// ─── NAV SCROLL ───
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50)
+});
+
+// ─── CHAT ───
+let chatOpen=false;
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chatBubble').classList.toggle('open',chatOpen);
+}
+async function sendChat(){
+  const inp=document.getElementById('chatInput');
+  const msg=inp.value.trim();
+  if(!msg)return;
+  addMsg(msg,'user');
+  inp.value='';
+  addMsg('...','bot thinking');
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        system:`Tu es Lumi, l'agent IA support de Feelsyst.com. Tu réponds uniquement en français, de manière concise et aidante. Tu aides les visiteurs à comprendre nos services et nos agents IA (Aria-stratégie, Nova-marketing, Rex-ventes, Vera-finance, Lumi-support). Plans: Découverte gratuit 7j, Starter 29€/mois, Pro 79€/mois, Illimité 179€/mois, Agent custom 399€. Tu guides vers l'inscription gratuite sur auth.html?plan=free.`,
+        messages:[{role:'user',content:msg}]
+      })
+    });
+    const d=await r.json();
+    removeThinking();
+    addMsg(d.content?.[0]?.text||"Désolée, une erreur s'est produite. Réessayez!",'bot');
+  }catch(e){
+    removeThinking();
+    addMsg("Je suis temporairement indisponible. Contactez-nous à contact@feelsyst.com",'bot');
+  }
+}
+function addMsg(text,cls){
+  const box=document.getElementById('chatMessages');
+  const d=document.createElement('div');
+  d.className='msg '+cls;
+  d.textContent=text;
+  box.appendChild(d);
+  box.scrollTop=box.scrollHeight;
+}
+function removeThinking(){
+  const t=document.querySelector('.msg.thinking');
+  if(t)t.remove();
+}
+
+// ─── INSCRIPTION GRATUITE ───
+async function registerFree(){
+  const f=document.getElementById('reg-firstname').value.trim();
+  const l=document.getElementById('reg-lastname').value.trim();
+  const e=document.getElementById('reg-email').value.trim();
+  const c=document.getElementById('reg-company').value.trim();
+  const s=document.getElementById('reg-sector').value;
+  const p=document.getElementById('reg-password').value;
+  if(!f||!l||!e||!c||!s||!p){showNotif('Veuillez remplir tous les champs','error');return;}
+  if(p.length<8){showNotif('Le mot de passe doit faire au moins 8 caractères','error');return;}
+  try{
+    const btn=event.target;
+    btn.textContent='Création en cours...';btn.disabled=true;
+    const resp=await fetch('/api/register',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({firstname:f,lastname:l,email:e,company:c,sector:s,password:p,plan:'free'})
+    });
+    const data=await resp.json();
+    if(data.success){
+      showNotif('✓ Compte créé ! Redirection vers votre tableau de bord...','success');
+      setTimeout(()=>window.location.href='dashboard.html?welcome=1',2000);
+    }else{
+      showNotif(data.error||'Erreur lors de l\'inscription','error');
+      btn.textContent='Créer mon compte gratuit →';btn.disabled=false;
+    }
+  }catch(err){
+    showNotif('Erreur réseau. Réessayez.','error');
+  }
+}
+function showNotif(msg,type){
+  const n=document.getElementById('notification');
+  n.textContent=msg;n.className='notif '+type+' show';
+  setTimeout(()=>n.classList.remove('show'),4000);
+}
+</script>
+</body>
+</html>
