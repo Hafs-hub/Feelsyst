@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Connexion / Inscription — Feelsyst</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237C3AED'/%3E%3Cpath d='M16 6L6 11l10 5 10-5-10-5zM6 21l10 5 10-5M6 16l10 5 10-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --black:#0A0A0F;--dark:#111118;--card:#16161F;--border:#222230;
+  --muted:#2A2A3A;--text:#E8E8F0;--subtle:#888899;
+  --violet:#7C3AED;--violet-light:#9D6FF8;--violet-dim:rgba(124,58,237,0.15);
+  --cyan:#06B6D4;--green:#10B981;--red:#EF4444;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.bg-orbs{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.25}
+.orb-1{width:500px;height:500px;background:var(--violet);top:-100px;left:-100px}
+.orb-2{width:400px;height:400px;background:var(--cyan);bottom:-100px;right:-100px}
+.auth-wrapper{position:relative;z-index:1;width:100%;max-width:920px;display:grid;grid-template-columns:1fr 1fr;min-height:560px;border-radius:24px;overflow:hidden;border:1px solid var(--border);box-shadow:0 40px 120px rgba(0,0,0,.7)}
+.auth-brand{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(6,182,212,.1));padding:48px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:40px}
+.logo-mark{width:36px;height:36px;background:var(--violet);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800}
+.logo-text span{color:#9D6FF8}
+.brand-headline{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1.2;margin-bottom:16px}
+.brand-sub{font-size:15px;color:var(--subtle);line-height:1.7}
+.agent-mini-list{display:flex;flex-direction:column;gap:12px;margin-top:32px}
+.agent-mini{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid var(--border)}
+.agent-mini .icon{font-size:20px}
+.agent-mini .info .name{font-size:13px;font-weight:700}
+.agent-mini .info .role{font-size:11px;color:var(--subtle)}
+.status-dot{width:6px;height:6px;background:var(--green);border-radius:50%;margin-left:auto;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.brand-footer{font-size:12px;color:var(--subtle)}
+.auth-form-area{background:var(--dark);padding:48px}
+.tabs{display:flex;gap:0;margin-bottom:32px;background:var(--muted);border-radius:10px;padding:4px}
+.tab{flex:1;padding:10px;text-align:center;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s;color:var(--subtle);border:none;background:none}
+.tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.form-section{display:none}
+.form-section.active{display:block}
+.form-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
+.form-subtitle{font-size:14px;color:var(--subtle);margin-bottom:28px}
+.plan-selector{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px}
+.plan-opt{padding:10px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;font-size:12px;text-align:center}
+.plan-opt:hover{border-color:var(--violet)}
+.plan-opt.selected{border-color:var(--violet);background:var(--violet-dim)}
+.plan-opt .pname{font-weight:700;display:block;margin-bottom:2px}
+.plan-opt .pprice{color:var(--subtle)}
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--subtle);margin-bottom:5px}
+.form-row input,.form-row select{width:100%;background:var(--muted);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;transition:border .2s}
+.form-row input:focus,.form-row select:focus{outline:none;border-color:var(--violet)}
+.form-row select option{background:var(--dark)}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-submit{width:100%;padding:13px;background:var(--violet);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;margin-top:8px}
+.btn-submit:hover{background:var(--violet-light);transform:translateY(-1px)}
+.btn-submit.green{background:var(--green)}
+.btn-submit.green:hover{background:#0ea572}
+.form-foot{font-size:12px;color:var(--subtle);text-align:center;margin-top:12px}
+.form-foot a{color:var(--violet-light)}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:12px;color:var(--subtle)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.notif{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+.notif.success{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green)}
+.notif.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+@media(max-width:700px){
+  .auth-wrapper{grid-template-columns:1fr}
+  .auth-brand{display:none}
+}
+</style>
+</head>
+<body>
+<div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+<div class="auth-wrapper">
+  <div class="auth-brand">
+    <div>
+      <a href="index.html" class="logo">
+        <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <span class="logo-text">feel<span>syst</span></span>
+      </a>
+      <div class="brand-headline">Votre équipe IA vous attend</div>
+      <p class="brand-sub">5 agents spécialisés prêts à travailler pour votre entreprise dès votre connexion.</p>
+      <div class="agent-mini-list">
+        <div class="agent-mini"><span class="icon">🧠</span><div class="info"><div class="name">Aria</div><div class="role">Stratégie & Veille</div></div><span class="status-dot"></span></div>
+        <div class="agent-mini"><span class="icon">✨</span><div class="info"><div class="name">Nova</div><div class="role">Marketing & Contenu</div></div><span class="status-dot"></span></div>
+        <div class="agent-mini"><span class="icon">💼</span><div class="info"><div class="name">Rex</div><div class="role">Ventes & Prospection</div></div><span class="status-dot"></span></div>
+        <div class="agent-mini"><span class="icon">📊</span><div class="info"><div class="name">Vera</div><div class="role">Finance & Facturation</div></div><span class="status-dot"></span></div>
+        <div class="agent-mini"><span class="icon">💬</span><div class="info"><div class="name">Lumi</div><div class="role">Support Client</div></div><span class="status-dot"></span></div>
+      </div>
+    </div>
+    <div class="brand-footer">© 2025 Feelsyst · contact@feelsyst.com</div>
+  </div>
+
+  <div class="auth-form-area">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Se connecter</button>
+      <button class="tab" onclick="switchTab('register')">S'inscrire</button>
+    </div>
+
+    <!-- CONNEXION -->
+    <div class="form-section active" id="tab-login">
+      <div class="form-title">Bon retour 👋</div>
+      <div class="form-subtitle">Accédez à votre tableau de bord et vos agents IA</div>
+      <div class="notif" id="login-notif"></div>
+      <div class="form-row">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="votre@email.com" autocomplete="email"/>
+      </div>
+      <div class="form-row">
+        <label>Mot de passe</label>
+        <input type="password" id="login-password" placeholder="Votre mot de passe" autocomplete="current-password"/>
+      </div>
+      <button class="btn-submit" onclick="doLogin()">Se connecter →</button>
+      <div class="form-foot" style="margin-top:16px">
+        <a href="#" onclick="showForgot()">Mot de passe oublié ?</a>
+        &nbsp;·&nbsp;
+        Pas de compte ? <a href="#" onclick="switchTab('register')">S'inscrire</a>
+      </div>
+    </div>
+
+    <!-- INSCRIPTION -->
+    <div class="form-section" id="tab-register">
+      <div class="form-title">Créer mon compte</div>
+      <div class="form-subtitle">7 jours gratuits — sans carte bancaire</div>
+      <div class="notif" id="reg-notif"></div>
+
+      <div class="plan-selector" id="plan-selector">
+        <div class="plan-opt selected" data-plan="free" onclick="selectPlan(this)"><span class="pname">🎁 Découverte</span><span class="pprice">Gratuit 7j</span></div>
+        <div class="plan-opt" data-plan="starter" onclick="selectPlan(this)"><span class="pname">Starter</span><span class="pprice">29€/mois</span></div>
+        <div class="plan-opt" data-plan="pro" onclick="selectPlan(this)"><span class="pname">⭐ Pro</span><span class="pprice">79€/mois</span></div>
+        <div class="plan-opt" data-plan="unlimited" onclick="selectPlan(this)"><span class="pname">Illimité</span><span class="pprice">179€/mois</span></div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Prénom</label>
+          <input type="text" id="r-firstname" placeholder="Jean" autocomplete="given-name"/>
+        </div>
+        <div class="form-row">
+          <label>Nom</label>
+          <input type="text" id="r-lastname" placeholder="Dupont" autocomplete="family-name"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Email professionnel</label>
+        <input type="email" id="r-email" placeholder="jean@entreprise.com" autocomplete="email"/>
+      </div>
+      <div class="form-row">
+        <label>Entreprise</label>
+        <input type="text" id="r-company" placeholder="Nom de votre entreprise"/>
+      </div>
+      <div class="form-row">
+        <label>Secteur d'activité</label>
+        <select id="r-sector">
+          <option value="">Choisissez votre secteur</option>
+          <option>Commerce & Retail</option>
+          <option>Tech & SaaS</option>
+          <option>Immobilier</option>
+          <option>Santé & Bien-être</option>
+          <option>Restauration & Hôtellerie</option>
+          <option>Formation & Éducation</option>
+          <option>Finance & Assurance</option>
+          <option>BTP & Artisanat</option>
+          <option>Conseil & Services B2B</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Mot de passe</label>
+          <input type="password" id="r-password" placeholder="Min. 8 caractères" autocomplete="new-password"/>
+        </div>
+        <div class="form-row">
+          <label>Confirmer</label>
+          <input type="password" id="r-password2" placeholder="Confirmer" autocomplete="new-password"/>
+        </div>
+      </div>
+      <button class="btn-submit green" id="reg-submit" onclick="doRegister()">
+        Créer mon compte →
+      </button>
+      <div class="form-foot">Déjà inscrit ? <a href="#" onclick="switchTab('login')">Se connecter</a></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Read URL param for plan
+const urlParams=new URLSearchParams(window.location.search);
+const planParam=urlParams.get('plan');
+if(planParam){
+  document.querySelectorAll('.plan-opt').forEach(o=>{
+    o.classList.toggle('selected',o.dataset.plan===planParam);
+  });
+  if(planParam!=='login'){switchTab('register');}
+}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));
+  document.getElementById('tab-login').classList.toggle('active',t==='login');
+  document.getElementById('tab-register').classList.toggle('active',t==='register');
+}
+
+function selectPlan(el){
+  document.querySelectorAll('.plan-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  const btn=document.getElementById('reg-submit');
+  btn.className='btn-submit'+(el.dataset.plan==='free'?' green':'');
+  btn.textContent=el.dataset.plan==='free'?'Créer mon compte gratuit →':'Créer mon compte →';
+}
+
+function showNotif(id,msg,type){
+  const n=document.getElementById(id);
+  n.textContent=msg;n.className='notif '+type;n.style.display='block';
+  setTimeout(()=>{n.style.display='none'},5000);
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const password=document.getElementById('login-password').value;
+  if(!email||!password){showNotif('login-notif','Remplissez tous les champs','error');return;}
+  const btn=event.target;btn.textContent='Connexion...';btn.disabled=true;
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    const d=await r.json();
+    if(d.success){
+      localStorage.setItem('fs_token',d.token);
+      localStorage.setItem('fs_user',JSON.stringify(d.user));
+      window.location.href='dashboard.html';
+    }else{
+      showNotif('login-notif',d.error||'Email ou mot de passe incorrect','error');
+      btn.textContent='Se connecter →';btn.disabled=false;
+    }
+  }catch(e){
+    showNotif('login-notif','Erreur réseau. Réessayez.','error');
+    btn.textContent='Se connecter →';btn.disabled=false;
+  }
+}
+
+async function doRegister(){
+  const plan=document.querySelector('.plan-opt.selected')?.dataset.plan||'free';
+  const firstname=document.getElementById('r-firstname').value.trim();
+  const lastname=document.getElementById('r-lastname').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const company=document.getElementById('r-company').value.trim();
+  const sector=document.getElementById('r-sector').value;
+  const password=document.getElementById('r-password').value;
+  const password2=document.getElementById('r-password2').value;
+  if(!firstname||!lastname||!email||!company||!sector||!password){
+    showNotif('reg-notif','Veuillez remplir tous les champs','error');return;
+  }
+  if(password.length<8){showNotif('reg-notif','Mot de passe trop court (min. 8 caractères)','error');return;}
+  if(password!==password2){showNotif('reg-notif','Les mots de passe ne correspondent pas','error');return;}
+  const btn=document.getElementById('reg-submit');
+  btn.textContent='Création en cours...';btn.disabled=true;
+  try{
+    const r=await fetch('/api/register',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({firstname,lastname,email,company,sector,password,plan})
+    });
+    const d=await r.json();
+    if(d.success){
+      localStorage.setItem('fs_token',d.token);
+      localStorage.setItem('fs_user',JSON.stringify(d.user));
+      if(plan!=='free'){
+        window.location.href=d.paymentUrl||'dashboard.html?welcome=1';
+      }else{
+        window.location.href='dashboard.html?welcome=1';
+      }
+    }else{
+      showNotif('reg-notif',d.error||'Erreur lors de l\'inscription','error');
+      btn.textContent='Créer mon compte →';btn.disabled=false;
+    }
+  }catch(e){
+    showNotif('reg-notif','Erreur réseau. Réessayez.','error');
+    btn.textContent='Créer mon compte →';btn.disabled=false;
+  }
+}
+
+function showForgot(){
+  const email=prompt('Entrez votre email pour réinitialiser votre mot de passe :');
+  if(email){
+    fetch('/api/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})})
+      .then(r=>r.json())
+      .then(d=>showNotif('login-notif','Email de réinitialisation envoyé si le compte existe.','success'))
+      .catch(()=>showNotif('login-notif','Erreur. Réessayez.','error'));
+  }
+}
+</script>
+</body>
+</html>
