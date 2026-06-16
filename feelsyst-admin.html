@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feelsyst — Admin</title>
+<style>
+  /* ── TOKENS ── */
+  :root {
+    --bg:        #0a0a0f;
+    --surface:   #12121a;
+    --card:      #1a1a26;
+    --border:    #2a2a3d;
+    --accent:    #7c5cfc;
+    --accent2:   #fc5c7d;
+    --green:     #22d3a5;
+    --yellow:    #f5c842;
+    --red:       #fc5c5c;
+    --text:      #e8e8f0;
+    --muted:     #6b6b8a;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --font-main: 'Inter', system-ui, sans-serif;
+    --radius:    10px;
+    --sidebar:   220px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo .logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .sidebar-logo .logo-sub {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 3px;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-section {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 12px 10px 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 13.5px;
+    font-family: var(--font-main);
+  }
+
+  .nav-item:hover { background: var(--card); color: var(--text); }
+  .nav-item.active { background: rgba(124,92,252,0.15); color: var(--accent); }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .alert-badge {
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  .refresh-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font-main);
+    transition: all 0.15s;
+  }
+  .refresh-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .content {
+    padding: 28px;
+    flex: 1;
+  }
+
+  /* ── SECTIONS ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── LOGIN ── */
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    width: 360px;
+  }
+
+  .login-card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .login-card p { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+
+  /* ── CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .kpi-green .kpi-value { color: var(--green); }
+  .kpi-red .kpi-value { color: var(--red); }
+  .kpi-yellow .kpi-value { color: var(--yellow); }
+  .kpi-accent .kpi-value { color: var(--accent); }
+
+  /* ── TABLES ── */
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .table-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .table-actions { display: flex; gap: 8px; align-items: center; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(42,42,61,0.5);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(124,92,252,0.04); }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-green  { background: rgba(34,211,165,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(245,200,66,0.15);  color: var(--yellow); }
+  .badge-red    { background: rgba(252,92,92,0.15);   color: var(--red); }
+  .badge-purple { background: rgba(124,92,252,0.15);  color: var(--accent); }
+  .badge-gray   { background: rgba(107,107,138,0.15); color: var(--muted); }
+
+  /* ── FORMS ── */
+  .form-group { margin-bottom: 16px; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--font-main);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  textarea { resize: vertical; min-height: 100px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    font-family: var(--font-main);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #6a4edb; }
+
+  .btn-danger {
+    background: rgba(252,92,92,0.15);
+    color: var(--red);
+    border: 1px solid rgba(252,92,92,0.3);
+  }
+  .btn-danger:hover { background: rgba(252,92,92,0.25); }
+
+  .btn-ghost {
+    background: var(--card);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    width: 480px;
+    max-width: 95vw;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .modal-header h3 { font-size: 16px; font-weight: 600; }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  /* ── ALERTS ── */
+  .alert-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .alert-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .alert-item.critical { border-left: 3px solid var(--red); }
+  .alert-item.warning  { border-left: 3px solid var(--yellow); }
+  .alert-item.info     { border-left: 3px solid var(--accent); }
+
+  .alert-icon { font-size: 18px; flex-shrink: 0; }
+  .alert-body { flex: 1; }
+  .alert-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .alert-msg   { font-size: 12px; color: var(--muted); }
+  .alert-time  { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── AGENT CARDS ── */
+  .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .agent-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: border-color 0.15s;
+  }
+
+  .agent-card:hover { border-color: var(--accent); }
+
+  .agent-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .agent-info { display: flex; align-items: center; gap: 10px; }
+  .agent-avatar { font-size: 24px; }
+  .agent-name { font-size: 14px; font-weight: 600; }
+  .agent-role { font-size: 11px; color: var(--muted); }
+
+  .toggle {
+    width: 36px; height: 20px;
+    background: var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    border: none;
+  }
+
+  .toggle.on { background: var(--green); }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.2s;
+  }
+
+  .toggle.on::after { transform: translateX(16px); }
+
+  .agent-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 8px;
+  }
+
+  .agent-stat { text-align: center; flex: 1; }
+  .agent-stat-val { font-size: 18px; font-weight: 700; font-family: var(--font-mono); color: var(--accent); }
+  .agent-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* ── SEARCH ── */
+  .search-input {
+    width: 220px;
+    padding: 7px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  /* ── TOAST ── */
+  .toast-wrap {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toast {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.2s ease;
+    min-width: 260px;
+  }
+
+  .toast.success { border-left: 3px solid var(--green); }
+  .toast.error   { border-left: 3px solid var(--red); }
+
+  @keyframes slideIn {
+    from { transform: translateX(40px); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+
+  /* ── MISC ── */
+  .page-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+  }
+
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; }
+
+  .loading {
+    text-align: center;
+    padding: 32px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .prompt-area {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    min-height: 140px;
+  }
+
+  .finance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(42,42,61,0.5);
+  }
+
+  .finance-row:last-child { border-bottom: none; }
+  .finance-label { font-size: 13px; color: var(--muted); }
+  .finance-val { font-size: 14px; font-weight: 600; font-family: var(--font-mono); }
+
+  .prospect-status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+
+  .dot-new       { background: var(--muted); }
+  .dot-contacted { background: var(--yellow); }
+  .dot-replied   { background: var(--accent); }
+  .dot-qualified { background: var(--green); }
+  .dot-converted { background: #22d3a5; }
+  .dot-lost      { background: var(--red); }
+
+  select option { background: var(--card); }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <h2>Feelsyst Admin</h2>
+    <p>Accès réservé — panneau de contrôle fondateur</p>
+    <div class="form-group">
+      <label>Mot de passe admin</label>
+      <input type="password" id="adminPwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doLogin()">
+      Accéder au panneau →
+    </button>
+    <p id="loginErr" style="color:var(--red);font-size:12px;margin-top:12px;text-align:center"></p>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app" style="display:none;width:100%;display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Feelsyst</div>
+      <div class="logo-sub">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Vue globale</div>
+      <button class="nav-item active" onclick="showSection('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" onclick="showSection('alerts')">
+        <span class="nav-icon">🔔</span> Alertes
+        <span id="alertCount" class="alert-badge" style="display:none;margin-left:auto"></span>
+      </button>
+
+      <div class="nav-section">Clients</div>
+      <button class="nav-item" onclick="showSection('clients')">
+        <span class="nav-icon">👥</span> Clients
+      </button>
+      <button class="nav-item" onclick="showSection('prospects')">
+        <span class="nav-icon">🎯</span> Prospects
+      </button>
+      <button class="nav-item" onclick="showSection('tickets')">
+        <span class="nav-icon">💬</span> Support
+      </button>
+
+      <div class="nav-section">Plateforme</div>
+      <button class="nav-item" onclick="showSection('finance')">
+        <span class="nav-icon">💰</span> Finance
+      </button>
+      <button class="nav-item" onclick="showSection('agents')">
+        <span class="nav-icon">🤖</span> Agents
+      </button>
+      <button class="nav-item" onclick="showSection('logs')">
+        <span class="nav-icon">📋</span> Logs
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="margin-bottom:4px">Connecté en tant qu'admin</div>
+      <div style="font-size:11px" id="lastRefresh">—</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <span id="topAlertBadge" class="alert-badge" style="display:none" onclick="showSection('alerts')"></span>
+        <button class="refresh-btn" onclick="refreshCurrent()">↻ Actualiser</button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ════════════════════════════════════ DASHBOARD ══ -->
+      <div class="section active" id="sec-dashboard">
+        <div class="page-title">Vue globale</div>
+        <div class="page-sub">État de la plateforme en temps réel</div>
+
+        <div class="cards-grid" id="kpiGrid">
+          <div class="loading">Chargement des métriques…</div>
+        </div>
+
+        <div class="two-col">
+          <div class="table-wrap">
+            <div class="table-header">
+              <h3>Derniers clients</h3>
+              <button class="btn btn-ghost btn-sm" onclick="showSection('clients')">Voir tout →</button>
+            </div>
+            <table>
+              <thead>
+                <tr><th>Client</th><th>Plan</th><th>Statut</th><th>Inscrit</th></tr>
+              </thead>
+              <tbody id="recentClientsBody">
+                <tr><td colspan="4" class="loading">Chargement…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-wrap">
+            <div class="table-header">
+              <h3>Trials expirant bientôt</h3>
+            </div>
+            <div id="expiringTrials" style="padding:16px">
+              <div class="loading">Chargement…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════ ALERTES ══ -->
+      <div class="section" id="sec-alerts">
+        <div class="page-title">Alertes</div>
+        <div class="page-sub">Notifications critiques nécessitant votre attention</div>
+        <div class="alert-list" id="alertsList">
+          <div class="loading">Chargement…</div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════ CLIENTS ══ -->
+      <div class="section" id="sec-clients">
+        <div class="page-title">Clients</div>
+        <div class="page-sub">Gestion complète de votre base clients</div>
+
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>Tous les clients</h3>
+            <div class="table-actions">
+              <input class="search-input" id="clientSearch" placeholder="🔍 Rechercher…" oninput="filterClients()">
+              <select id="filterPlan" onchange="filterClients()" style="width:120px">
+                <option value="">Tous les plans</option>
+                <option value="trial">Trial</option>
+                <option value="starter">Starter</option>
+                <option value="pro">Pro</option>
+                <option value="unlimited">Unlimited</option>
+                <option value="custom">Custom</option>
+              </select>
+              <select id="filterStatus" onchange="filterClients()" style="width:120px">
+                <option value="">Tous statuts</option>
+                <option value="active">Actif</option>
+                <option value="trial">Trial</option>
+                <option value="past_due">Retard</option>
+                <option value="cancelled">Annulé</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Client</th><th>Entreprise</th><th>Plan</th>
+                <th>Statut</th><th>Inscrit</th><th>Dernière connexion</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="clientsBody">
+              <tr><td colspan="7" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════ PROSPECTS ══ -->
+      <div class="section" id="sec-prospects">
+        <div class="page-title">Prospects Rex</div>
+        <div class="page-sub">Pipeline de prospection automatisée</div>
+
+        <div class="cards-grid" id="prospectKpis" style="grid-template-columns:repeat(6,1fr)">
+          <div class="loading">Chargement…</div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>Pipeline prospects</h3>
+            <div class="table-actions">
+              <input class="search-input" id="prospectSearch" placeholder="🔍 Rechercher…" oninput="filterProspects()">
+              <select id="filterProspectStatus" onchange="filterProspects()" style="width:140px">
+                <option value="">Tous statuts</option>
+                <option value="new">Nouveau</option>
+                <option value="contacted">Contacté</option>
+                <option value="replied">A répondu</option>
+                <option value="qualified">Qualifié</option>
+                <option value="converted">Converti</option>
+                <option value="lost">Perdu</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Entreprise</th><th>Contact</th><th>Secteur</th><th>Statut</th><th>Envoyé le</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="prospectsBody">
+              <tr><td colspan="6" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════ SUPPORT ══ -->
+      <div class="section" id="sec-tickets">
+        <div class="page-title">Support Lumi</div>
+        <div class="page-sub">Tickets ouverts et conversations clients</div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>Tickets</h3>
+            <select id="filterTicketStatus" onchange="loadTickets()" style="width:140px">
+              <option value="">Tous</option>
+              <option value="open">Ouverts</option>
+              <option value="in_progress">En cours</option>
+              <option value="resolved">Résolus</option>
+            </select>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Client</th><th>Sujet</th><th>Canal</th><th>Priorité</th><th>Statut</th><th>Créé le</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="ticketsBody">
+              <tr><td colspan="7" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════ FINANCE ══ -->
+      <div class="section" id="sec-finance">
+        <div class="page-title">Finance</div>
+        <div class="page-sub">Revenus, coûts API et marges</div>
+
+        <div class="cards-grid" id="financeKpis">
+          <div class="loading">Chargement…</div>
+        </div>
+
+        <div class="two-col">
+          <div class="table-wrap">
+            <div class="table-header"><h3>MRR par plan</h3></div>
+            <div id="mrrByPlan" style="padding:16px 20px">
+              <div class="loading">Chargement…</div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <div class="table-header"><h3>Rentabilité par client (30j)</h3></div>
+            <table>
+              <thead><tr><th>Client</th><th>Plan</th><th>Revenu</th><th>Coût API</th><th>Marge</th></tr></thead>
+              <tbody id="marginBody">
+                <tr><td colspan="5" class="loading">Chargement…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header"><h3>Derniers paiements</h3></div>
+          <table>
+            <thead><tr><th>Client</th><th>Plan</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
+            <tbody id="paymentsBody">
+              <tr><td colspan="5" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════ AGENTS ══ -->
+      <div class="section" id="sec-agents">
+        <div class="page-title">Agents IA</div>
+        <div class="page-sub">Configuration et performances des agents</div>
+        <div class="agents-grid" id="agentsGrid">
+          <div class="loading">Chargement…</div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════ LOGS ══ -->
+      <div class="section" id="sec-logs">
+        <div class="page-title">Logs admin</div>
+        <div class="page-sub">Historique de toutes les actions</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Action</th><th>Cible</th><th>Détails</th><th>Date</th></tr></thead>
+            <tbody id="logsBody">
+              <tr><td colspan="4" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /app -->
+
+<!-- ── MODALS ── -->
+
+<!-- Modal client -->
+<div class="modal-overlay" id="modalClient">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Fiche client</h3>
+      <button class="modal-close" onclick="closeModal('modalClient')">×</button>
+    </div>
+    <div id="clientModalBody"></div>
+  </div>
+</div>
+
+<!-- Modal agent prompt -->
+<div class="modal-overlay" id="modalAgent">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="agentModalTitle">Configurer l'agent</h3>
+      <button class="modal-close" onclick="closeModal('modalAgent')">×</button>
+    </div>
+    <div id="agentModalBody"></div>
+  </div>
+</div>
+
+<!-- Modal ticket -->
+<div class="modal-overlay" id="modalTicket">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Ticket support</h3>
+      <button class="modal-close" onclick="closeModal('modalTicket')">×</button>
+    </div>
+    <div id="ticketModalBody"></div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIG — Remplacer les 3 valeurs ci-dessous
+// ══════════════════════════════════════════════════════════════
+const SUPABASE_URL      = 'https://uygydopvfyfrczokgbdl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5Z3lkb3B2ZnlmcmN6b2tnYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNTUxMTIsImV4cCI6MjA5NjgzMTExMn0.BRFqiRIN405CswhLpF121gnzY2YBW9Y9QRkvKc6Cjkg';
+const RLS_ADMIN_SECRET  = 'feelsyst_rls_admin_2025';
+
+// Cache données
+let _clients = [];
+let _prospects = [];
+let _currentSection = 'dashboard';
+
+// ══════════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════════
+function doLogin() {
+  const pwd = document.getElementById('adminPwd').value;
+  const ADMIN_PWD = '#"Feelsyst-admin.hafs"0-1#';
+  if (pwd === ADMIN_PWD) {
+    localStorage.setItem('feelsyst_admin_token', pwd);
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initApp();
+  } else {
+    document.getElementById('loginErr').textContent = 'Mot de passe incorrect';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('feelsyst_admin_token');
+  location.reload();
+}
+
+// ══════════════════════════════════════════════════════════════
+// SUPABASE FETCH
+// ══════════════════════════════════════════════════════════════
+// Headers communs — injectés dans chaque requête Supabase
+// Le header x-admin-secret active les politiques RLS admin
+function sbHeaders(extra = {}) {
+  return {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation',
+    'x-admin-secret': RLS_ADMIN_SECRET,
+    ...extra,
+  };
+}
+
+async function sb(table, params = '') {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
+    headers: sbHeaders(),
+  });
+  if (!r.ok) {
+    const err = await r.text();
+    throw new Error(`${table}: ${err}`);
+  }
+  return r.json();
+}
+
+async function sbPatch(table, id, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: sbHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function sbPost(table, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body: JSON.stringify(data),
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function sbDelete(table, id) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: sbHeaders(),
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return true;
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+function initApp() {
+  // Vérifier si déjà connecté
+  const saved = localStorage.getItem('feelsyst_admin_token');
+  if (saved) {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  }
+  updateLastRefresh();
+  loadDashboard();
+  loadAlertCount();
+}
+
+function updateLastRefresh() {
+  document.getElementById('lastRefresh').textContent =
+    'Mis à jour ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function refreshCurrent() {
+  updateLastRefresh();
+  switch(_currentSection) {
+    case 'dashboard':  loadDashboard();  break;
+    case 'alerts':     loadAlerts();     break;
+    case 'clients':    loadClients();    break;
+    case 'prospects':  loadProspects();  break;
+    case 'tickets':    loadTickets();    break;
+    case 'finance':    loadFinance();    break;
+    case 'agents':     loadAgents();     break;
+    case 'logs':       loadLogs();       break;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+const sectionTitles = {
+  dashboard: 'Dashboard', alerts: 'Alertes', clients: 'Clients',
+  prospects: 'Prospects Rex', tickets: 'Support Lumi',
+  finance: 'Finance', agents: 'Agents IA', logs: 'Logs admin',
+};
+
+function showSection(name) {
+  _currentSection = name;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.trim().toLowerCase().includes(sectionTitles[name]?.split(' ')[0]?.toLowerCase()))
+      n.classList.add('active');
+  });
+  document.getElementById('topbarTitle').textContent = sectionTitles[name] || name;
+  refreshCurrent();
+}
+
+// ══════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════
+function planBadge(plan) {
+  const map = { trial:'yellow', starter:'purple', pro:'green', unlimited:'green', custom:'accent' };
+  const cls = map[plan] || 'gray';
+  return `<span class="badge badge-${cls}">${plan || '—'}</span>`;
+}
+
+function statusBadge(s) {
+  const map = { active:'green', trial:'yellow', past_due:'red', cancelled:'gray', suspended:'red' };
+  return `<span class="badge badge-${map[s]||'gray'}">${s||'—'}</span>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function fmtTime(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  const diff = Date.now() - dt.getTime();
+  if (diff < 60000) return 'À l\'instant';
+  if (diff < 3600000) return Math.floor(diff/60000) + 'min';
+  if (diff < 86400000) return Math.floor(diff/3600000) + 'h';
+  return fmtDate(d);
+}
+
+function euro(n) { return (n || 0).toFixed(2) + ' €'; }
+
+// ══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════════════
+async function loadDashboard() {
+  try {
+    const [clients, payments, usage, alerts] = await Promise.all([
+      sb('clients', '?select=id,plan,status,created_at,full_name,email,company_name'),
+      sb('payments', '?select=amount,status,created_at&order=created_at.desc&limit=5'),
+      sb('usage', `?select=estimated_cost&date=gte.${new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]}`),
+      sb('admin_alerts', '?select=id&is_read=eq.false'),
+    ]);
+
+    const active   = clients.filter(c => c.status === 'active').length;
+    const trials   = clients.filter(c => c.status === 'trial').length;
+    const cancelled = clients.filter(c => c.status === 'cancelled').length;
+
+    const planRevenue = { starter: 29, pro: 79, unlimited: 179, custom: 399 };
+    const mrr = clients
+      .filter(c => c.status === 'active')
+      .reduce((s, c) => s + (planRevenue[c.plan] || 0), 0);
+
+    const apiCost = usage.reduce((s, u) => s + (u.estimated_cost || 0), 0);
+    const margin  = mrr - apiCost;
+
+    document.getElementById('kpiGrid').innerHTML = `
+      <div class="kpi-card kpi-accent">
+        <div class="kpi-label">MRR</div>
+        <div class="kpi-value">${mrr}€</div>
+        <div class="kpi-sub">${active} abonnés actifs</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-label">Clients actifs</div>
+        <div class="kpi-value">${active}</div>
+        <div class="kpi-sub">${trials} en trial</div>
+      </div>
+      <div class="kpi-card kpi-red">
+        <div class="kpi-label">Coût API (mois)</div>
+        <div class="kpi-value">${euro(apiCost)}</div>
+        <div class="kpi-sub">Claude Sonnet</div>
+      </div>
+      <div class="kpi-card ${margin >= 0 ? 'kpi-green' : 'kpi-red'}">
+        <div class="kpi-label">Marge estimée</div>
+        <div class="kpi-value">${euro(margin)}</div>
+        <div class="kpi-sub">${mrr > 0 ? Math.round((margin/mrr)*100) : 0}% du MRR</div>
+      </div>
+      <div class="kpi-card kpi-yellow">
+        <div class="kpi-label">Trials actifs</div>
+        <div class="kpi-value">${trials}</div>
+        <div class="kpi-sub">${cancelled} annulés</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total clients</div>
+        <div class="kpi-value">${clients.length}</div>
+        <div class="kpi-sub">depuis le début</div>
+      </div>
+    `;
+
+    // Derniers clients
+    const recent = [...clients].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0,5);
+    document.getElementById('recentClientsBody').innerHTML = recent.length
+      ? recent.map(c => `
+        <tr>
+          <td>
+            <div style="font-weight:500">${c.full_name || '—'}</div>
+            <div style="font-size:11px;color:var(--muted)">${c.email}</div>
+          </td>
+          <td>${planBadge(c.plan)}</td>
+          <td>${statusBadge(c.status)}</td>
+          <td style="color:var(--muted)">${fmtDate(c.created_at)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" class="empty-state"><p>Aucun client</p></td></tr>';
+
+    // Trials expirant
+    const now = Date.now();
+    const expiring = clients.filter(c => {
+      if (c.status !== 'trial') return false;
+      const trialEnd = new Date(c.trial_ends_at || 0).getTime();
+      const daysLeft = (trialEnd - now) / 86400000;
+      return daysLeft >= 0 && daysLeft <= 3;
+    });
+
+    document.getElementById('expiringTrials').innerHTML = expiring.length
+      ? expiring.map(c => {
+          const d = Math.ceil((new Date(c.trial_ends_at) - now) / 86400000);
+          return `<div class="alert-item warning" style="margin-bottom:8px">
+            <div class="alert-icon">⏰</div>
+            <div class="alert-body">
+              <div class="alert-title">${c.company_name || c.full_name}</div>
+              <div class="alert-msg">${c.email} — expire dans ${d} jour${d>1?'s':''}</div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<div class="empty-state"><div class="empty-icon">✅</div><p>Aucun trial expirant bientôt</p></div>';
+
+    // Badge alertes
+    if (alerts.length > 0) {
+      document.getElementById('topAlertBadge').style.display = 'inline-block';
+      document.getElementById('topAlertBadge').textContent = alerts.length + ' alertes';
+      document.getElementById('alertCount').style.display = 'inline-block';
+      document.getElementById('alertCount').textContent = alerts.length;
+    }
+
+  } catch(e) {
+    document.getElementById('kpiGrid').innerHTML = `<div style="color:var(--red);padding:16px">Erreur: ${e.message}<br><small>Vérifiez SUPABASE_URL et SUPABASE_ANON_KEY dans le code.</small></div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ALERTES
+// ══════════════════════════════════════════════════════════════
+async function loadAlertCount() {
+  try {
+    const alerts = await sb('admin_alerts', '?select=id&is_read=eq.false');
+    if (alerts.length > 0) {
+      document.getElementById('topAlertBadge').style.display = 'inline-block';
+      document.getElementById('topAlertBadge').textContent = alerts.length + ' alertes';
+      document.getElementById('alertCount').style.display = 'inline-block';
+      document.getElementById('alertCount').textContent = alerts.length;
+    }
+  } catch(e) {}
+}
+
+async function loadAlerts() {
+  try {
+    const alerts = await sb('admin_alerts', '?select=*&order=created_at.desc&limit=50');
+    const icons = { churn:'💔', payment_failed:'❌', high_usage:'⚡', trial_expiring:'⏰', churn_risk:'⚠️' };
+
+    document.getElementById('alertsList').innerHTML = alerts.length
+      ? alerts.map(a => `
+        <div class="alert-item ${a.severity}" style="${a.is_read ? 'opacity:0.5' : ''}">
+          <div class="alert-icon">${icons[a.type] || '🔔'}</div>
+          <div class="alert-body">
+            <div class="alert-title">${a.title}</div>
+            <div class="alert-msg">${a.message || ''}</div>
+            <div class="alert-time">${fmtTime(a.created_at)}</div>
+          </div>
+          ${!a.is_read ? `<button class="btn btn-ghost btn-sm" onclick="markAlertRead('${a.id}')">Marquer lu</button>` : ''}
+        </div>`).join('')
+      : '<div class="empty-state"><div class="empty-icon">✅</div><p>Aucune alerte en cours</p></div>';
+  } catch(e) {
+    document.getElementById('alertsList').innerHTML = `<div style="color:var(--red)">Erreur: ${e.message}</div>`;
+  }
+}
+
+async function markAlertRead(id) {
+  await sbPatch('admin_alerts', id, { is_read: true });
+  loadAlerts();
+  toast('Alerte marquée comme lue', 'success');
+}
+
+// ══════════════════════════════════════════════════════════════
+// CLIENTS
+// ══════════════════════════════════════════════════════════════
+async function loadClients() {
+  try {
+    _clients = await sb('clients', '?select=*&order=created_at.desc');
+    renderClients(_clients);
+  } catch(e) {
+    document.getElementById('clientsBody').innerHTML = `<tr><td colspan="7" style="color:var(--red);padding:16px">Erreur: ${e.message}</td></tr>`;
+  }
+}
+
+function renderClients(list) {
+  document.getElementById('clientsBody').innerHTML = list.length
+    ? list.map(c => `
+      <tr>
+        <td>
+          <div style="font-weight:500">${c.full_name || '—'}</div>
+          <div style="font-size:11px;color:var(--muted)">${c.email}</div>
+        </td>
+        <td>${c.company_name || '—'}</td>
+        <td>${planBadge(c.plan)}</td>
+        <td>${statusBadge(c.status)}</td>
+        <td style="color:var(--muted)">${fmtDate(c.created_at)}</td>
+        <td style="color:var(--muted)">${fmtTime(c.last_login_at)}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="openClientModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+            Voir →
+          </button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty-state"><div class="empty-icon">👥</div><p>Aucun client</p></td></tr>';
+}
+
+function filterClients() {
+  const q      = document.getElementById('clientSearch').value.toLowerCase();
+  const plan   = document.getElementById('filterPlan').value;
+  const status = document.getElementById('filterStatus').value;
+  renderClients(_clients.filter(c => {
+    const matchQ = !q || [c.email, c.full_name, c.company_name].some(v => (v||'').toLowerCase().includes(q));
+    const matchP = !plan   || c.plan   === plan;
+    const matchS = !status || c.status === status;
+    return matchQ && matchP && matchS;
+  }));
+}
+
+function openClientModal(c) {
+  const planRevenue = { starter: 29, pro: 79, unlimited: 179, custom: 399 };
+  document.getElementById('clientModalBody').innerHTML = `
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px">
+      <div style="width:48px;height:48px;background:rgba(124,92,252,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px">
+        ${(c.full_name||'?')[0].toUpperCase()}
+      </div>
+      <div>
+        <div style="font-size:16px;font-weight:600">${c.full_name || '—'}</div>
+        <div style="color:var(--muted);font-size:13px">${c.email}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div style="background:var(--bg);padding:12px;border-radius:8px">
+        <div class="kpi-label">Entreprise</div>
+        <div style="font-weight:500">${c.company_name || '—'}</div>
+      </div>
+      <div style="background:var(--bg);padding:12px;border-radius:8px">
+        <div class="kpi-label">Secteur</div>
+        <div style="font-weight:500">${c.sector || '—'}</div>
+      </div>
+      <div style="background:var(--bg);padding:12px;border-radius:8px">
+        <div class="kpi-label">Plan actuel</div>
+        <div>${planBadge(c.plan)}</div>
+      </div>
+      <div style="background:var(--bg);padding:12px;border-radius:8px">
+        <div class="kpi-label">Statut</div>
+        <div>${statusBadge(c.status)}</div>
+      </div>
+      <div style="background:var(--bg);padding:12px;border-radius:8px">
+        <div class="kpi-label">Inscrit le</div>
+        <div style="font-weight:500">${fmtDate(c.created_at)}</div>
+      </div>
+      <div style="background:var(--bg);padding:12px;border-radius:8px">
+        <div class="kpi-label">Dernière connexion</div>
+        <div style="font-weight:500">${fmtTime(c.last_login_at)}</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <div style="margin-bottom:16px;font-size:13px;font-weight:600">Modifier le compte</div>
+
+    <div class="form-group">
+      <label>Changer le plan</label>
+      <select id="editPlan">
+        ${['trial','starter','pro','unlimited','custom'].map(p =>
+          `<option value="${p}" ${c.plan===p?'selected':''}>${p}</option>`
+        ).join('')}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Statut du compte</label>
+      <select id="editStatus">
+        ${['active','trial','past_due','suspended','cancelled'].map(s =>
+          `<option value="${s}" ${c.status===s?'selected':''}>${s}</option>`
+        ).join('')}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Notes internes</label>
+      <textarea id="editNotes">${c.notes || ''}</textarea>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="saveClient('${c.id}')">Enregistrer</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalClient')">Annuler</button>
+    </div>
+  `;
+  document.getElementById('modalClient').classList.add('open');
+}
+
+async function saveClient(id) {
+  const plan   = document.getElementById('editPlan').value;
+  const status = document.getElementById('editStatus').value;
+  const notes  = document.getElementById('editNotes').value;
+  try {
+    await sbPatch('clients', id, { plan, status, notes });
+    closeModal('modalClient');
+    loadClients();
+    toast('Client mis à jour', 'success');
+  } catch(e) {
+    toast('Erreur: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// PROSPECTS
+// ══════════════════════════════════════════════════════════════
+async function loadProspects() {
+  try {
+    _prospects = await sb('prospects', '?select=*&order=created_at.desc');
+
+    // KPIs pipeline
+    const counts = { new:0, contacted:0, replied:0, qualified:0, converted:0, lost:0 };
+    _prospects.forEach(p => { if (counts[p.status] !== undefined) counts[p.status]++; });
+
+    document.getElementById('prospectKpis').innerHTML = Object.entries(counts).map(([k,v]) => `
+      <div class="kpi-card">
+        <div class="kpi-label">${k}</div>
+        <div class="kpi-value" style="font-size:22px">${v}</div>
+      </div>`).join('');
+
+    renderProspects(_prospects);
+  } catch(e) {
+    document.getElementById('prospectsBody').innerHTML = `<tr><td colspan="6" style="color:var(--red);padding:16px">Erreur: ${e.message}</td></tr>`;
+  }
+}
+
+const statusDot = { new:'dot-new', contacted:'dot-contacted', replied:'dot-replied', qualified:'dot-qualified', converted:'dot-converted', lost:'dot-lost' };
+
+function renderProspects(list) {
+  document.getElementById('prospectsBody').innerHTML = list.length
+    ? list.map(p => `
+      <tr>
+        <td style="font-weight:500">${p.company_name}</td>
+        <td>
+          <div>${p.contact_name || '—'}</div>
+          <div style="font-size:11px;color:var(--muted)">${p.email || ''}</div>
+        </td>
+        <td style="color:var(--muted)">${p.sector || '—'}</td>
+        <td>
+          <span class="prospect-status-dot ${statusDot[p.status]||'dot-new'}"></span>
+          ${p.status}
+        </td>
+        <td style="color:var(--muted)">${fmtDate(p.outreach_sent_at)}</td>
+        <td>
+          <select class="btn btn-ghost btn-sm" onchange="updateProspectStatus('${p.id}', this.value)" style="padding:4px 8px;border-radius:6px">
+            ${['new','contacted','replied','qualified','converted','lost'].map(s =>
+              `<option value="${s}" ${p.status===s?'selected':''}>${s}</option>`
+            ).join('')}
+          </select>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" class="empty-state"><div class="empty-icon">🎯</div><p>Aucun prospect</p></td></tr>';
+}
+
+function filterProspects() {
+  const q = document.getElementById('prospectSearch').value.toLowerCase();
+  const s = document.getElementById('filterProspectStatus').value;
+  renderProspects(_prospects.filter(p => {
+    const mq = !q || [p.company_name, p.contact_name, p.email].some(v => (v||'').toLowerCase().includes(q));
+    const ms = !s || p.status === s;
+    return mq && ms;
+  }));
+}
+
+async function updateProspectStatus(id, status) {
+  try {
+    await sbPatch('prospects', id, { status });
+    toast(`Statut mis à jour → ${status}`, 'success');
+    loadProspects();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// TICKETS
+// ══════════════════════════════════════════════════════════════
+async function loadTickets() {
+  try {
+    const status = document.getElementById('filterTicketStatus').value;
+    const params = status ? `?status=eq.${status}&order=created_at.desc` : '?order=created_at.desc&limit=100';
+    const tickets = await sb('support_tickets', params);
+    const priorityColor = { low:'gray', normal:'purple', high:'yellow', urgent:'red' };
+
+    document.getElementById('ticketsBody').innerHTML = tickets.length
+      ? tickets.map(t => `
+        <tr>
+          <td style="color:var(--muted)">${t.email}</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.subject || '—'}</td>
+          <td><span class="badge badge-gray">${t.channel}</span></td>
+          <td><span class="badge badge-${priorityColor[t.priority]||'gray'}">${t.priority}</span></td>
+          <td>${statusBadge(t.status)}</td>
+          <td style="color:var(--muted)">${fmtDate(t.created_at)}</td>
+          <td>
+            <button class="btn btn-ghost btn-sm" onclick="openTicketModal(${JSON.stringify(t).replace(/"/g,'&quot;')})">Voir →</button>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="7" class="empty-state"><div class="empty-icon">💬</div><p>Aucun ticket</p></td></tr>';
+  } catch(e) {
+    document.getElementById('ticketsBody').innerHTML = `<tr><td colspan="7" style="color:var(--red);padding:16px">Erreur: ${e.message}</td></tr>`;
+  }
+}
+
+function openTicketModal(t) {
+  document.getElementById('ticketModalBody').innerHTML = `
+    <div class="form-group">
+      <label>Email client</label>
+      <input value="${t.email}" readonly>
+    </div>
+    <div class="form-group">
+      <label>Message client</label>
+      <textarea readonly style="min-height:80px">${t.body || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Réponse Lumi</label>
+      <textarea readonly style="min-height:80px;color:var(--accent)">${t.lumi_response || 'Aucune réponse Lumi'}</textarea>
+    </div>
+    <hr class="divider">
+    <div class="form-group">
+      <label>Votre réponse manuelle</label>
+      <textarea id="adminReply" placeholder="Répondre en tant qu'admin…" style="min-height:80px">${t.admin_response || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Changer le statut</label>
+      <select id="ticketStatus">
+        ${['open','in_progress','resolved','closed'].map(s =>
+          `<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`
+        ).join('')}
+      </select>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="saveTicket('${t.id}')">Enregistrer</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalTicket')">Annuler</button>
+    </div>
+  `;
+  document.getElementById('modalTicket').classList.add('open');
+}
+
+async function saveTicket(id) {
+  const admin_response = document.getElementById('adminReply').value;
+  const status = document.getElementById('ticketStatus').value;
+  try {
+    await sbPatch('support_tickets', id, { admin_response, status,
+      resolved_at: status === 'resolved' ? new Date().toISOString() : null });
+    closeModal('modalTicket');
+    loadTickets();
+    toast('Ticket mis à jour', 'success');
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// FINANCE
+// ══════════════════════════════════════════════════════════════
+async function loadFinance() {
+  try {
+    const [clients, payments, usage] = await Promise.all([
+      sb('clients', '?select=id,email,company_name,plan,status'),
+      sb('payments', '?select=*&order=created_at.desc&limit=20'),
+      sb('usage', `?select=client_id,estimated_cost&date=gte.${new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]}`),
+    ]);
+
+    const planRevenue = { starter: 29, pro: 79, unlimited: 179, custom: 399 };
+    const mrr  = clients.filter(c=>c.status==='active').reduce((s,c)=>s+(planRevenue[c.plan]||0),0);
+    const cost  = usage.reduce((s,u)=>s+(u.estimated_cost||0),0);
+    const paid  = payments.filter(p=>p.status==='paid').reduce((s,p)=>s+(p.amount||0),0);
+
+    document.getElementById('financeKpis').innerHTML = `
+      <div class="kpi-card kpi-accent">
+        <div class="kpi-label">MRR</div>
+        <div class="kpi-value">${mrr}€</div>
+        <div class="kpi-sub">Revenus récurrents</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-label">Encaissé (total)</div>
+        <div class="kpi-value">${Math.round(paid)}€</div>
+        <div class="kpi-sub">${payments.filter(p=>p.status==='paid').length} paiements</div>
+      </div>
+      <div class="kpi-card kpi-red">
+        <div class="kpi-label">Coût API (mois)</div>
+        <div class="kpi-value">${euro(cost)}</div>
+        <div class="kpi-sub">Claude Sonnet</div>
+      </div>
+      <div class="kpi-card ${mrr-cost>=0?'kpi-green':'kpi-red'}">
+        <div class="kpi-label">Marge brute</div>
+        <div class="kpi-value">${euro(mrr-cost)}</div>
+        <div class="kpi-sub">${mrr>0?Math.round(((mrr-cost)/mrr)*100):0}%</div>
+      </div>
+    `;
+
+    // MRR par plan
+    const byPlan = {};
+    clients.filter(c=>c.status==='active').forEach(c => {
+      byPlan[c.plan] = (byPlan[c.plan] || {count:0, rev:0});
+      byPlan[c.plan].count++;
+      byPlan[c.plan].rev += planRevenue[c.plan] || 0;
+    });
+
+    document.getElementById('mrrByPlan').innerHTML = Object.entries(byPlan).length
+      ? Object.entries(byPlan).map(([plan, d]) => `
+        <div class="finance-row">
+          <div class="finance-label">${planBadge(plan)} × ${d.count}</div>
+          <div class="finance-val">${d.rev} €/mois</div>
+        </div>`).join('')
+      : '<div style="color:var(--muted);font-size:13px">Aucun abonné actif</div>';
+
+    // Rentabilité par client
+    const costByClient = {};
+    usage.forEach(u => {
+      costByClient[u.client_id] = (costByClient[u.client_id] || 0) + (u.estimated_cost || 0);
+    });
+
+    document.getElementById('marginBody').innerHTML = clients
+      .filter(c => c.status === 'active')
+      .map(c => {
+        const rev  = planRevenue[c.plan] || 0;
+        const cost = costByClient[c.id] || 0;
+        const margin = rev - cost;
+        return `<tr>
+          <td>
+            <div style="font-weight:500;font-size:12px">${c.company_name || c.email}</div>
+          </td>
+          <td>${planBadge(c.plan)}</td>
+          <td style="font-family:var(--font-mono)">${rev}€</td>
+          <td style="font-family:var(--font-mono);color:var(--red)">${euro(cost)}</td>
+          <td style="font-family:var(--font-mono);color:${margin>=0?'var(--green)':'var(--red)'};font-weight:600">${euro(margin)}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="5" class="empty-state"><p>Aucun client actif</p></td></tr>';
+
+    // Derniers paiements
+    document.getElementById('paymentsBody').innerHTML = payments.length
+      ? payments.map(p => `
+        <tr>
+          <td style="color:var(--muted)">${p.client_id?.slice(0,8) || '—'}</td>
+          <td>${planBadge(p.plan)}</td>
+          <td style="font-family:var(--font-mono);font-weight:600">${p.amount}€</td>
+          <td>${statusBadge(p.status)}</td>
+          <td style="color:var(--muted)">${fmtDate(p.created_at)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="5" class="empty-state"><p>Aucun paiement</p></td></tr>';
+
+  } catch(e) {
+    document.getElementById('financeKpis').innerHTML = `<div style="color:var(--red)">Erreur: ${e.message}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// AGENTS
+// ══════════════════════════════════════════════════════════════
+async function loadAgents() {
+  try {
+    const [configs, usageData] = await Promise.all([
+      sb('agent_configs', '?select=*&order=agent'),
+      sb('usage', `?select=agent,messages_count,estimated_cost&date=gte.${new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]}`),
+    ]);
+
+    const agentEmojis = { aria:'🧠', nova:'✨', rex:'💼', vera:'📊', lumi:'💬', lex:'⚖️', pulse:'📈', atlas:'🎓' };
+
+    // Agréger usage par agent
+    const usageByAgent = {};
+    usageData.forEach(u => {
+      if (!usageByAgent[u.agent]) usageByAgent[u.agent] = { messages: 0, cost: 0 };
+      usageByAgent[u.agent].messages += u.messages_count || 0;
+      usageByAgent[u.agent].cost     += u.estimated_cost || 0;
+    });
+
+    document.getElementById('agentsGrid').innerHTML = configs.map(a => `
+      <div class="agent-card">
+        <div class="agent-card-header">
+          <div class="agent-info">
+            <div class="agent-avatar">${agentEmojis[a.agent] || '🤖'}</div>
+            <div>
+              <div class="agent-name">${a.display_name || a.agent}</div>
+              <div class="agent-role">${a.model || 'claude-sonnet-4-6'}</div>
+            </div>
+          </div>
+          <button class="toggle ${a.is_active ? 'on' : ''}" onclick="toggleAgent('${a.agent}', ${!a.is_active})"></button>
+        </div>
+
+        <div class="agent-stats">
+          <div class="agent-stat">
+            <div class="agent-stat-val">${usageByAgent[a.agent]?.messages || 0}</div>
+            <div class="agent-stat-label">Messages</div>
+          </div>
+          <div class="agent-stat">
+            <div class="agent-stat-val">${euro(usageByAgent[a.agent]?.cost || 0)}</div>
+            <div class="agent-stat-label">Coût mois</div>
+          </div>
+          <div class="agent-stat">
+            <div class="agent-stat-val">${a.temperature || 0.7}</div>
+            <div class="agent-stat-label">Temp.</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--muted);background:var(--bg);padding:10px;border-radius:6px;margin-bottom:14px;line-height:1.5;max-height:60px;overflow:hidden">
+          ${(a.system_prompt || '').slice(0, 120)}…
+        </div>
+
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center" onclick="openAgentModal(${JSON.stringify(a).replace(/"/g,'&quot;')})">
+          ✏️ Modifier le prompt
+        </button>
+      </div>
+    `).join('');
+
+  } catch(e) {
+    document.getElementById('agentsGrid').innerHTML = `<div style="color:var(--red)">Erreur: ${e.message}</div>`;
+  }
+}
+
+async function toggleAgent(agent, active) {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/agent_configs?agent=eq.${agent}`, {
+      method: 'PATCH',
+      headers: sbHeaders(),
+      body: JSON.stringify({ is_active: active }),
+    });
+    if (!r.ok) throw new Error(await r.text());
+    toast(`Agent ${agent} ${active ? 'activé' : 'désactivé'}`, 'success');
+    loadAgents();
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+function openAgentModal(a) {
+  document.getElementById('agentModalTitle').textContent = `Configurer ${a.display_name || a.agent}`;
+  document.getElementById('agentModalBody').innerHTML = `
+    <div class="form-group">
+      <label>System prompt</label>
+      <textarea class="prompt-area" id="agentPrompt">${a.system_prompt || ''}</textarea>
+    </div>
+    <div class="two-col">
+      <div class="form-group">
+        <label>Température (0–1)</label>
+        <input type="number" id="agentTemp" value="${a.temperature || 0.7}" min="0" max="1" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>Max tokens</label>
+        <input type="number" id="agentTokens" value="${a.max_tokens || 1000}" min="100" max="4000">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="saveAgent('${a.agent}')">Enregistrer</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalAgent')">Annuler</button>
+    </div>
+  `;
+  document.getElementById('modalAgent').classList.add('open');
+}
+
+async function saveAgent(agent) {
+  const system_prompt = document.getElementById('agentPrompt').value;
+  const temperature   = parseFloat(document.getElementById('agentTemp').value);
+  const max_tokens    = parseInt(document.getElementById('agentTokens').value);
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/agent_configs?agent=eq.${agent}`, {
+      method: 'PATCH',
+      headers: sbHeaders(),
+      body: JSON.stringify({ system_prompt, temperature, max_tokens }),
+    });
+    if (!r.ok) throw new Error(await r.text());
+    closeModal('modalAgent');
+    loadAgents();
+    toast(`Prompt ${agent} mis à jour`, 'success');
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// LOGS
+// ══════════════════════════════════════════════════════════════
+async function loadLogs() {
+  try {
+    const logs = await sb('admin_logs', '?select=*&order=created_at.desc&limit=100');
+    document.getElementById('logsBody').innerHTML = logs.length
+      ? logs.map(l => `
+        <tr>
+          <td><code style="font-size:11px;color:var(--accent)">${l.action}</code></td>
+          <td style="color:var(--muted)">${l.target_type || '—'} ${l.target_id ? '#' + l.target_id.slice(0,8) : ''}</td>
+          <td style="font-size:11px;color:var(--muted);max-width:200px">
+            ${l.details ? JSON.stringify(l.details).slice(0,80) : '—'}
+          </td>
+          <td style="color:var(--muted)">${fmtTime(l.created_at)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" class="empty-state"><p>Aucun log</p></td></tr>';
+  } catch(e) {
+    document.getElementById('logsBody').innerHTML = `<tr><td colspan="4" style="color:var(--red)">Erreur: ${e.message}</td></tr>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODALS & TOASTS
+// ══════════════════════════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  document.querySelectorAll('.modal-overlay.open').forEach(m => {
+    if (e.target === m) m.classList.remove('open');
+  });
+});
+
+function toast(msg, type = 'success') {
+  const wrap = document.getElementById('toastWrap');
+  const el   = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${msg}`;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ══════════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('feelsyst_admin_token');
+  if (saved === '#"Feelsyst-admin.hafs"0-1#') {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    updateLastRefresh();
+    loadDashboard();
+    loadAlertCount();
+  }
+});
+</script>
+</body>
+</html>
