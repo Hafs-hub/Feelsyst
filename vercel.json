@@ -8,25 +8,24 @@
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+        { "key": "Access-Control-Allow-Origin",  "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, PATCH, DELETE, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, x-admin-secret" }
       ]
     }
   ],
   "env": {
-    "ANTHROPIC_API_KEY": "@anthropic_api_key",
-    "STRIPE_SECRET_KEY": "@stripe_secret_key",
-    "STRIPE_WEBHOOK_SECRET": "@stripe_webhook_secret",
-    "BREVO_API_KEY": "@brevo_api_key",
-    "PASSWORD_SALT": "@password_salt",
-    "ADMIN_SECRET": "@admin_secret"
+    "ANTHROPIC_API_KEY":      "@anthropic_api_key",
+    "STRIPE_SECRET_KEY":      "@stripe_secret_key",
+    "STRIPE_WEBHOOK_SECRET":  "@stripe_webhook_secret",
+    "BREVO_API_KEY":          "@brevo_api_key",
+    "PASSWORD_SALT":          "@password_salt",
+    "ADMIN_SECRET":           "@admin_secret",
+    "SUPABASE_URL":           "@supabase_url",
+    "SUPABASE_SERVICE_KEY":   "@supabase_service_key"
   },
   "functions": {
     "api/*.js": {
-      "maxDuration": 30
-    },
-    "api/admin/*.js": {
       "maxDuration": 30
     }
   }
