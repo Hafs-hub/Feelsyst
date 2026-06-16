@@ -1,30 +1,90 @@
-// api/admin/clients.js — Liste clients pour l'admin panel
-let usersStore = global._feelsystUsers || (global._feelsystUsers = {});
+// api/admin/clients.js — Liste clients admin — Migré Supabase
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
 const ADMIN_TOKEN = process.env.ADMIN_SECRET || 'feelsyst_admin_2025';
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).end();
 
-  // Auth admin basique
+  // Auth admin
   const auth = req.headers['authorization'] || '';
   const token = auth.replace('Bearer ', '').trim();
-  // En production, utiliser un vrai système d'auth admin
-  // Pour l'instant, on accepte la requête (l'admin panel a son propre password)
+  if (token !== ADMIN_TOKEN) {
+    return res.status(401).json({ error: 'Non autorisé' });
+  }
 
-  const clients = Object.values(usersStore).map(u => {
-    const c = { ...u };
-    delete c.passwordHash;
-    return c;
-  });
+  // ── GET : liste tous les clients ──
+  if (req.method === 'GET') {
+    const { plan, status, limit = 100 } = req.query;
 
-  return res.status(200).json({
-    success: true,
-    clients,
-    total: clients.length,
-  });
+    let query = supabase
+      .from('clients')
+      .select(`
+        id, email, full_name, company_name, sector, plan, status,
+        created_at, last_login_at, trial_ends_at,
+        subscription_start, stripe_customer_id, notes
+      `)
+      .order('created_at', { ascending: false })
+      .limit(parseInt(limit));
+
+    if (plan) query = query.eq('plan', plan);
+    if (status) query = query.eq('status', status);
+
+    const { data: clients, error } = await query;
+    if (error) return res.status(500).json({ error: error.message });
+
+    // Stats rapides
+    const stats = {
+      total: clients.length,
+      byPlan: clients.reduce((acc, c) => {
+        acc[c.plan] = (acc[c.plan] || 0) + 1;
+        return acc;
+      }, {}),
+      active: clients.filter(c => c.status === 'active').length,
+      trial: clients.filter(c => c.status === 'trial').length,
+      cancelled: clients.filter(c => c.status === 'cancelled').length,
+    };
+
+    return res.status(200).json({ success: true, clients, stats, total: clients.length });
+  }
+
+  // ── PATCH : modifier un client (plan, statut, notes) ──
+  if (req.method === 'PATCH') {
+    const { id, plan, status, notes } = req.body || {};
+    if (!id) return res.status(400).json({ error: 'id client requis' });
+
+    const updates = {};
+    if (plan) updates.plan = plan;
+    if (status) updates.status = status;
+    if (notes !== undefined) updates.notes = notes;
+
+    const { data, error } = await supabase
+      .from('clients')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    // Logger l'action admin
+    await supabase.from('admin_logs').insert([{
+      action: 'client.updated',
+      target_type: 'client',
+      target_id: id,
+      details: updates,
+    }]);
+
+    return res.status(200).json({ success: true, client: data });
+  }
+
+  return res.status(405).json({ error: 'Méthode non autorisée' });
 };

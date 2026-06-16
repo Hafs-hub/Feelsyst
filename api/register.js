@@ -1,14 +1,17 @@
-// api/register.js — Feelsyst V2
-// Inscription client : création compte + email Rex de bienvenue
-
+// api/register.js — Feelsyst V2 — Migré Supabase
 const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
 
-// Plans Stripe — Payment Links avec vrais price IDs
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
+
 const STRIPE_LINKS = {
-  starter:   'https://buy.stripe.com/pay/price_1TgL8mAeed9sYBiokS3BJgG0',  // 29€/mois
-  pro:       'https://buy.stripe.com/pay/price_1TgLALAeed9sYBiouz0mxBsd',  // 79€/mois
-  unlimited: 'https://buy.stripe.com/pay/price_1TgLB0Aeed9sYBioFYaYx8RI',  // 179€/mois
-  custom:    'https://buy.stripe.com/pay/price_1TgLBtAeed9sYBio4mRzpovS',  // 399€ unique
+  starter:   'https://buy.stripe.com/pay/price_1TgL8mAeed9sYBiokS3BJgG0',
+  pro:       'https://buy.stripe.com/pay/price_1TgLALAeed9sYBiouz0mxBsd',
+  unlimited: 'https://buy.stripe.com/pay/price_1TgLB0Aeed9sYBioFYaYx8RI',
+  custom:    'https://buy.stripe.com/pay/price_1TgLBtAeed9sYBio4mRzpovS',
 };
 
 function hashPassword(password) {
@@ -21,12 +24,9 @@ function generateToken(email) {
 
 async function sendWelcomeEmail(user) {
   const BREVO_KEY = process.env.BREVO_API_KEY;
-  if (!BREVO_KEY) {
-    console.warn('BREVO_API_KEY manquante — email non envoyé');
-    return;
-  }
+  if (!BREVO_KEY) return;
 
-  const planNames = { free: 'Découverte (7 jours gratuits)', starter: 'Starter', pro: 'Pro', unlimited: 'Illimité' };
+  const planNames = { trial: 'Découverte (7 jours gratuits)', starter: 'Starter', pro: 'Pro', unlimited: 'Illimité' };
 
   const emailBody = `Bonjour ${user.firstname},
 
@@ -38,7 +38,9 @@ Votre compte a été créé avec succès ! Voici vos informations :
 • Entreprise : ${user.company}
 • Secteur : ${user.sector}
 
-${user.plan === 'free' ? `Vous disposez de 7 jours pour tester nos 5 agents IA en conditions réelles. Pas de carte bancaire requise.` : `Votre abonnement est actif. Vos 5 agents IA sont prêts à travailler pour vous.`}
+${user.plan === 'trial'
+  ? 'Vous disposez de 7 jours pour tester nos agents IA en conditions réelles. Pas de carte bancaire requise.'
+  : 'Votre abonnement est actif. Vos agents IA sont prêts à travailler pour vous.'}
 
 Accédez à votre tableau de bord : https://feelsyst.com/dashboard.html
 
@@ -49,19 +51,12 @@ Vos agents IA qui vous attendent :
 📊 Vera — Finance & Facturation
 💬 Lumi — Support client 24h/7j
 
-N'hésitez pas à me contacter directement si vous avez des questions.
-
 À très vite,
-Rex
-Agent Commercial IA — Feelsyst
-contact@feelsyst.com`;
+Rex — Agent Commercial IA Feelsyst`;
 
   await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key': BREVO_KEY,
-    },
+    headers: { 'Content-Type': 'application/json', 'api-key': BREVO_KEY },
     body: JSON.stringify({
       sender: { name: 'Rex — Feelsyst', email: 'contact@feelsyst.com' },
       to: [{ email: user.email, name: `${user.firstname} ${user.lastname}` }],
@@ -71,21 +66,15 @@ contact@feelsyst.com`;
   });
 }
 
-// Simple in-memory storage (remplacez par DB en production)
-// En production : utilisez Vercel KV, PlanetScale, ou Supabase
-let usersStore = global._feelsystUsers || (global._feelsystUsers = {});
-let tokensStore = global._feelsystTokens || (global._feelsystTokens = {});
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Méthode non autorisée' });
 
   try {
-    const { firstname, lastname, email, company, sector, password, plan = 'free' } = req.body;
+    const { firstname, lastname, email, company, sector, password, plan = 'trial' } = req.body;
 
     // Validation
     if (!firstname || !lastname || !email || !company || !sector || !password) {
@@ -98,46 +87,76 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Mot de passe trop court (min. 8 caractères)' });
     }
 
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Vérifier si email déjà utilisé
-    if (usersStore[email]) {
+    const { data: existing } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('email', normalizedEmail)
+      .single();
+
+    if (existing) {
       return res.status(400).json({ error: 'Un compte existe déjà avec cet email' });
     }
 
-    // Créer l'utilisateur
-    const user = {
-      id: crypto.randomBytes(8).toString('hex'),
+    // Créer le client dans Supabase
+    const trialEndsAt = plan === 'trial'
+      ? new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()
+      : null;
+
+    const { data: newClient, error: insertError } = await supabase
+      .from('clients')
+      .insert([{
+        email: normalizedEmail,
+        full_name: `${firstname.trim()} ${lastname.trim()}`,
+        company_name: company.trim(),
+        sector,
+        plan,
+        status: plan === 'trial' ? 'trial' : 'active',
+        trial_ends_at: trialEndsAt,
+        password_hash: hashPassword(password), // ← ajouter colonne password_hash à la table clients (voir note)
+      }])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    // Générer le token et le stocker dans Supabase
+    const token = generateToken(normalizedEmail);
+
+    await supabase.from('sessions').insert([{
+      token,
+      client_id: newClient.id,
+      expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(), // 30 jours
+    }]);
+
+    // Email de bienvenue Rex
+    sendWelcomeEmail({
       firstname: firstname.trim(),
       lastname: lastname.trim(),
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       company: company.trim(),
       sector,
       plan,
-      passwordHash: hashPassword(password),
-      createdAt: new Date().toISOString(),
-      active: true,
-      trialEndsAt: plan === 'free' ? new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString() : null,
-    };
+    }).catch(e => console.error('Email error:', e));
 
-    usersStore[email] = user;
-
-    // Générer le token
-    const token = generateToken(email);
-    tokensStore[token] = email;
-
-    // Envoyer email de bienvenue (Rex) — async, non bloquant
-    sendWelcomeEmail(user).catch(e => console.error('Email error:', e));
-
-    // Préparer la réponse
-    const userPublic = { ...user };
-    delete userPublic.passwordHash;
-
-    // Si plan payant, fournir le lien Stripe
-    const paymentUrl = plan !== 'free' ? STRIPE_LINKS[plan] : null;
+    const paymentUrl = plan !== 'trial' ? STRIPE_LINKS[plan] : null;
 
     return res.status(200).json({
       success: true,
       token,
-      user: userPublic,
+      user: {
+        id: newClient.id,
+        firstname: firstname.trim(),
+        lastname: lastname.trim(),
+        email: normalizedEmail,
+        company: company.trim(),
+        sector,
+        plan,
+        trialEndsAt,
+        createdAt: newClient.created_at,
+      },
       paymentUrl,
       message: 'Compte créé avec succès',
     });
