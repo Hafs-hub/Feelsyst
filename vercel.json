@@ -1,8 +1,14 @@
 {
   "version": 2,
   "name": "feelsyst-v2",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*\\.html)", "dest": "/$1" },
+    { "src": "/(.*\\.js)", "dest": "/$1" },
+    { "src": "/(.*\\.css)", "dest": "/$1" },
+    { "src": "/(.*\\.xml)", "dest": "/$1" },
+    { "src": "/(.*\\.txt)", "dest": "/$1" },
+    { "src": "/", "dest": "/index.html" }
   ],
   "headers": [
     {
