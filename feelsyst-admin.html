@@ -710,6 +710,9 @@
       <button class="nav-item" onclick="showSection('agents')">
         <span class="nav-icon">🤖</span> Agents
       </button>
+      <button class="nav-item" onclick="showSection('broadcast')">
+        <span class="nav-icon">📣</span> Broadcast
+      </button>
       <button class="nav-item" onclick="showSection('logs')">
         <span class="nav-icon">📋</span> Logs
       </button>
@@ -803,6 +806,7 @@
                 <option value="past_due">Retard</option>
                 <option value="cancelled">Annulé</option>
               </select>
+              <button class="btn btn-ghost btn-sm" onclick="exportClientsCSV()">⬇ Export CSV</button>
             </div>
           </div>
           <table>
@@ -842,6 +846,7 @@
                 <option value="converted">Converti</option>
                 <option value="lost">Perdu</option>
               </select>
+              <button class="btn btn-ghost btn-sm" onclick="exportProspectsCSV()">⬇ Export CSV</button>
             </div>
           </div>
           <table>
@@ -925,6 +930,70 @@
         <div class="page-sub">Configuration et performances des agents</div>
         <div class="agents-grid" id="agentsGrid">
           <div class="loading">Chargement…</div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════ BROADCAST ══ -->
+      <div class="section" id="sec-broadcast">
+        <div class="page-title">Broadcast</div>
+        <div class="page-sub">Envoyer un email groupé à un segment de clients</div>
+
+        <div class="two-col">
+          <div class="table-wrap" style="padding:20px">
+            <div class="form-group">
+              <label>Segment</label>
+              <select id="bcSegment" onchange="updateBroadcastFilters()">
+                <option value="">Tous les clients</option>
+                <option value="trial_expiring">Trials expirant sous 3 jours</option>
+              </select>
+            </div>
+            <div class="two-col" id="bcFilters">
+              <div class="form-group">
+                <label>Filtrer par plan</label>
+                <select id="bcPlan">
+                  <option value="">Tous les plans</option>
+                  <option value="trial">Trial</option>
+                  <option value="starter">Starter</option>
+                  <option value="pro">Pro</option>
+                  <option value="unlimited">Unlimited</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Filtrer par statut</label>
+                <select id="bcStatus">
+                  <option value="">Tous statuts</option>
+                  <option value="active">Actif</option>
+                  <option value="trial">Trial</option>
+                  <option value="past_due">Retard</option>
+                  <option value="cancelled">Annulé</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Sujet</label>
+              <input id="bcSubject" placeholder="Ex : Nouveauté Feelsyst — découvrez Lex et Pulse">
+            </div>
+
+            <div class="form-group">
+              <label>Message — variables : {{prenom}}, {{entreprise}}, {{plan}}</label>
+              <textarea id="bcBody" style="min-height:180px" placeholder="Bonjour {{prenom}},&#10;&#10;..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="sendBroadcast()">📣 Envoyer le broadcast</button>
+            <span id="bcStatusMsg" style="margin-left:12px;font-size:13px;color:var(--muted)"></span>
+          </div>
+
+          <div class="table-wrap" style="padding:20px">
+            <h3 style="margin-bottom:14px">Aperçu et conseils</h3>
+            <div style="font-size:13px;color:var(--muted);line-height:1.7">
+              <p>• Le segment <strong>"Trials expirant sous 3 jours"</strong> ignore les filtres plan/statut.</p>
+              <p>• Les variables sont remplacées automatiquement par les vraies données de chaque client.</p>
+              <p>• L'envoi est limité à ~3 emails/seconde pour respecter les quotas Brevo.</p>
+              <p>• Chaque broadcast est enregistré dans les Logs admin avec le nombre d'envois.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1104,6 +1173,7 @@ function refreshCurrent() {
     case 'tickets':    loadTickets();    break;
     case 'finance':    loadFinance();    break;
     case 'agents':     loadAgents();     break;
+    case 'broadcast':  /* pas de chargement requis */ break;
     case 'logs':       loadLogs();       break;
   }
 }
@@ -1114,7 +1184,7 @@ function refreshCurrent() {
 const sectionTitles = {
   dashboard: 'Dashboard', alerts: 'Alertes', clients: 'Clients',
   prospects: 'Prospects Rex', tickets: 'Support Lumi',
-  finance: 'Finance', agents: 'Agents IA', logs: 'Logs admin',
+  finance: 'Finance', agents: 'Agents IA', broadcast: 'Broadcast', logs: 'Logs admin',
 };
 
 function showSection(name) {
@@ -1426,6 +1496,7 @@ function openClientModal(c) {
     <div style="display:flex;gap:10px">
       <button class="btn btn-primary" onclick="saveClient('${c.id}')">Enregistrer</button>
       <button class="btn btn-ghost" onclick="closeModal('modalClient')">Annuler</button>
+      <button class="btn btn-ghost" style="margin-left:auto" onclick="impersonateClient('${c.id}', '${(c.email||'').replace(/'/g,"\\'")}')">🔑 Se connecter en tant que</button>
     </div>
   `;
   document.getElementById('modalClient').classList.add('open');
@@ -1825,6 +1896,117 @@ async function loadLogs() {
   }
 }
 
+// ══════════════════════════════════════════════════════════════
+// EXPORT CSV
+// ══════════════════════════════════════════════════════════════
+function downloadCSV(filename, rows) {
+  if (!rows.length) { toast('Rien à exporter', 'error'); return; }
+  const headers = Object.keys(rows[0]);
+  const escape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const csv = [
+    headers.join(','),
+    ...rows.map(r => headers.map(h => escape(r[h])).join(','))
+  ].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`${rows.length} lignes exportées`, 'success');
+}
+
+function exportClientsCSV() {
+  const rows = _clients.map(c => ({
+    email: c.email,
+    nom: c.full_name,
+    entreprise: c.company_name,
+    secteur: c.sector,
+    plan: c.plan,
+    statut: c.status,
+    inscrit_le: fmtDate(c.created_at),
+    derniere_connexion: fmtDate(c.last_login_at),
+  }));
+  downloadCSV(`feelsyst-clients-${new Date().toISOString().split('T')[0]}.csv`, rows);
+}
+
+function exportProspectsCSV() {
+  const rows = _prospects.map(p => ({
+    entreprise: p.company_name,
+    contact: p.contact_name,
+    email: p.email,
+    secteur: p.sector,
+    statut: p.status,
+    envoye_le: fmtDate(p.outreach_sent_at),
+  }));
+  downloadCSV(`feelsyst-prospects-${new Date().toISOString().split('T')[0]}.csv`, rows);
+}
+
+// ══════════════════════════════════════════════════════════════
+// BROADCAST
+// ══════════════════════════════════════════════════════════════
+function updateBroadcastFilters() {
+  const isSpecial = document.getElementById('bcSegment').value === 'trial_expiring';
+  document.getElementById('bcFilters').style.opacity = isSpecial ? '0.4' : '1';
+  document.getElementById('bcFilters').style.pointerEvents = isSpecial ? 'none' : 'auto';
+}
+
+async function sendBroadcast() {
+  const segment = document.getElementById('bcSegment').value;
+  const plan    = document.getElementById('bcPlan').value;
+  const status  = document.getElementById('bcStatus').value;
+  const subject = document.getElementById('bcSubject').value.trim();
+  const body    = document.getElementById('bcBody').value.trim();
+  const msgEl   = document.getElementById('bcStatusMsg');
+
+  if (!subject || !body) { toast('Sujet et message requis', 'error'); return; }
+  if (!confirm('Envoyer ce broadcast maintenant ? Cette action ne peut pas être annulée.')) return;
+
+  msgEl.textContent = 'Envoi en cours…';
+  try {
+    const r = await fetch(`${location.origin}/api/admin/broadcast`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ADMIN_PWD_CONST()}` },
+      body: JSON.stringify({ segment, plan, status, subject, body }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erreur broadcast');
+    msgEl.textContent = `✅ ${data.sent}/${data.total} emails envoyés`;
+    toast(`Broadcast envoyé à ${data.sent} client(s)`, 'success');
+  } catch (e) {
+    msgEl.textContent = '';
+    toast('Erreur: ' + e.message, 'error');
+  }
+}
+
+// Récupère le mot de passe admin actuel pour servir de Bearer token aux routes /api/admin/*
+function ADMIN_PWD_CONST() {
+  return localStorage.getItem('feelsyst_admin_token') || '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// IMPERSONATION
+// ══════════════════════════════════════════════════════════════
+async function impersonateClient(clientId, email) {
+  if (!confirm(`Se connecter en tant que ${email} ? Une session de 2h sera créée.`)) return;
+  try {
+    const r = await fetch(`${location.origin}/api/admin/impersonate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ADMIN_PWD_CONST()}` },
+      body: JSON.stringify({ client_id: clientId }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erreur impersonation');
+
+    // Ouvre le dashboard client dans un nouvel onglet avec le token en query param
+    // Le dashboard.html doit lire ?impersonate_token=... et le stocker comme token de session
+    const dashboardUrl = `${location.origin}/dashboard.html?impersonate_token=${data.token}`;
+    window.open(dashboardUrl, '_blank');
+    toast(`Connecté en tant que ${email} (2h)`, 'success');
+  } catch (e) {
+    toast('Erreur: ' + e.message, 'error');
+  }
+}
 // ══════════════════════════════════════════════════════════════
 // MODALS & TOASTS
 // ══════════════════════════════════════════════════════════════
