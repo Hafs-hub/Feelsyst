@@ -3,123 +3,260 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conditions Générales de Vente — Feelsyst.com</title>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<title>Conditions Générales de Vente — Feelsyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f0e8;--ink:#0f0f0d;--signal:#00c896;--muted:#8a7d6e;--border:#e0d8cc}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh}
-nav{position:sticky;top:0;z-index:100;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,240,232,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
-.nav-logo svg{width:22px;height:22px}
-.logo-t{font-size:1.1rem;letter-spacing:-.5px;display:flex;align-items:baseline}
-.fl{font-weight:200}.sy{font-weight:700}.dt{font-weight:200;color:#00a87c}.co{font-family:'DM Mono',monospace;font-size:.6rem;color:#00a87c;letter-spacing:.5px;margin-left:1px}
-.back-link{font-size:12px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s;font-family:'DM Mono',monospace;letter-spacing:.5px}
-.back-link:hover{color:var(--signal)}
-.wrap{max-width:720px;margin:0 auto;padding:60px 24px 80px}
-.page-tag{font-family:'DM Mono',monospace;font-size:9px;color:var(--signal);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.page-tag::before{content:'';width:20px;height:1px;background:var(--signal)}
-.page-title{font-family:'Instrument Serif',serif;font-size:clamp(2rem,5vw,3rem);letter-spacing:-2px;line-height:1;margin-bottom:8px}
-.page-title em{font-style:italic;color:var(--signal)}
-.page-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:48px}
-h2{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.5rem;letter-spacing:-.5px;color:var(--ink);margin:40px 0 14px;padding-top:28px;border-top:1px solid var(--border)}
-p{font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:12px}
-ul{list-style:none;margin:8px 0 16px;padding:0}
-li{font-size:13px;color:var(--muted);padding:5px 0 5px 16px;position:relative;line-height:1.6}
-li::before{content:'→';position:absolute;left:0;color:var(--signal);font-size:10px;top:7px}
-strong{color:var(--ink);font-weight:500}
-.tarif-table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:12px}
-.tarif-table th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);background:rgba(0,200,150,.04)}
-.tarif-table td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--ink)}
-.tarif-table td:last-child{font-family:'DM Mono',monospace;color:var(--signal);font-weight:500}
-.tarif-table tr:last-child td{border-bottom:none}
-.page-footer{border-top:1px solid var(--border);margin-top:60px;padding-top:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.page-footer a{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.5px;transition:color .2s}
-.page-footer a:hover{color:var(--signal)}
-@media(max-width:640px){nav{padding:0 20px}.wrap{padding:40px 20px 60px}.page-footer{flex-direction:column}}
+:root {
+  --bg:#0c0f1e; --surface:#141827; --card:#1c2035; --border:#252a42;
+  --violet:#7c5cfc; --rose:#fc5c7d; --green:#22d3a5;
+  --text:#e8e8f4; --muted:#6b7290;
+  --display:'Syne',sans-serif; --body:'Inter',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.7;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(12,15,30,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:var(--display);font-size:19px;font-weight:800;background:linear-gradient(135deg,var(--violet),var(--rose));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+.nav-back{color:var(--muted);text-decoration:none;font-size:13px;transition:color .15s;}
+.nav-back:hover{color:var(--text);}
+
+.hero-legal{padding:64px 24px 48px;text-align:center;border-bottom:1px solid var(--border);}
+.legal-badge{display:inline-block;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--violet);margin-bottom:18px;}
+.hero-legal h1{font-family:var(--display);font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-.8px;margin-bottom:10px;}
+.gradient-text{background:linear-gradient(135deg,var(--violet),var(--rose));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-legal p{color:var(--muted);font-size:14px;}
+
+.legal-body{max-width:760px;margin:0 auto;padding:48px 24px 80px;}
+
+.legal-toc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:48px;}
+.legal-toc h3{font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:14px;color:var(--muted);}
+.legal-toc ol{padding-left:18px;display:flex;flex-direction:column;gap:6px;}
+.legal-toc a{color:var(--violet);text-decoration:none;font-size:13.5px;}
+.legal-toc a:hover{text-decoration:underline;}
+
+.legal-section{margin-bottom:48px;scroll-margin-top:80px;}
+.legal-section h2{font-family:var(--display);font-size:20px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.legal-section h3{font-size:15px;font-weight:600;margin:20px 0 8px;color:var(--text);}
+.legal-section p{color:#b8b8cc;margin-bottom:12px;font-size:14.5px;}
+.legal-section ul,
+.legal-section ol{padding-left:20px;display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.legal-section li{color:#b8b8cc;font-size:14.5px;}
+.legal-section strong{color:var(--text);}
+
+.legal-table{width:100%;border-collapse:collapse;margin:16px 0;}
+.legal-table th{background:var(--card);padding:10px 14px;text-align:left;font-size:13px;font-weight:600;border:1px solid var(--border);}
+.legal-table td{padding:10px 14px;font-size:13.5px;color:#b8b8cc;border:1px solid var(--border);}
+.legal-table tr:nth-child(even) td{background:rgba(28,32,53,.5);}
+
+.info-box{background:rgba(124,92,252,.07);border:1px solid rgba(124,92,252,.2);border-radius:10px;padding:16px 18px;margin:16px 0;}
+.info-box p{color:#b8b8cc;font-size:14px;margin:0;}
+
+footer{background:var(--surface);border-top:1px solid var(--border);padding:28px 24px;text-align:center;}
+.footer-links{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-bottom:12px;}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:13px;}
+.footer-links a:hover{color:var(--text);}
+.footer-copy{font-size:12px;color:var(--muted);}
 </style>
 </head>
 <body>
+
 <nav>
-  <a href="/" class="nav-logo">
-    <svg viewBox="0 0 64 64" fill="none">
-      <rect x="1" y="1" width="62" height="62" stroke="#ddd8ce" stroke-width=".6"/>
-      <line x1="18" y1="16" x2="18" y2="48" stroke="#0f0f0d" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="18" y1="16" x2="38" y2="16" stroke="#0f0f0d" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="18" y1="32" x2="32" y2="32" stroke="#0f0f0d" stroke-width="1.4" stroke-linecap="round"/>
-      <circle cx="46" cy="48" r="4" fill="#00a87c"/>
-    </svg>
-    <span class="logo-t"><span class="fl">feel</span><span class="sy">syst</span><span class="dt">.</span><span class="co">com</span></span>
-  </a>
-  <a href="/" class="back-link">← Retour au site</a>
+  <a href="/" class="nav-logo">Feelsyst</a>
+  <a href="/" class="nav-back">← Retour à l'accueil</a>
 </nav>
-<div class="wrap">
-  <div class="page-tag">Légal</div>
-  <h1 class="page-title">Conditions générales <em>de vente</em></h1>
-  <p class="page-date">Dernière mise à jour : mai 2026 · Ces CGV régissent toutes les relations commerciales entre Feelsyst.com et ses clients.</p>
 
-  <h2>Article 1 — Objet</h2>
-  <p>Les présentes Conditions Générales de Vente définissent les droits et obligations de [FEELSYST] et de ses clients dans le cadre de la vente de services de marketing digital et communication autonome par intelligence artificielle via le site feelsyst.com.</p>
+<div class="hero-legal">
+  <div class="legal-badge">Document légal</div>
+  <h1>Conditions Générales <span class="gradient-text">de Vente</span></h1>
+  <p>Dernière mise à jour : 1er juillet 2025 · Version 1.0</p>
+</div>
 
-  <h2>Article 2 — Services et tarifs</h2>
-  <table class="tarif-table">
-    <thead>
-      <tr><th>Service</th><th>Description</th><th>Tarif</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Pack Starter</td><td>4 posts, 1 article SEO, 1 newsletter / mois</td><td>49 euros HT/mois</td></tr>
-      <tr><td>Pack Pro</td><td>12 posts, 4 articles SEO, 4 newsletters / mois</td><td>149 euros HT/mois</td></tr>
-      <tr><td>Pack Illimité</td><td>Contenu illimité + tous les agents</td><td>299 euros HT/mois</td></tr>
-      <tr><td>Agent IA Personnalisé</td><td>Agent sur mesure livré en 7 jours</td><td>599 euros HT</td></tr>
-      <tr><td>Audit Marketing IA</td><td>Rapport stratégique livré en 48h</td><td>299 euros HT</td></tr>
-      <tr><td>Dashboard SaaS</td><td>Infrastructure en marque blanche</td><td>79 euros HT/mois</td></tr>
-      <tr><td>Formation équipe</td><td>Session de 2h en visioconférence</td><td>199 euros HT</td></tr>
-    </tbody>
-  </table>
-  <p>Tous les prix sont indiqués hors taxes. La TVA applicable est de 20%. Le montant TTC est affiché lors du paiement.</p>
+<div class="legal-body">
 
-  <h2>Article 3 — Commande et acceptation</h2>
-  <p>Toute commande implique l'acceptation sans réserve des présentes CGV. La commande est validée à réception du paiement intégral. Un email de confirmation automatique est envoyé dans les 5 minutes suivant le paiement par l'agent Lumi.</p>
+  <div class="legal-toc">
+    <h3>Sommaire</h3>
+    <ol>
+      <li><a href="#s1">Objet et champ d'application</a></li>
+      <li><a href="#s2">Présentation de Feelsyst</a></li>
+      <li><a href="#s3">Services proposés</a></li>
+      <li><a href="#s4">Tarifs et facturation</a></li>
+      <li><a href="#s5">Conditions de paiement</a></li>
+      <li><a href="#s6">Période d'essai</a></li>
+      <li><a href="#s7">Résiliation et remboursement</a></li>
+      <li><a href="#s8">Obligations des parties</a></li>
+      <li><a href="#s9">Propriété intellectuelle</a></li>
+      <li><a href="#s10">Données personnelles</a></li>
+      <li><a href="#s11">Limitation de responsabilité</a></li>
+      <li><a href="#s12">Droit applicable et litiges</a></li>
+    </ol>
+  </div>
 
-  <h2>Article 4 — Paiement</h2>
-  <p>Le paiement s'effectue exclusivement en ligne par carte bancaire via <strong>Stripe</strong> (certifié PCI-DSS). Pour les abonnements, le renouvellement est automatique à chaque échéance. Feelsyst.com ne stocke aucune donnée bancaire — ces informations sont gérées exclusivement par Stripe.</p>
+  <div class="legal-section" id="s1">
+    <h2>1. Objet et champ d'application</h2>
+    <p>Les présentes Conditions Générales de Vente (ci-après "CGV") régissent l'ensemble des relations contractuelles entre la société Feelsyst (ci-après "le Prestataire") et toute personne physique ou morale souscrivant aux services proposés sur la plateforme feelsyst.com (ci-après "le Client").</p>
+    <p>En souscrivant à un abonnement ou en utilisant les services Feelsyst, le Client accepte sans réserve les présentes CGV. Ces CGV prévalent sur tout autre document du Client, sauf accord préalable écrit du Prestataire.</p>
+    <p>Le Prestataire se réserve le droit de modifier les présentes CGV à tout moment. Le Client sera informé de toute modification par email avec un préavis de 30 jours. L'utilisation continue des services après cette période vaut acceptation des nouvelles conditions.</p>
+  </div>
 
-  <h2>Article 5 — Délais de livraison</h2>
-  <ul>
-    <li><strong>Pack Starter / Pro / Illimité :</strong> Premiers livrables sous 72h, puis livraisons selon calendrier mensuel</li>
-    <li><strong>Agent IA Personnalisé :</strong> Livraison sous 7 jours ouvrés</li>
-    <li><strong>Audit Marketing IA :</strong> Rapport livré sous 48h ouvrées</li>
-    <li><strong>Dashboard SaaS :</strong> Accès immédiat après paiement</li>
-    <li><strong>Formation équipe :</strong> Planification sous 5 jours ouvrés</li>
-  </ul>
+  <div class="legal-section" id="s2">
+    <h2>2. Présentation de Feelsyst</h2>
+    <p><strong>Feelsyst</strong> est une plateforme SaaS d'agents IA spécialisés destinée aux petites et moyennes entreprises françaises.</p>
+    <div class="info-box">
+      <p>
+        <strong>Raison sociale :</strong> Feelsyst<br>
+        <strong>Propriétaire :</strong> Salim Hafif<br>
+        <strong>Forme juridique :</strong> Entreprise individuelle en cours d'immatriculation<br>
+        <strong>SIRET :</strong> En cours d'immatriculation<br>
+        <strong>Siège social :</strong> 17 rue de la Cocoterie, Kaweni 97600<br>
+        <strong>Email :</strong> contact@feelsyst.com<br>
+        <strong>Site web :</strong> https://feelsyst.com
+      </p>
+    </div>
+    <div class="info-box" style="background:rgba(245,200,66,.07);border-color:rgba(245,200,66,.25)">
+      <p>⚠️ <strong>Note :</strong> Feelsyst est actuellement en cours d'immatriculation. Les informations légales (SIRET, forme juridique définitive) seront mises à jour dès l'obtention du numéro d'immatriculation. Cette démarche n'affecte pas la validité des présentes CGV ni la fourniture des services.</p>
+    </div>
+  </div>
 
-  <h2>Article 6 — Droit de rétractation</h2>
-  <p>Conformément à l'article L.221-28 du Code de la consommation, le droit de rétractation de 14 jours s'applique aux abonnements à condition qu'aucun livrable n'ait encore été fourni. Si des livrables ont été remis, le service est considéré comme partiellement exécuté et le droit de rétractation ne peut s'exercer que sur la partie non exécutée.</p>
+  <div class="legal-section" id="s3">
+    <h2>3. Services proposés</h2>
+    <p>Feelsyst propose un accès à une plateforme d'agents IA spécialisés comprenant :</p>
+    <ul>
+      <li><strong>Aria</strong> — Agent Stratégie & Veille marché</li>
+      <li><strong>Nova</strong> — Agent Marketing & Création de contenu</li>
+      <li><strong>Rex</strong> — Agent Prospection & Ventes</li>
+      <li><strong>Vera</strong> — Agent Finance & Facturation</li>
+      <li><strong>Lumi</strong> — Agent Support client</li>
+      <li><strong>Lex</strong> — Agent Juridique & Conformité</li>
+      <li><strong>Pulse</strong> — Agent Analytics & Reporting</li>
+      <li><strong>Atlas</strong> — Agent Onboarding & Formation</li>
+    </ul>
+    <p>Les services sont fournis sous forme d'abonnement mensuel, donnant accès à la plateforme en ligne via un navigateur web. Aucune installation de logiciel n'est requise.</p>
+    <p>Feelsyst se réserve le droit de faire évoluer ses services, d'ajouter ou de modifier des fonctionnalités, sans que cela constitue une modification substantielle des présentes CGV.</p>
+  </div>
 
-  <h2>Article 7 — Résiliation des abonnements</h2>
-  <p>Les abonnements peuvent être résiliés à tout moment depuis l'espace client ou par email à <strong>finance@feelsyst.com</strong>. La résiliation prend effet à la fin de la période de facturation en cours. Aucun remboursement partiel n'est effectué pour la période déjà facturée.</p>
+  <div class="legal-section" id="s4">
+    <h2>4. Tarifs et facturation</h2>
+    <p>Les tarifs applicables sont ceux affichés sur le site feelsyst.com au moment de la souscription. Tous les prix sont indiqués en euros (€) hors taxes (HT), auxquels s'ajoute la TVA applicable au taux en vigueur.</p>
 
-  <h2>Article 8 — Responsabilité</h2>
-  <p>Feelsyst.com s'engage à fournir les services décrits avec professionnalisme et diligence. Notre responsabilité est limitée au montant des sommes effectivement perçues au cours des 3 derniers mois précédant le sinistre. Feelsyst.com ne saurait être tenu responsable des dommages indirects, pertes de profits ou pertes de données.</p>
+    <table class="legal-table">
+      <thead>
+        <tr><th>Plan</th><th>Prix HT/mois</th><th>Messages inclus</th><th>Agents</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Découverte (essai)</td><td>Gratuit</td><td>500</td><td>8</td></tr>
+        <tr><td>Starter</td><td>24,17 €</td><td>500</td><td>8</td></tr>
+        <tr><td>Pro</td><td>65,83 €</td><td>2 000</td><td>8</td></tr>
+        <tr><td>Illimité</td><td>149,17 €</td><td>Illimité</td><td>8</td></tr>
+      </tbody>
+    </table>
 
-  <h2>Article 9 — Propriété intellectuelle des livrables</h2>
-  <p>A compter du paiement intégral, le client devient propriétaire des contenus créés spécifiquement pour lui. Feelsyst.com conserve le droit d'utiliser ces créations comme références commerciales (portfolio) sauf opposition écrite du client dans un délai de 30 jours après livraison.</p>
+    <p>Les tarifs TTC (TVA 20%) sont respectivement de 29 €, 79 € et 179 € par mois.</p>
+    <p>Feelsyst se réserve le droit de modifier ses tarifs avec un préavis de 30 jours par email. Les modifications tarifaires s'appliquent au renouvellement de l'abonnement suivant la notification.</p>
+  </div>
 
-  <h2>Article 10 — Confidentialité</h2>
-  <p>Feelsyst.com s'engage à traiter comme strictement confidentielles toutes les informations transmises par le client dans le cadre de l'exécution des services. Ces informations ne seront jamais partagées avec des tiers sans accord explicite du client.</p>
+  <div class="legal-section" id="s5">
+    <h2>5. Conditions de paiement</h2>
+    <p>Le paiement s'effectue par carte bancaire via la solution de paiement sécurisée Stripe. Les données bancaires du Client ne sont jamais stockées sur les serveurs Feelsyst.</p>
+    <p>L'abonnement est facturé mensuellement, à terme à échoir, à la date d'anniversaire de la souscription. Une facture électronique est émise automatiquement après chaque paiement et envoyée à l'adresse email du compte.</p>
+    <p>En cas d'échec de paiement, Feelsyst se réserve le droit de suspendre l'accès au service jusqu'à régularisation de la situation. Le Client dispose d'un délai de 7 jours pour régulariser le paiement avant suspension définitive.</p>
+  </div>
 
-  <h2>Article 11 — Litiges</h2>
-  <p>En cas de litige, une solution amiable sera recherchée en priorité. A défaut d'accord amiable dans un délai de 30 jours, les tribunaux compétents du ressort du siège social de [FEELSYST] seront saisis. Le droit applicable est le droit français.</p>
+  <div class="legal-section" id="s6">
+    <h2>6. Période d'essai</h2>
+    <p>Feelsyst propose une période d'essai gratuite de 7 (sept) jours calendaires à compter de la date d'inscription. Pendant cette période :</p>
+    <ul>
+      <li>Aucune carte bancaire n'est requise</li>
+      <li>L'accès à l'ensemble des 8 agents est complet</li>
+      <li>Un quota de 500 messages est disponible</li>
+    </ul>
+    <p>À l'expiration de la période d'essai, l'accès aux services est automatiquement suspendu. Le Client doit souscrire à un plan payant pour continuer à utiliser la plateforme. Les données du compte sont conservées pendant 30 jours après l'expiration, puis supprimées définitivement.</p>
+  </div>
 
-  <h2>Article 12 — Contact</h2>
-  <p>Pour toute question relative aux présentes CGV : <strong>contact@feelsyst.com</strong></p>
+  <div class="legal-section" id="s7">
+    <h2>7. Résiliation et remboursement</h2>
+    <h3>7.1 Résiliation par le Client</h3>
+    <p>Le Client peut résilier son abonnement à tout moment depuis son tableau de bord ou en contactant contact@feelsyst.com. La résiliation prend effet à la fin de la période d'abonnement en cours. Aucun remboursement n'est effectué pour la période entamée.</p>
 
-  <div class="page-footer">
-    <a href="/mentions-legales.html">Mentions légales</a>
+    <h3>7.2 Résiliation par Feelsyst</h3>
+    <p>Feelsyst se réserve le droit de résilier un abonnement en cas de non-respect des présentes CGV, d'utilisation abusive de la plateforme, ou de comportement contraire aux lois en vigueur. Dans ce cas, aucun remboursement ne sera accordé.</p>
+
+    <h3>7.3 Remboursement</h3>
+    <p>Conformément à l'article L.221-28 du Code de la consommation, le droit de rétractation ne s'applique pas aux services numériques dont l'exécution a commencé avec l'accord préalable du consommateur. Toutefois, en cas de dysfonctionnement majeur imputable à Feelsyst, un avoir ou remboursement pourra être accordé au cas par cas.</p>
+  </div>
+
+  <div class="legal-section" id="s8">
+    <h2>8. Obligations des parties</h2>
+    <h3>8.1 Obligations de Feelsyst</h3>
+    <ul>
+      <li>Fournir l'accès au service conformément aux caractéristiques décrites</li>
+      <li>Assurer la disponibilité de la plateforme (objectif 99,5% de disponibilité)</li>
+      <li>Informer le Client de toute interruption programmée avec un préavis raisonnable</li>
+      <li>Protéger les données personnelles conformément au RGPD</li>
+      <li>Mettre en œuvre les mesures de sécurité appropriées</li>
+    </ul>
+
+    <h3>8.2 Obligations du Client</h3>
+    <ul>
+      <li>Fournir des informations exactes lors de l'inscription</li>
+      <li>Maintenir la confidentialité de ses identifiants de connexion</li>
+      <li>Ne pas partager son accès avec des tiers non autorisés</li>
+      <li>Utiliser les services conformément aux lois en vigueur</li>
+      <li>Ne pas tenter de contourner les mesures de sécurité de la plateforme</li>
+      <li>Ne pas utiliser les agents IA à des fins illicites ou contraires à l'éthique</li>
+    </ul>
+  </div>
+
+  <div class="legal-section" id="s9">
+    <h2>9. Propriété intellectuelle</h2>
+    <p>La plateforme Feelsyst, ses agents IA, son code source, ses algorithmes, son design et son contenu sont protégés par les droits de propriété intellectuelle et appartiennent exclusivement à Feelsyst.</p>
+    <p>Le Client conserve la propriété des données et contenus qu'il génère via la plateforme. En utilisant Feelsyst, le Client concède à Feelsyst une licence non exclusive et limitée pour traiter ces données dans le seul but de fournir les services.</p>
+    <p>Il est strictement interdit de reproduire, copier, revendre ou exploiter à des fins commerciales tout élément de la plateforme Feelsyst sans autorisation préalable écrite.</p>
+  </div>
+
+  <div class="legal-section" id="s10">
+    <h2>10. Données personnelles</h2>
+    <p>Le traitement des données personnelles est régi par notre <a href="/confidentialite.html" style="color:var(--violet)">Politique de confidentialité</a>, conforme au Règlement Général sur la Protection des Données (RGPD - UE 2016/679).</p>
+    <p>Les données sont hébergées sur des serveurs situés dans l'Union Européenne et ne sont jamais transmises à des tiers à des fins commerciales.</p>
+  </div>
+
+  <div class="legal-section" id="s11">
+    <h2>11. Limitation de responsabilité</h2>
+    <p>Feelsyst est soumis à une obligation de moyens et non de résultat. La responsabilité de Feelsyst ne saurait être engagée en cas de :</p>
+    <ul>
+      <li>Décisions prises par le Client sur la base des conseils des agents IA</li>
+      <li>Interruption de service due à un cas de force majeure</li>
+      <li>Perte de données imputable au Client ou à un tiers</li>
+      <li>Erreurs dans les réponses générées par les agents IA (l'IA peut faire des erreurs)</li>
+      <li>Dommages indirects, pertes d'exploitation ou manques à gagner</li>
+    </ul>
+    <div class="info-box">
+      <p>⚠️ <strong>Important :</strong> Les réponses des agents IA sont fournies à titre indicatif. Pour les questions juridiques, fiscales ou médicales, consultez toujours un professionnel qualifié. Lex, par exemple, fournit une assistance juridique générale et ne remplace pas un avocat.</p>
+    </div>
+    <p>En tout état de cause, la responsabilité de Feelsyst est limitée au montant des sommes effectivement payées par le Client au cours des 12 derniers mois.</p>
+  </div>
+
+  <div class="legal-section" id="s12">
+    <h2>12. Droit applicable et litiges</h2>
+    <p>Les présentes CGV sont soumises au droit français. En cas de litige, les parties s'engagent à rechercher une solution amiable dans un délai de 30 jours à compter de la notification du litige par lettre recommandée.</p>
+    <p>À défaut d'accord amiable, le litige sera soumis aux tribunaux compétents du ressort du siège social de Feelsyst.</p>
+    <p>Conformément à l'article L.616-1 du Code de la consommation, le Client peut recourir gratuitement à un médiateur de la consommation. Feelsyst adhère au service de médiation : <strong>[médiateur à désigner]</strong>.</p>
+    <p>Pour toute question relative aux présentes CGV : <a href="mailto:contact@feelsyst.com" style="color:var(--violet)">contact@feelsyst.com</a></p>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-links">
+    <a href="/">Accueil</a>
     <a href="/cgv.html">CGV</a>
     <a href="/confidentialite.html">Confidentialité</a>
-    <a href="/">Retour au site</a>
+    <a href="/mentions-legales.html">Mentions légales</a>
+    <a href="mailto:contact@feelsyst.com">Contact</a>
   </div>
-</div>
+  <p class="footer-copy">© 2025 Feelsyst. Tous droits réservés.</p>
+</footer>
+
 </body>
 </html>

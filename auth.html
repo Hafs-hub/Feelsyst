@@ -1,294 +1,957 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Connexion / Inscription — Feelsyst</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237C3AED'/%3E%3Cpath d='M16 6L6 11l10 5 10-5-10-5zM6 21l10 5 10-5M6 16l10 5 10-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feelsyst — Connexion & Inscription</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --black:#0A0A0F;--dark:#111118;--card:#16161F;--border:#222230;
-  --muted:#2A2A3A;--text:#E8E8F0;--subtle:#888899;
-  --violet:#7C3AED;--violet-light:#9D6FF8;--violet-dim:rgba(124,58,237,0.15);
-  --cyan:#06B6D4;--green:#10B981;--red:#EF4444;
+:root {
+  --bg:      #0c0f1e;
+  --surface: #141827;
+  --card:    #1c2035;
+  --border:  #252a42;
+  --violet:  #7c5cfc;
+  --violet2: #6a46e8;
+  --rose:    #fc5c7d;
+  --green:   #22d3a5;
+  --red:     #fc5c5c;
+  --yellow:  #f5c842;
+  --text:    #e8e8f4;
+  --muted:   #6b7290;
+  --display: 'Syne', sans-serif;
+  --body:    'Inter', sans-serif;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.bg-orbs{position:fixed;inset:0;pointer-events:none;overflow:hidden}
-.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.25}
-.orb-1{width:500px;height:500px;background:var(--violet);top:-100px;left:-100px}
-.orb-2{width:400px;height:400px;background:var(--cyan);bottom:-100px;right:-100px}
-.auth-wrapper{position:relative;z-index:1;width:100%;max-width:920px;display:grid;grid-template-columns:1fr 1fr;min-height:560px;border-radius:24px;overflow:hidden;border:1px solid var(--border);box-shadow:0 40px 120px rgba(0,0,0,.7)}
-.auth-brand{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(6,182,212,.1));padding:48px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--border)}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:40px}
-.logo-mark{width:36px;height:36px;background:var(--violet);border-radius:8px;display:flex;align-items:center;justify-content:center}
-.logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800}
-.logo-text span{color:#9D6FF8}
-.brand-headline{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1.2;margin-bottom:16px}
-.brand-sub{font-size:15px;color:var(--subtle);line-height:1.7}
-.agent-mini-list{display:flex;flex-direction:column;gap:12px;margin-top:32px}
-.agent-mini{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid var(--border)}
-.agent-mini .icon{font-size:20px}
-.agent-mini .info .name{font-size:13px;font-weight:700}
-.agent-mini .info .role{font-size:11px;color:var(--subtle)}
-.status-dot{width:6px;height:6px;background:var(--green);border-radius:50%;margin-left:auto;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.brand-footer{font-size:12px;color:var(--subtle)}
-.auth-form-area{background:var(--dark);padding:48px}
-.tabs{display:flex;gap:0;margin-bottom:32px;background:var(--muted);border-radius:10px;padding:4px}
-.tab{flex:1;padding:10px;text-align:center;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s;color:var(--subtle);border:none;background:none}
-.tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.form-section{display:none}
-.form-section.active{display:block}
-.form-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
-.form-subtitle{font-size:14px;color:var(--subtle);margin-bottom:28px}
-.plan-selector{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px}
-.plan-opt{padding:10px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;font-size:12px;text-align:center}
-.plan-opt:hover{border-color:var(--violet)}
-.plan-opt.selected{border-color:var(--violet);background:var(--violet-dim)}
-.plan-opt .pname{font-weight:700;display:block;margin-bottom:2px}
-.plan-opt .pprice{color:var(--subtle)}
-.form-row{margin-bottom:14px}
-.form-row label{display:block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--subtle);margin-bottom:5px}
-.form-row input,.form-row select{width:100%;background:var(--muted);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;transition:border .2s}
-.form-row input:focus,.form-row select:focus{outline:none;border-color:var(--violet)}
-.form-row select option{background:var(--dark)}
-.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn-submit{width:100%;padding:13px;background:var(--violet);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;margin-top:8px}
-.btn-submit:hover{background:var(--violet-light);transform:translateY(-1px)}
-.btn-submit.green{background:var(--green)}
-.btn-submit.green:hover{background:#0ea572}
-.form-foot{font-size:12px;color:var(--subtle);text-align:center;margin-top:12px}
-.form-foot a{color:var(--violet-light)}
-.divider{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:12px;color:var(--subtle)}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.notif{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
-.notif.success{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green)}
-.notif.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
-@media(max-width:700px){
-  .auth-wrapper{grid-template-columns:1fr}
-  .auth-brand{display:none}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.auth-wrapper {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  min-height: 100vh;
+}
+
+.auth-left {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-left::before {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  background: var(--violet);
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.08;
+  top: -100px; left: -100px;
+  pointer-events: none;
+}
+
+.auth-left::after {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  background: var(--rose);
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.06;
+  bottom: -80px; right: -80px;
+  pointer-events: none;
+}
+
+.left-logo {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--violet), var(--rose));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  margin-bottom: 48px;
+  position: relative;
+  z-index: 1;
+}
+
+.left-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.left-content h1 {
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--violet), var(--rose));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.left-content p {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 400px;
+  margin-bottom: 40px;
+}
+
+.agent-teaser {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: border-color 0.2s;
+}
+
+.agent-row:hover { border-color: var(--violet); }
+
+.agent-row-ico {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: rgba(124,92,252,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.agent-row-info { flex: 1; }
+.agent-row-name { font-weight: 600; font-size: 13.5px; }
+.agent-row-desc { font-size: 12px; color: var(--muted); }
+
+.online-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 2.5s infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 60%{opacity:.3} }
+
+.left-footer {
+  font-size: 12px;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+  margin-top: 32px;
+}
+.left-footer a { color: var(--muted); text-decoration: underline; }
+
+/* ── AUTH FORM ── */
+.auth-right {
+  display: flex;
+  flex-direction: column;
+  padding: 40px 36px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.auth-right-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 32px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: var(--muted);
+  font-family: var(--body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tab-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* Forms */
+.form-panel { display: none; }
+.form-panel.active { display: block; }
+
+.form-title {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.form-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 13px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13.5px;
+  transition: border-color 0.15s;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.field input:focus,
+.field select:focus { border-color: var(--violet); }
+
+.field input.error { border-color: var(--red); }
+
+.field-error {
+  font-size: 11.5px;
+  color: var(--red);
+  margin-top: 4px;
+  display: none;
+}
+
+.field-error.show { display: block; }
+
+/* Plan selector */
+.plan-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.plan-option {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.plan-option:hover { border-color: var(--violet); }
+.plan-option.selected { border-color: var(--violet); background: rgba(124,92,252,0.08); }
+.plan-option.selected::after { content:'✓'; position:absolute; top:6px; right:8px; font-size:11px; color:var(--violet); font-weight:700; }
+
+.plan-opt-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+.plan-opt-price { font-size: 11.5px; color: var(--muted); }
+
+input[type="radio"] { display: none; }
+
+/* Password strength */
+.pwd-strength {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.pwd-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.pwd-bar.weak  { background: var(--red); }
+.pwd-bar.fair  { background: var(--yellow); }
+.pwd-bar.good  { background: var(--green); }
+
+.pwd-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Submit */
+.btn-submit {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--violet), var(--violet2));
+  color: #fff;
+  font-family: var(--body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+  box-shadow: 0 4px 16px rgba(124,92,252,0.3);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(124,92,252,0.45);
+}
+
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.btn-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+.btn-submit.loading .btn-spinner { display: block; }
+.btn-submit.loading .btn-text { opacity: 0.7; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Alert */
+.alert {
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+  line-height: 1.5;
+}
+.alert.show { display: block; }
+.alert.err { background: rgba(252,92,92,0.1); border: 1px solid rgba(252,92,92,0.3); color: var(--red); }
+.alert.ok  { background: rgba(34,211,165,0.1); border: 1px solid rgba(34,211,165,0.3); color: var(--green); }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* Switch tab links */
+.switch-tab {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 20px;
+}
+.switch-tab a {
+  color: var(--violet);
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.switch-tab a:hover { text-decoration: underline; }
+
+/* Forgot password */
+.forgot-link {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  float: right;
+  margin-top: 6px;
+}
+.forgot-link:hover { color: var(--violet); }
+
+/* Trial badge */
+.trial-info {
+  background: rgba(34,211,165,0.08);
+  border: 1px solid rgba(34,211,165,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: var(--green);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* RGPD note */
+.rgpd-note {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+.rgpd-note a { color: var(--muted); text-decoration: underline; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .auth-wrapper { grid-template-columns: 1fr; }
+  .auth-left { display: none; }
+  .auth-right { padding: 24px 20px; min-height: 100vh; }
+  .auth-right-top { margin-bottom: 20px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .plan-selector { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
 <body>
-<div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
 <div class="auth-wrapper">
-  <div class="auth-brand">
-    <div>
-      <a href="index.html" class="logo">
-        <div class="logo-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-        <span class="logo-text">feel<span>syst</span></span>
-      </a>
-      <div class="brand-headline">Votre équipe IA vous attend</div>
-      <p class="brand-sub">5 agents spécialisés prêts à travailler pour votre entreprise dès votre connexion.</p>
-      <div class="agent-mini-list">
-        <div class="agent-mini"><span class="icon">🧠</span><div class="info"><div class="name">Aria</div><div class="role">Stratégie & Veille</div></div><span class="status-dot"></span></div>
-        <div class="agent-mini"><span class="icon">✨</span><div class="info"><div class="name">Nova</div><div class="role">Marketing & Contenu</div></div><span class="status-dot"></span></div>
-        <div class="agent-mini"><span class="icon">💼</span><div class="info"><div class="name">Rex</div><div class="role">Ventes & Prospection</div></div><span class="status-dot"></span></div>
-        <div class="agent-mini"><span class="icon">📊</span><div class="info"><div class="name">Vera</div><div class="role">Finance & Facturation</div></div><span class="status-dot"></span></div>
-        <div class="agent-mini"><span class="icon">💬</span><div class="info"><div class="name">Lumi</div><div class="role">Support Client</div></div><span class="status-dot"></span></div>
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="auth-left">
+    <a href="/" class="left-logo">Feelsyst</a>
+
+    <div class="left-content">
+      <h1>Votre équipe IA<br><span class="gradient-text">vous attend.</span></h1>
+      <p>8 agents spécialisés prêts à travailler pour votre PME. Stratégie, marketing, commercial, finance, juridique et plus — dès aujourd'hui.</p>
+
+      <div class="agent-teaser">
+        <div class="agent-row">
+          <div class="agent-row-ico">🧠</div>
+          <div class="agent-row-info">
+            <div class="agent-row-name">Aria — Stratégie</div>
+            <div class="agent-row-desc">Roadmap, analyse marché, positionnement</div>
+          </div>
+          <div class="online-dot"></div>
+        </div>
+        <div class="agent-row">
+          <div class="agent-row-ico">💼</div>
+          <div class="agent-row-info">
+            <div class="agent-row-name">Rex — Prospection</div>
+            <div class="agent-row-desc">Prospects B2B, emails personnalisés, pipeline</div>
+          </div>
+          <div class="online-dot"></div>
+        </div>
+        <div class="agent-row">
+          <div class="agent-row-ico">⚖️</div>
+          <div class="agent-row-info">
+            <div class="agent-row-name">Lex — Juridique</div>
+            <div class="agent-row-desc">CGV, contrats, conformité RGPD</div>
+          </div>
+          <div class="online-dot"></div>
+        </div>
+        <div class="agent-row">
+          <div class="agent-row-ico">📈</div>
+          <div class="agent-row-info">
+            <div class="agent-row-name">Pulse — Analytics</div>
+            <div class="agent-row-desc">Rapports PDF hebdo, KPIs, tendances</div>
+          </div>
+          <div class="online-dot"></div>
+        </div>
       </div>
     </div>
-    <div class="brand-footer">© 2025 Feelsyst · contact@feelsyst.com</div>
+
+    <div class="left-footer">
+      Conforme RGPD · Données hébergées en Europe ·
+      <a href="/cgv.html">CGV</a> ·
+      <a href="/confidentialite.html">Confidentialité</a>
+    </div>
   </div>
 
-  <div class="auth-form-area">
+  <!-- ── RIGHT PANEL ── -->
+  <div class="auth-right">
+    <div class="auth-right-top">
+      <a href="/" style="font-size:13px;color:var(--muted);text-decoration:none">← Retour à l'accueil</a>
+    </div>
+
+    <!-- TABS -->
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('login')">Se connecter</button>
-      <button class="tab" onclick="switchTab('register')">S'inscrire</button>
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Connexion</button>
+      <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Créer un compte</button>
     </div>
 
-    <!-- CONNEXION -->
-    <div class="form-section active" id="tab-login">
+    <!-- ── LOGIN FORM ── -->
+    <div class="form-panel active" id="panelLogin">
       <div class="form-title">Bon retour 👋</div>
-      <div class="form-subtitle">Accédez à votre tableau de bord et vos agents IA</div>
-      <div class="notif" id="login-notif"></div>
-      <div class="form-row">
+      <div class="form-sub">Connectez-vous pour retrouver votre équipe IA.</div>
+
+      <div class="alert" id="loginAlert"></div>
+
+      <div class="field">
         <label>Email</label>
-        <input type="email" id="login-email" placeholder="votre@email.com" autocomplete="email"/>
+        <input type="email" id="loginEmail" placeholder="vous@entreprise.fr" autocomplete="email">
       </div>
-      <div class="form-row">
-        <label>Mot de passe</label>
-        <input type="password" id="login-password" placeholder="Votre mot de passe" autocomplete="current-password"/>
+
+      <div class="field">
+        <label>Mot de passe <a class="forgot-link" onclick="switchTab('forgot')">Mot de passe oublié ?</a></label>
+        <input type="password" id="loginPwd" placeholder="••••••••" autocomplete="current-password">
       </div>
-      <button class="btn-submit" onclick="doLogin()">Se connecter →</button>
-      <div class="form-foot" style="margin-top:16px">
-        <a href="#" onclick="showForgot()">Mot de passe oublié ?</a>
-        &nbsp;·&nbsp;
-        Pas de compte ? <a href="#" onclick="switchTab('register')">S'inscrire</a>
-      </div>
+
+      <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">Se connecter →</span>
+      </button>
+
+      <div class="switch-tab">Pas encore de compte ? <a onclick="switchTab('register')">Créer un compte gratuitement</a></div>
     </div>
 
-    <!-- INSCRIPTION -->
-    <div class="form-section" id="tab-register">
-      <div class="form-title">Créer mon compte</div>
-      <div class="form-subtitle">7 jours gratuits — sans carte bancaire</div>
-      <div class="notif" id="reg-notif"></div>
+    <!-- ── REGISTER FORM ── -->
+    <div class="form-panel" id="panelRegister">
+      <div class="form-title">Commencer gratuitement</div>
+      <div class="form-sub">7 jours d'essai complet. Sans carte bancaire.</div>
 
-      <div class="plan-selector" id="plan-selector">
-        <div class="plan-opt selected" data-plan="free" onclick="selectPlan(this)"><span class="pname">🎁 Découverte</span><span class="pprice">Gratuit 7j</span></div>
-        <div class="plan-opt" data-plan="starter" onclick="selectPlan(this)"><span class="pname">Starter</span><span class="pprice">29€/mois</span></div>
-        <div class="plan-opt" data-plan="pro" onclick="selectPlan(this)"><span class="pname">⭐ Pro</span><span class="pprice">79€/mois</span></div>
-        <div class="plan-opt" data-plan="unlimited" onclick="selectPlan(this)"><span class="pname">Illimité</span><span class="pprice">179€/mois</span></div>
+      <div class="trial-info">
+        🎁 Essai gratuit 7 jours — accès à tous les 8 agents IA
       </div>
 
-      <div class="form-grid-2">
-        <div class="form-row">
+      <div class="alert" id="registerAlert"></div>
+
+      <div class="form-row">
+        <div class="field">
           <label>Prénom</label>
-          <input type="text" id="r-firstname" placeholder="Jean" autocomplete="given-name"/>
+          <input type="text" id="regFirstname" placeholder="Marie" autocomplete="given-name">
+          <div class="field-error" id="errFirstname">Prénom requis</div>
         </div>
-        <div class="form-row">
+        <div class="field">
           <label>Nom</label>
-          <input type="text" id="r-lastname" placeholder="Dupont" autocomplete="family-name"/>
+          <input type="text" id="regLastname" placeholder="Dupont" autocomplete="family-name">
+          <div class="field-error" id="errLastname">Nom requis</div>
         </div>
       </div>
-      <div class="form-row">
+
+      <div class="field">
         <label>Email professionnel</label>
-        <input type="email" id="r-email" placeholder="jean@entreprise.com" autocomplete="email"/>
+        <input type="email" id="regEmail" placeholder="vous@entreprise.fr" autocomplete="email">
+        <div class="field-error" id="errEmail">Email invalide</div>
       </div>
-      <div class="form-row">
-        <label>Entreprise</label>
-        <input type="text" id="r-company" placeholder="Nom de votre entreprise"/>
+
+      <div class="field">
+        <label>Nom de l'entreprise</label>
+        <input type="text" id="regCompany" placeholder="Acme SAS" autocomplete="organization">
+        <div class="field-error" id="errCompany">Nom d'entreprise requis</div>
       </div>
-      <div class="form-row">
+
+      <div class="field">
         <label>Secteur d'activité</label>
-        <select id="r-sector">
-          <option value="">Choisissez votre secteur</option>
-          <option>Commerce & Retail</option>
-          <option>Tech & SaaS</option>
-          <option>Immobilier</option>
-          <option>Santé & Bien-être</option>
-          <option>Restauration & Hôtellerie</option>
-          <option>Formation & Éducation</option>
-          <option>Finance & Assurance</option>
-          <option>BTP & Artisanat</option>
-          <option>Conseil & Services B2B</option>
-          <option>Autre</option>
+        <select id="regSector" autocomplete="off">
+          <option value="">Choisissez votre secteur…</option>
+          <option value="e-commerce">E-commerce & Retail</option>
+          <option value="saas">SaaS & Tech</option>
+          <option value="conseil">Conseil & Consulting</option>
+          <option value="immobilier">Immobilier</option>
+          <option value="restauration">Restauration & Food</option>
+          <option value="sante">Santé & Bien-être</option>
+          <option value="education">Éducation & Formation</option>
+          <option value="artisanat">Artisanat & BTP</option>
+          <option value="finance">Finance & Assurance</option>
+          <option value="juridique">Juridique & Notariat</option>
+          <option value="communication">Communication & Marketing</option>
+          <option value="logistique">Logistique & Transport</option>
+          <option value="industrie">Industrie & Manufacture</option>
+          <option value="autre">Autre</option>
         </select>
+        <div class="field-error" id="errSector">Secteur requis</div>
       </div>
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label>Mot de passe</label>
-          <input type="password" id="r-password" placeholder="Min. 8 caractères" autocomplete="new-password"/>
+
+      <div class="field">
+        <label>Mot de passe <span style="font-weight:400;text-transform:none;font-size:11px">(min. 8 caractères)</span></label>
+        <input type="password" id="regPwd" placeholder="••••••••" oninput="checkPwd(this.value)" autocomplete="new-password">
+        <div class="pwd-strength">
+          <div class="pwd-bar" id="bar1"></div>
+          <div class="pwd-bar" id="bar2"></div>
+          <div class="pwd-bar" id="bar3"></div>
+          <div class="pwd-bar" id="bar4"></div>
         </div>
-        <div class="form-row">
-          <label>Confirmer</label>
-          <input type="password" id="r-password2" placeholder="Confirmer" autocomplete="new-password"/>
+        <div class="pwd-label" id="pwdLabel"></div>
+        <div class="field-error" id="errPwd">Mot de passe trop court (min. 8 caractères)</div>
+      </div>
+
+      <!-- Plan selector (visible si ?plan= dans l'URL ou si upgrade=1) -->
+      <div id="planSelectorWrap" style="display:none">
+        <div class="divider">Choisissez votre plan</div>
+        <div class="plan-selector" id="planSelector">
+          <label class="plan-option selected" onclick="setPlan('trial')">
+            <input type="radio" name="plan" value="trial" checked>
+            <div class="plan-opt-name">Découverte</div>
+            <div class="plan-opt-price">Gratuit 7j</div>
+          </label>
+          <label class="plan-option" onclick="setPlan('starter')">
+            <input type="radio" name="plan" value="starter">
+            <div class="plan-opt-name">Starter</div>
+            <div class="plan-opt-price">29 €/mois</div>
+          </label>
+          <label class="plan-option" onclick="setPlan('pro')">
+            <input type="radio" name="plan" value="pro">
+            <div class="plan-opt-name">Pro</div>
+            <div class="plan-opt-price">79 €/mois</div>
+          </label>
+          <label class="plan-option" onclick="setPlan('unlimited')">
+            <input type="radio" name="plan" value="unlimited">
+            <div class="plan-opt-name">Illimité</div>
+            <div class="plan-opt-price">179 €/mois</div>
+          </label>
         </div>
       </div>
-      <button class="btn-submit green" id="reg-submit" onclick="doRegister()">
-        Créer mon compte →
+
+      <input type="hidden" id="regPlan" value="trial">
+
+      <button class="btn-submit" id="registerBtn" onclick="doRegister()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">Créer mon compte gratuit →</span>
       </button>
-      <div class="form-foot">Déjà inscrit ? <a href="#" onclick="switchTab('login')">Se connecter</a></div>
+
+      <p class="rgpd-note">
+        En créant un compte, vous acceptez nos <a href="/cgv.html">CGV</a> et notre
+        <a href="/confidentialite.html">politique de confidentialité</a>.
+        Vos données sont hébergées en Europe et conformes au RGPD.
+      </p>
+
+      <div class="switch-tab">Déjà un compte ? <a onclick="switchTab('login')">Se connecter</a></div>
+    </div>
+
+    <!-- ── FORGOT PASSWORD ── -->
+    <div class="form-panel" id="panelForgot">
+      <div class="form-title">Mot de passe oublié</div>
+      <div class="form-sub">Entrez votre email et nous vous enverrons un lien de réinitialisation.</div>
+
+      <div class="alert" id="forgotAlert"></div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="forgotEmail" placeholder="vous@entreprise.fr">
+      </div>
+
+      <button class="btn-submit" id="forgotBtn" onclick="doForgot()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text">Envoyer le lien →</span>
+      </button>
+
+      <div class="switch-tab"><a onclick="switchTab('login')">← Retour à la connexion</a></div>
     </div>
 
   </div>
 </div>
 
 <script>
-// Read URL param for plan
-const urlParams=new URLSearchParams(window.location.search);
-const planParam=urlParams.get('plan');
-if(planParam){
-  document.querySelectorAll('.plan-opt').forEach(o=>{
-    o.classList.toggle('selected',o.dataset.plan===planParam);
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  // Si déjà connecté → dashboard
+  if (localStorage.getItem('feelsyst_token')) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+
+  // Plan pré-sélectionné depuis l'URL
+  const planParam = params.get('plan');
+  if (planParam && ['starter','pro','unlimited','trial'].includes(planParam)) {
+    setPlan(planParam);
+    document.getElementById('planSelectorWrap').style.display = 'block';
+    switchTab('register');
+  }
+
+  // Upgrade depuis le dashboard
+  if (params.get('upgrade') === '1') {
+    document.getElementById('planSelectorWrap').style.display = 'block';
+    switchTab('register');
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+  if (tab === 'login') {
+    document.getElementById('panelLogin').classList.add('active');
+    document.getElementById('tabLogin').classList.add('active');
+    document.getElementById('tabRegister').classList.remove('active');
+  } else if (tab === 'register') {
+    document.getElementById('panelRegister').classList.add('active');
+    document.getElementById('tabRegister').classList.add('active');
+    document.getElementById('tabLogin').classList.remove('active');
+  } else if (tab === 'forgot') {
+    document.getElementById('panelForgot').classList.add('active');
+    document.getElementById('tabLogin').classList.remove('active');
+    document.getElementById('tabRegister').classList.remove('active');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// PLAN SELECTOR
+// ══════════════════════════════════════════════════════════════
+function setPlan(plan) {
+  document.getElementById('regPlan').value = plan;
+  document.querySelectorAll('.plan-option').forEach(el => el.classList.remove('selected'));
+  const radio = document.querySelector(`input[value="${plan}"]`);
+  if (radio) radio.closest('.plan-option').classList.add('selected');
+
+  // Mettre à jour le texte du bouton
+  const labels = { trial:'Créer mon compte gratuit →', starter:'Continuer vers le paiement →', pro:'Continuer vers le paiement →', unlimited:'Continuer vers le paiement →' };
+  const btnText = document.querySelector('#registerBtn .btn-text');
+  if (btnText) btnText.textContent = labels[plan] || 'Créer mon compte →';
+}
+
+// ══════════════════════════════════════════════════════════════
+// PASSWORD STRENGTH
+// ══════════════════════════════════════════════════════════════
+function checkPwd(val) {
+  const bars = ['bar1','bar2','bar3','bar4'];
+  const label = document.getElementById('pwdLabel');
+  let strength = 0;
+  if (val.length >= 8) strength++;
+  if (val.length >= 12) strength++;
+  if (/[A-Z]/.test(val) && /[0-9]/.test(val)) strength++;
+  if (/[^A-Za-z0-9]/.test(val)) strength++;
+
+  const classes = ['', 'weak', 'fair', 'good', 'good'];
+  const texts = ['', 'Faible', 'Moyen', 'Bon', 'Excellent'];
+  const colors = ['', 'var(--red)', 'var(--yellow)', 'var(--green)', 'var(--green)'];
+
+  bars.forEach((id, i) => {
+    const bar = document.getElementById(id);
+    bar.className = 'pwd-bar' + (i < strength ? ' ' + classes[strength] : '');
   });
-  if(planParam!=='login'){switchTab('register');}
+
+  label.textContent = val.length > 0 ? texts[strength] : '';
+  label.style.color = colors[strength];
 }
 
-function switchTab(t){
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));
-  document.getElementById('tab-login').classList.toggle('active',t==='login');
-  document.getElementById('tab-register').classList.toggle('active',t==='register');
+// ══════════════════════════════════════════════════════════════
+// VALIDATION
+// ══════════════════════════════════════════════════════════════
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg || el.textContent; el.classList.add('show'); }
+}
+function hideErr(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+function showAlert(id, msg, type='err') {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = `alert ${type} show`;
+}
+function hideAlert(id) {
+  const el = document.getElementById(id);
+  el.className = 'alert';
+}
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.classList.toggle('loading', loading);
 }
 
-function selectPlan(el){
-  document.querySelectorAll('.plan-opt').forEach(o=>o.classList.remove('selected'));
-  el.classList.add('selected');
-  const btn=document.getElementById('reg-submit');
-  btn.className='btn-submit'+(el.dataset.plan==='free'?' green':'');
-  btn.textContent=el.dataset.plan==='free'?'Créer mon compte gratuit →':'Créer mon compte →';
-}
+// ══════════════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════════════
+async function doLogin() {
+  hideAlert('loginAlert');
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd   = document.getElementById('loginPwd').value;
 
-function showNotif(id,msg,type){
-  const n=document.getElementById(id);
-  n.textContent=msg;n.className='notif '+type;n.style.display='block';
-  setTimeout(()=>{n.style.display='none'},5000);
-}
-
-async function doLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const password=document.getElementById('login-password').value;
-  if(!email||!password){showNotif('login-notif','Remplissez tous les champs','error');return;}
-  const btn=event.target;btn.textContent='Connexion...';btn.disabled=true;
-  try{
-    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
-    const d=await r.json();
-    if(d.success){
-      localStorage.setItem('fs_token',d.token);
-      localStorage.setItem('fs_user',JSON.stringify(d.user));
-      window.location.href='dashboard.html';
-    }else{
-      showNotif('login-notif',d.error||'Email ou mot de passe incorrect','error');
-      btn.textContent='Se connecter →';btn.disabled=false;
-    }
-  }catch(e){
-    showNotif('login-notif','Erreur réseau. Réessayez.','error');
-    btn.textContent='Se connecter →';btn.disabled=false;
+  if (!email || !pwd) {
+    showAlert('loginAlert', 'Email et mot de passe requis.');
+    return;
   }
-}
 
-async function doRegister(){
-  const plan=document.querySelector('.plan-opt.selected')?.dataset.plan||'free';
-  const firstname=document.getElementById('r-firstname').value.trim();
-  const lastname=document.getElementById('r-lastname').value.trim();
-  const email=document.getElementById('r-email').value.trim();
-  const company=document.getElementById('r-company').value.trim();
-  const sector=document.getElementById('r-sector').value;
-  const password=document.getElementById('r-password').value;
-  const password2=document.getElementById('r-password2').value;
-  if(!firstname||!lastname||!email||!company||!sector||!password){
-    showNotif('reg-notif','Veuillez remplir tous les champs','error');return;
-  }
-  if(password.length<8){showNotif('reg-notif','Mot de passe trop court (min. 8 caractères)','error');return;}
-  if(password!==password2){showNotif('reg-notif','Les mots de passe ne correspondent pas','error');return;}
-  const btn=document.getElementById('reg-submit');
-  btn.textContent='Création en cours...';btn.disabled=true;
-  try{
-    const r=await fetch('/api/register',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({firstname,lastname,email,company,sector,password,plan})
+  setLoading('loginBtn', true);
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd }),
     });
-    const d=await r.json();
-    if(d.success){
-      localStorage.setItem('fs_token',d.token);
-      localStorage.setItem('fs_user',JSON.stringify(d.user));
-      if(plan!=='free'){
-        window.location.href=d.paymentUrl||'dashboard.html?welcome=1';
-      }else{
-        window.location.href='dashboard.html?welcome=1';
+
+    const data = await r.json();
+
+    if (!r.ok) {
+      if (data.trialExpired) {
+        showAlert('loginAlert', '⏰ Votre période d\'essai est terminée. Choisissez un plan pour continuer.');
+        setTimeout(() => {
+          document.getElementById('panelLogin').querySelector('.switch-tab').innerHTML =
+            '<a onclick="switchTab(\'register\')">→ Choisir un plan</a>';
+          setPlan('starter');
+          document.getElementById('planSelectorWrap').style.display = 'block';
+          switchTab('register');
+        }, 2000);
+      } else {
+        showAlert('loginAlert', data.error || 'Identifiants incorrects.');
       }
-    }else{
-      showNotif('reg-notif',d.error||'Erreur lors de l\'inscription','error');
-      btn.textContent='Créer mon compte →';btn.disabled=false;
+      return;
     }
-  }catch(e){
-    showNotif('reg-notif','Erreur réseau. Réessayez.','error');
-    btn.textContent='Créer mon compte →';btn.disabled=false;
+
+    localStorage.setItem('feelsyst_token', data.token);
+    showAlert('loginAlert', '✅ Connexion réussie !', 'ok');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+
+  } catch(e) {
+    showAlert('loginAlert', 'Erreur de connexion. Vérifiez votre réseau.');
+  } finally {
+    setLoading('loginBtn', false);
   }
 }
 
-function showForgot(){
-  const email=prompt('Entrez votre email pour réinitialiser votre mot de passe :');
-  if(email){
-    fetch('/api/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})})
-      .then(r=>r.json())
-      .then(d=>showNotif('login-notif','Email de réinitialisation envoyé si le compte existe.','success'))
-      .catch(()=>showNotif('login-notif','Erreur. Réessayez.','error'));
+// ══════════════════════════════════════════════════════════════
+// REGISTER
+// ══════════════════════════════════════════════════════════════
+async function doRegister() {
+  hideAlert('registerAlert');
+  ['errFirstname','errLastname','errEmail','errCompany','errSector','errPwd']
+    .forEach(hideErr);
+
+  const firstname = document.getElementById('regFirstname').value.trim();
+  const lastname  = document.getElementById('regLastname').value.trim();
+  const email     = document.getElementById('regEmail').value.trim();
+  const company   = document.getElementById('regCompany').value.trim();
+  const sector    = document.getElementById('regSector').value;
+  const pwd       = document.getElementById('regPwd').value;
+  const plan      = document.getElementById('regPlan').value || 'trial';
+
+  let valid = true;
+  if (!firstname) { showErr('errFirstname'); valid = false; }
+  if (!lastname)  { showErr('errLastname');  valid = false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showErr('errEmail', 'Email invalide'); valid = false;
+  }
+  if (!company)   { showErr('errCompany');   valid = false; }
+  if (!sector)    { showErr('errSector', 'Sélectionnez votre secteur'); valid = false; }
+  if (pwd.length < 8) { showErr('errPwd');   valid = false; }
+  if (!valid) return;
+
+  setLoading('registerBtn', true);
+  try {
+    const r = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstname, lastname, email, company, sector, password: pwd, plan }),
+    });
+
+    const data = await r.json();
+
+    if (!r.ok) {
+      showAlert('registerAlert', data.error || 'Erreur lors de la création du compte.');
+      return;
+    }
+
+    localStorage.setItem('feelsyst_token', data.token);
+
+    // Si plan payant → rediriger vers Stripe
+    if (data.paymentUrl) {
+      showAlert('registerAlert', '✅ Compte créé ! Redirection vers le paiement…', 'ok');
+      setTimeout(() => { window.location.href = data.paymentUrl; }, 1000);
+    } else {
+      showAlert('registerAlert', `✅ Bienvenue ${firstname} ! Redirection vers votre tableau de bord…`, 'ok');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+    }
+
+  } catch(e) {
+    showAlert('registerAlert', 'Erreur de connexion. Vérifiez votre réseau.');
+  } finally {
+    setLoading('registerBtn', false);
   }
 }
+
+// ══════════════════════════════════════════════════════════════
+// FORGOT PASSWORD
+// ══════════════════════════════════════════════════════════════
+async function doForgot() {
+  hideAlert('forgotAlert');
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showAlert('forgotAlert', 'Email requis.'); return; }
+
+  setLoading('forgotBtn', true);
+  try {
+    const r = await fetch('/api/mot-de-passe-oublie', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await r.json();
+    if (!r.ok) { showAlert('forgotAlert', data.error || 'Erreur.'); return; }
+    showAlert('forgotAlert', '✅ Email envoyé ! Vérifiez votre boîte mail.', 'ok');
+  } catch(e) {
+    showAlert('forgotAlert', 'Erreur de connexion.');
+  } finally {
+    setLoading('forgotBtn', false);
+  }
+}
+
+// ── Touche Entrée ──
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.form-panel.active');
+  if (!active) return;
+  if (active.id === 'panelLogin')    doLogin();
+  else if (active.id === 'panelRegister') doRegister();
+  else if (active.id === 'panelForgot')   doForgot();
+});
 </script>
 </body>
 </html>

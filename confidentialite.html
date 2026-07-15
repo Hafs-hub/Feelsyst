@@ -3,192 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Politique de Confidentialité — Feelsyst.com</title>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<title>Politique de Confidentialité — Feelsyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f0e8;--ink:#0f0f0d;--signal:#00c896;--muted:#8a7d6e;--border:#e0d8cc}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh}
-nav{position:sticky;top:0;z-index:100;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,240,232,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
-.nav-logo svg{width:22px;height:22px}
-.logo-t{font-size:1.1rem;letter-spacing:-.5px;display:flex;align-items:baseline}
-.fl{font-weight:200}.sy{font-weight:700}.dt{font-weight:200;color:#00a87c}.co{font-family:'DM Mono',monospace;font-size:.6rem;color:#00a87c;letter-spacing:.5px;margin-left:1px}
-.back-link{font-size:12px;color:var(--muted);text-decoration:none;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:color .2s}
-.back-link:hover{color:var(--signal)}
-.wrap{max-width:720px;margin:0 auto;padding:60px 24px 80px}
-.page-tag{font-family:'DM Mono',monospace;font-size:9px;color:var(--signal);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.page-tag::before{content:'';width:20px;height:1px;background:var(--signal)}
-.page-title{font-family:'Instrument Serif',serif;font-size:clamp(2rem,5vw,3rem);letter-spacing:-2px;line-height:1;margin-bottom:8px}
-.page-title em{font-style:italic;color:var(--signal)}
-.page-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:48px}
-.dpo-box{background:rgba(0,200,150,.06);border:1px solid rgba(0,200,150,.2);border-radius:6px;padding:16px 20px;margin-bottom:36px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8}
-.dpo-box strong{color:var(--signal);display:block;margin-bottom:4px}
-h2{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.5rem;letter-spacing:-.5px;color:var(--ink);margin:40px 0 14px;padding-top:28px;border-top:1px solid var(--border)}
-h3{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:20px 0 10px}
-p{font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:12px}
-ul{list-style:none;margin:8px 0 16px;padding:0}
-li{font-size:13px;color:var(--muted);padding:5px 0 5px 16px;position:relative;line-height:1.6}
-li::before{content:'→';position:absolute;left:0;color:var(--signal);font-size:10px;top:7px}
-strong{color:var(--ink);font-weight:500}
-.rights-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 24px}
-.right-card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:14px 16px}
-.right-card h4{font-size:11px;font-weight:600;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.right-card p{font-size:11px;margin-bottom:0;line-height:1.6}
-.subcontractors{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin:16px 0 24px}
-.sc-row{display:grid;grid-template-columns:140px 1fr 1fr;gap:0;border-bottom:1px solid var(--border)}
-.sc-row:last-child{border-bottom:none}
-.sc-row div{padding:11px 14px;font-size:12px}
-.sc-head div{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);background:rgba(0,200,150,.04)}
-.sc-row div:not(:last-child){border-right:1px solid var(--border)}
-.page-footer{border-top:1px solid var(--border);margin-top:60px;padding-top:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.page-footer a{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.5px;transition:color .2s}
-.page-footer a:hover{color:var(--signal)}
-@media(max-width:640px){nav{padding:0 20px}.wrap{padding:40px 20px 60px}.rights-grid{grid-template-columns:1fr}.sc-row{grid-template-columns:1fr}.page-footer{flex-direction:column}}
+:root{--bg:#0c0f1e;--surface:#141827;--card:#1c2035;--border:#252a42;--violet:#7c5cfc;--rose:#fc5c7d;--green:#22d3a5;--text:#e8e8f4;--muted:#6b7290;--display:'Syne',sans-serif;--body:'Inter',sans-serif;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.7;}
+nav{position:sticky;top:0;z-index:100;background:rgba(12,15,30,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:var(--display);font-size:19px;font-weight:800;background:linear-gradient(135deg,var(--violet),var(--rose));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+.nav-back{color:var(--muted);text-decoration:none;font-size:13px;transition:color .15s;}
+.nav-back:hover{color:var(--text);}
+.hero-legal{padding:64px 24px 48px;text-align:center;border-bottom:1px solid var(--border);}
+.legal-badge{display:inline-block;background:rgba(34,211,165,.1);border:1px solid rgba(34,211,165,.2);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--green);margin-bottom:18px;}
+.hero-legal h1{font-family:var(--display);font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-.8px;margin-bottom:10px;}
+.gradient-text{background:linear-gradient(135deg,var(--violet),var(--rose));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-legal p{color:var(--muted);font-size:14px;}
+.legal-body{max-width:760px;margin:0 auto;padding:48px 24px 80px;}
+.legal-toc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:48px;}
+.legal-toc h3{font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:14px;color:var(--muted);}
+.legal-toc ol{padding-left:18px;display:flex;flex-direction:column;gap:6px;}
+.legal-toc a{color:var(--violet);text-decoration:none;font-size:13.5px;}
+.legal-toc a:hover{text-decoration:underline;}
+.legal-section{margin-bottom:48px;scroll-margin-top:80px;}
+.legal-section h2{font-family:var(--display);font-size:20px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.legal-section h3{font-size:15px;font-weight:600;margin:20px 0 8px;color:var(--text);}
+.legal-section p{color:#b8b8cc;margin-bottom:12px;font-size:14.5px;}
+.legal-section ul{padding-left:20px;display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.legal-section li{color:#b8b8cc;font-size:14.5px;}
+.legal-section strong{color:var(--text);}
+.legal-table{width:100%;border-collapse:collapse;margin:16px 0;}
+.legal-table th{background:var(--card);padding:10px 14px;text-align:left;font-size:13px;font-weight:600;border:1px solid var(--border);}
+.legal-table td{padding:10px 14px;font-size:13.5px;color:#b8b8cc;border:1px solid var(--border);}
+.legal-table tr:nth-child(even) td{background:rgba(28,32,53,.5);}
+.info-box{background:rgba(34,211,165,.06);border:1px solid rgba(34,211,165,.2);border-radius:10px;padding:16px 18px;margin:16px 0;}
+.info-box p{color:#b8b8cc;font-size:14px;margin:0;}
+.rights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0;}
+.right-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.right-card .icon{font-size:20px;margin-bottom:8px;}
+.right-card h4{font-size:13.5px;font-weight:600;margin-bottom:4px;}
+.right-card p{font-size:12px;color:var(--muted);margin:0;}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:28px 24px;text-align:center;}
+.footer-links{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-bottom:12px;}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:13px;}
+.footer-links a:hover{color:var(--text);}
+.footer-copy{font-size:12px;color:var(--muted);}
 </style>
 </head>
 <body>
+
 <nav>
-  <a href="/" class="nav-logo">
-    <svg viewBox="0 0 64 64" fill="none">
-      <rect x="1" y="1" width="62" height="62" stroke="#ddd8ce" stroke-width=".6"/>
-      <line x1="18" y1="16" x2="18" y2="48" stroke="#0f0f0d" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="18" y1="16" x2="38" y2="16" stroke="#0f0f0d" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="18" y1="32" x2="32" y2="32" stroke="#0f0f0d" stroke-width="1.4" stroke-linecap="round"/>
-      <circle cx="46" cy="48" r="4" fill="#00a87c"/>
-    </svg>
-    <span class="logo-t"><span class="fl">feel</span><span class="sy">syst</span><span class="dt">.</span><span class="co">com</span></span>
-  </a>
-  <a href="/" class="back-link">← Retour au site</a>
+  <a href="/" class="nav-logo">Feelsyst</a>
+  <a href="/" class="nav-back">← Retour à l'accueil</a>
 </nav>
-<div class="wrap">
-  <div class="page-tag">Confidentialité</div>
-  <h1 class="page-title">Politique de <em>confidentialité</em></h1>
-  <p class="page-date">Conformément au RGPD UE 2016/679 · Dernière mise à jour : mai 2026</p>
 
-  <div class="dpo-box">
-    <strong>Responsable du traitement et DPO</strong>
-    [FEELSYST] · [Adresse] · contact@feelsyst.com<br>
-    Délégué à la Protection des Données : dpo@feelsyst.com<br>
-    Réponse garantie sous 30 jours calendaires
+<div class="hero-legal">
+  <div class="legal-badge">🔒 Conforme RGPD</div>
+  <h1>Politique de <span class="gradient-text">Confidentialité</span></h1>
+  <p>Dernière mise à jour : 1er juillet 2025 · Version 1.0</p>
+</div>
+
+<div class="legal-body">
+
+  <div class="legal-toc">
+    <h3>Sommaire</h3>
+    <ol>
+      <li><a href="#r1">Responsable du traitement</a></li>
+      <li><a href="#r2">Données collectées</a></li>
+      <li><a href="#r3">Finalités et bases légales</a></li>
+      <li><a href="#r4">Durée de conservation</a></li>
+      <li><a href="#r5">Destinataires des données</a></li>
+      <li><a href="#r6">Transferts hors UE</a></li>
+      <li><a href="#r7">Vos droits</a></li>
+      <li><a href="#r8">Cookies</a></li>
+      <li><a href="#r9">Sécurité</a></li>
+      <li><a href="#r10">Contact et réclamations</a></li>
+    </ol>
   </div>
 
-  <h2>1. Données collectées</h2>
-  <h3>Données de contact</h3>
-  <ul>
-    <li>Adresse email (formulaire de contact, souscription aux services)</li>
-    <li>Nom et prénom (facturation et communication)</li>
-    <li>Nom de l'entreprise (optionnel, pour personnalisation)</li>
-  </ul>
-  <h3>Données de paiement</h3>
-  <ul>
-    <li>Les données bancaires sont traitées exclusivement par Stripe (certifié PCI-DSS). Feelsyst.com ne stocke jamais vos numéros de carte bancaire.</li>
-  </ul>
-  <h3>Données techniques</h3>
-  <ul>
-    <li>Adresse IP (logs serveur, conservation 90 jours maximum)</li>
-    <li>Pages visitées et durée de navigation</li>
-    <li>Cookies techniques de session et de préférences</li>
-  </ul>
+  <div class="info-box" style="margin-bottom:32px">
+    <p>🇫🇷 <strong>Notre engagement :</strong> Vos données sont hébergées en Europe, ne sont jamais revendues à des tiers, et ne sont jamais utilisées pour entraîner des modèles IA. Feelsyst respecte intégralement le RGPD (Règlement UE 2016/679).</p>
+  </div>
 
-  <h2>2. Finalités et bases légales du traitement</h2>
-  <ul>
-    <li><strong>Exécution du contrat :</strong> facturation, livraison des services, support client via l'agent Lumi</li>
-    <li><strong>Intérêt légitime :</strong> amélioration des services, sécurité informatique, prévention des fraudes</li>
-    <li><strong>Consentement :</strong> envoi de newsletters marketing (révocable à tout moment)</li>
-    <li><strong>Obligation légale :</strong> conservation des factures pendant 10 ans (Code de commerce)</li>
-  </ul>
-
-  <h2>3. Durée de conservation</h2>
-  <ul>
-    <li><strong>Clients actifs :</strong> durée de la relation contractuelle + 3 ans</li>
-    <li><strong>Prospects :</strong> 3 ans après le dernier contact</li>
-    <li><strong>Factures et données comptables :</strong> 10 ans (obligation légale)</li>
-    <li><strong>Logs techniques :</strong> 90 jours maximum</li>
-    <li><strong>Cookies :</strong> 13 mois maximum</li>
-  </ul>
-
-  <h2>4. Vos droits</h2>
-  <div class="rights-grid">
-    <div class="right-card">
-      <h4>Droit d'accès</h4>
-      <p>Obtenir une copie de toutes vos données personnelles détenues par Feelsyst.com.</p>
+  <div class="legal-section" id="r1">
+    <h2>1. Responsable du traitement</h2>
+    <p>Le responsable du traitement des données personnelles collectées sur feelsyst.com est :</p>
+    <div class="info-box">
+      <p>
+        <strong>Feelsyst</strong><br>
+        <strong>Propriétaire :</strong> Salim Hafif<br>
+        <strong>Adresse :</strong> 17 rue de la Cocoterie, Kaweni 97600<br>
+        <strong>Statut :</strong> Entreprise individuelle en cours d'immatriculation<br>
+        <strong>SIRET :</strong> En cours d'immatriculation<br>
+        <strong>Email DPO :</strong> contact@feelsyst.com
+      </p>
     </div>
-    <div class="right-card">
-      <h4>Droit de rectification</h4>
-      <p>Corriger toute information inexacte ou incomplète vous concernant.</p>
-    </div>
-    <div class="right-card">
-      <h4>Droit à l'effacement</h4>
-      <p>Demander la suppression de vos données sous réserve des obligations légales.</p>
-    </div>
-    <div class="right-card">
-      <h4>Droit à la portabilité</h4>
-      <p>Recevoir vos données dans un format structuré et lisible par machine.</p>
-    </div>
-    <div class="right-card">
-      <h4>Droit d'opposition</h4>
-      <p>Vous opposer au traitement de vos données à des fins marketing.</p>
-    </div>
-    <div class="right-card">
-      <h4>Droit de limitation</h4>
-      <p>Demander la suspension temporaire du traitement de vos données.</p>
+    <div class="info-box" style="background:rgba(245,200,66,.07);border-color:rgba(245,200,66,.25);margin-top:12px">
+      <p>⚠️ <strong>Immatriculation en cours :</strong> Feelsyst est en cours d'immatriculation. Le SIRET et les informations définitives seront mis à jour dès l'obtention du numéro. Cette situation n'affecte pas la protection de vos données ni le respect du RGPD.</p>
     </div>
   </div>
-  <p>Pour exercer vos droits : <strong>dpo@feelsyst.com</strong>. Vous pouvez également introduire une réclamation auprès de la <strong>CNIL</strong> (cnil.fr).</p>
 
-  <h2>5. Sous-traitants et transferts hors UE</h2>
-  <div class="subcontractors">
-    <div class="sc-row sc-head">
-      <div>Sous-traitant</div>
-      <div>Rôle</div>
-      <div>Localisation</div>
-    </div>
-    <div class="sc-row">
-      <div><strong>Anthropic</strong></div>
-      <div>Traitement IA des données via agents</div>
-      <div>USA — Clauses contractuelles types UE</div>
-    </div>
-    <div class="sc-row">
-      <div><strong>Stripe</strong></div>
-      <div>Paiements et facturation en ligne</div>
-      <div>USA — Privacy Shield + CCT UE</div>
-    </div>
-    <div class="sc-row">
-      <div><strong>Vercel</strong></div>
-      <div>Hébergement du site web</div>
-      <div>USA — Clauses contractuelles types UE</div>
-    </div>
-    <div class="sc-row">
-      <div><strong>Google (Zoho)</strong></div>
-      <div>Emails professionnels des agents</div>
-      <div>UE/USA — Certifié RGPD</div>
-    </div>
-    <div class="sc-row">
-      <div><strong>Notion</strong></div>
-      <div>Base de données CRM clients</div>
-      <div>USA — Clauses contractuelles types UE</div>
-    </div>
+  <div class="legal-section" id="r2">
+    <h2>2. Données collectées</h2>
+
+    <h3>2.1 Données d'inscription</h3>
+    <ul>
+      <li>Prénom et nom</li>
+      <li>Adresse email professionnelle</li>
+      <li>Nom de l'entreprise</li>
+      <li>Secteur d'activité</li>
+      <li>Mot de passe (haché, jamais stocké en clair)</li>
+    </ul>
+
+    <h3>2.2 Données de navigation et d'utilisation</h3>
+    <ul>
+      <li>Adresse IP (anonymisée)</li>
+      <li>Type de navigateur et système d'exploitation</li>
+      <li>Pages visitées et durée des sessions</li>
+      <li>Agents IA utilisés et volume de messages (sans le contenu des conversations)</li>
+    </ul>
+
+    <h3>2.3 Données de paiement</h3>
+    <p>Les données bancaires (numéro de carte, CVV) sont collectées et stockées exclusivement par Stripe, notre prestataire de paiement certifié PCI-DSS. Feelsyst ne stocke jamais vos données bancaires complètes.</p>
+
+    <h3>2.4 Contenu des conversations</h3>
+    <p>Le contenu de vos échanges avec les agents IA est transmis à l'API Anthropic (Claude) pour générer les réponses. Ces données ne sont pas conservées par Feelsyst au-delà de la session. Consultez la politique de confidentialité d'Anthropic pour plus d'informations.</p>
   </div>
-  <p>Tous les transferts hors UE sont encadrés par des <strong>clauses contractuelles types</strong> approuvées par la Commission européenne, garantissant un niveau de protection adéquat de vos données.</p>
 
-  <h2>6. Cookies</h2>
-  <p>Feelsyst.com utilise uniquement des <strong>cookies strictement nécessaires</strong> au bon fonctionnement du site : session utilisateur et préférences d'affichage. Aucun cookie publicitaire ou de traçage tiers n'est déposé sans votre consentement explicite via notre bannière de cookies.</p>
-  <p>Vous pouvez retirer votre consentement à tout moment depuis les paramètres de votre navigateur ou en cliquant sur "Gérer les cookies" en bas de chaque page.</p>
+  <div class="legal-section" id="r3">
+    <h2>3. Finalités et bases légales</h2>
+    <table class="legal-table">
+      <thead>
+        <tr><th>Finalité</th><th>Base légale</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Création et gestion du compte</td><td>Exécution du contrat</td></tr>
+        <tr><td>Fourniture des services IA</td><td>Exécution du contrat</td></tr>
+        <tr><td>Facturation et paiement</td><td>Obligation légale</td></tr>
+        <tr><td>Emails transactionnels (factures, alertes)</td><td>Exécution du contrat</td></tr>
+        <tr><td>Amélioration de la plateforme</td><td>Intérêt légitime</td></tr>
+        <tr><td>Emails marketing (nouveautés, offres)</td><td>Consentement</td></tr>
+        <tr><td>Statistiques d'usage anonymisées</td><td>Intérêt légitime</td></tr>
+        <tr><td>Lutte contre la fraude et la sécurité</td><td>Intérêt légitime</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-  <h2>7. Sécurité des données</h2>
-  <p>Feelsyst.com met en oeuvre des mesures techniques et organisationnelles appropriées pour protéger vos données : chiffrement TLS 1.3 en transit, chiffrement AES-256 au repos, accès restreint aux données par authentification forte, journalisation des accès et audits de sécurité réguliers.</p>
+  <div class="legal-section" id="r4">
+    <h2>4. Durée de conservation</h2>
+    <ul>
+      <li><strong>Données de compte actif :</strong> pendant toute la durée de la relation contractuelle</li>
+      <li><strong>Données après résiliation :</strong> 30 jours (puis suppression définitive sur demande)</li>
+      <li><strong>Données comptables et factures :</strong> 10 ans (obligation légale)</li>
+      <li><strong>Logs de connexion :</strong> 12 mois</li>
+      <li><strong>Données d'essai non converti :</strong> 30 jours après expiration</li>
+      <li><strong>Contenu des conversations IA :</strong> durée de la session uniquement</li>
+    </ul>
+  </div>
 
-  <h2>8. Contact et réclamations</h2>
-  <p>Pour toute question relative à cette politique ou pour exercer vos droits : <strong>dpo@feelsyst.com</strong></p>
-  <p>En cas de réclamation non résolue, vous pouvez contacter la CNIL : Commission Nationale de l'Informatique et des Libertés, 3 Place de Fontenoy, 75007 Paris — cnil.fr</p>
+  <div class="legal-section" id="r5">
+    <h2>5. Destinataires des données</h2>
+    <p>Feelsyst ne revend jamais vos données à des tiers. Vos données peuvent être partagées avec les sous-traitants suivants, dans le strict cadre de leurs missions :</p>
+    <table class="legal-table">
+      <thead>
+        <tr><th>Prestataire</th><th>Rôle</th><th>Localisation</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Supabase</td><td>Base de données et authentification</td><td>UE (Ireland)</td></tr>
+        <tr><td>Vercel</td><td>Hébergement de l'application</td><td>UE</td></tr>
+        <tr><td>Anthropic (Claude)</td><td>Génération des réponses IA</td><td>États-Unis *</td></tr>
+        <tr><td>Stripe</td><td>Traitement des paiements</td><td>UE/USA *</td></tr>
+        <tr><td>Brevo</td><td>Envoi d'emails transactionnels</td><td>UE (France)</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--muted)">* Pour les transferts hors UE, voir la section 6.</p>
+  </div>
 
-  <div class="page-footer">
-    <a href="/mentions-legales.html">Mentions légales</a>
+  <div class="legal-section" id="r6">
+    <h2>6. Transferts hors Union Européenne</h2>
+    <p>Certains sous-traitants (Anthropic, Stripe) sont établis aux États-Unis. Ces transferts sont encadrés par :</p>
+    <ul>
+      <li>Les Clauses Contractuelles Types (CCT) approuvées par la Commission Européenne</li>
+      <li>Le cadre EU-U.S. Data Privacy Framework pour les entreprises certifiées</li>
+    </ul>
+    <p>Seul le contenu de la conversation en cours est transmis à Anthropic pour générer la réponse de l'agent IA. Aucune donnée d'identification (nom, email, entreprise) n'est transmise à Anthropic.</p>
+  </div>
+
+  <div class="legal-section" id="r7">
+    <h2>7. Vos droits</h2>
+    <p>Conformément au RGPD, vous disposez des droits suivants sur vos données personnelles :</p>
+
+    <div class="rights-grid">
+      <div class="right-card">
+        <div class="icon">👁️</div>
+        <h4>Droit d'accès</h4>
+        <p>Obtenir une copie de vos données</p>
+      </div>
+      <div class="right-card">
+        <div class="icon">✏️</div>
+        <h4>Droit de rectification</h4>
+        <p>Corriger vos données inexactes</p>
+      </div>
+      <div class="right-card">
+        <div class="icon">🗑️</div>
+        <h4>Droit à l'effacement</h4>
+        <p>Supprimer vos données ("droit à l'oubli")</p>
+      </div>
+      <div class="right-card">
+        <div class="icon">⏸️</div>
+        <h4>Droit à la limitation</h4>
+        <p>Suspendre le traitement de vos données</p>
+      </div>
+      <div class="right-card">
+        <div class="icon">📦</div>
+        <h4>Droit à la portabilité</h4>
+        <p>Recevoir vos données dans un format lisible</p>
+      </div>
+      <div class="right-card">
+        <div class="icon">🚫</div>
+        <h4>Droit d'opposition</h4>
+        <p>Vous opposer à certains traitements</p>
+      </div>
+    </div>
+
+    <p>Pour exercer vos droits, contactez-nous à <a href="mailto:contact@feelsyst.com" style="color:var(--violet)">contact@feelsyst.com</a>. Nous répondrons dans un délai de 30 jours.</p>
+    <p>En cas de réponse insatisfaisante, vous pouvez introduire une réclamation auprès de la CNIL : <a href="https://www.cnil.fr" style="color:var(--violet)" target="_blank">www.cnil.fr</a></p>
+  </div>
+
+  <div class="legal-section" id="r8">
+    <h2>8. Cookies</h2>
+    <p>Feelsyst utilise un nombre minimal de cookies strictement nécessaires au fonctionnement de la plateforme :</p>
+    <table class="legal-table">
+      <thead>
+        <tr><th>Cookie</th><th>Finalité</th><th>Durée</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>feelsyst_token</td><td>Session d'authentification (localStorage)</td><td>30 jours</td></tr>
+        <tr><td>feelsyst_last_agent</td><td>Dernier agent sélectionné (localStorage)</td><td>Persistant</td></tr>
+      </tbody>
+    </table>
+    <p>Feelsyst n'utilise pas de cookies publicitaires, de tracking tiers ou de cookies de profilage. Aucun consentement cookie n'est donc requis au sens de la directive ePrivacy.</p>
+  </div>
+
+  <div class="legal-section" id="r9">
+    <h2>9. Sécurité</h2>
+    <p>Feelsyst met en œuvre les mesures de sécurité suivantes pour protéger vos données :</p>
+    <ul>
+      <li>Chiffrement HTTPS/TLS pour toutes les communications</li>
+      <li>Mots de passe hachés (SHA-256 + sel) — jamais stockés en clair</li>
+      <li>Tokens de session à durée limitée (30 jours)</li>
+      <li>Accès aux bases de données restreint par Row Level Security (RLS)</li>
+      <li>Hébergement sur infrastructure certifiée ISO 27001 (Supabase/Vercel)</li>
+      <li>Journalisation des accès et détection d'anomalies</li>
+    </ul>
+    <p>En cas de violation de données susceptible d'engendrer un risque pour vos droits et libertés, Feelsyst s'engage à vous en informer dans les 72 heures conformément à l'article 33 du RGPD.</p>
+  </div>
+
+  <div class="legal-section" id="r10">
+    <h2>10. Contact et réclamations</h2>
+    <p>Pour toute question relative à la protection de vos données personnelles :</p>
+    <div class="info-box">
+      <p>
+        <strong>Email :</strong> <a href="mailto:contact@feelsyst.com" style="color:var(--violet)">contact@feelsyst.com</a><br>
+        <strong>Objet :</strong> Merci de préciser "RGPD - [votre demande]" dans l'objet<br>
+        <strong>Délai de réponse :</strong> 30 jours maximum
+      </p>
+    </div>
+    <p>Si vous n'êtes pas satisfait de notre réponse, vous avez le droit de déposer une plainte auprès de la CNIL :</p>
+    <ul>
+      <li>En ligne : <a href="https://www.cnil.fr/fr/plaintes" style="color:var(--violet)" target="_blank">cnil.fr/fr/plaintes</a></li>
+      <li>Par courrier : CNIL, 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07</li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-links">
+    <a href="/">Accueil</a>
     <a href="/cgv.html">CGV</a>
     <a href="/confidentialite.html">Confidentialité</a>
-    <a href="/">Retour au site</a>
+    <a href="/mentions-legales.html">Mentions légales</a>
+    <a href="mailto:contact@feelsyst.com">Contact</a>
   </div>
-</div>
+  <p class="footer-copy">© 2025 Feelsyst. Tous droits réservés.</p>
+</footer>
+
 </body>
 </html>
