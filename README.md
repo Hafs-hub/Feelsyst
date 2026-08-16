@@ -30,3 +30,4 @@ Site en cours de déploiement — [feelsyst.com](https://feelsyst.com)
 ## Statut
 
 🚧 Immatriculation en cours — V2 en production
+Dernière mise à jour : août 2026 — V2 en production
