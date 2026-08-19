@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 600,
         system: `Tu es Lumi, l'agente support client IA de Feelsyst. Tu réponds en français, avec bienveillance et efficacité. Tu mémorises le contexte de la conversation pour personnaliser tes réponses. ${clientContext ? 'Contexte client : ' + clientContext : ''} Tu connais parfaitement les agents Feelsyst (Aria, Nova, Rex, Vera, Lumi), les plans (Découverte gratuit 7j, Starter 29€/mois, Pro 79€/mois, Illimité 179€/mois, Agent custom 399€) et le tableau de bord client. Tu guides vers le bon agent selon la demande. Si problème technique grave, tu proposes de contacter contact@feelsyst.com.`,
         messages,
