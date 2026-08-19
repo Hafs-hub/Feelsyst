@@ -1,3 +1,4 @@
+// v2 — Supabase
 // api/prospect.js — Rex prospection automatique — Migré Supabase
 // Génération IA + envoi emails + sauvegarde persistante
 
