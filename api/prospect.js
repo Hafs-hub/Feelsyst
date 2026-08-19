@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5',
           max_tokens: 2000,
           system: `Tu es Rex, agent commercial expert en prospection B2B. Génère une liste de ${Math.min(volume, 50)} entreprises fictives mais réalistes pour la prospection commerciale dans le secteur demandé en France. Réponds UNIQUEMENT en JSON valide avec ce format exact sans aucun texte avant/après: {"prospects":[{"company":"Nom Entreprise","contact":"Prénom Nom","email":"prenom.nom@domaine.fr","sector":"secteur précis","title":"Titre du contact","city":"Ville","size":"TPE/PME/ETI"}]}`,
           messages: [{
