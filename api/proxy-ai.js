@@ -64,13 +64,13 @@ module.exports = async (req, res) => {
     }
   }
 
-  const { system, messages, max_tokens = 1000, agent = 'aria' } = req.body || {};
+  const { system, messages, max_tokens = 1000, agent = 'aria', userContext = {} } = req.body || {};
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'messages[] requis' });
   }
 
   try {
-    // Récupérer le system prompt depuis Supabase si non fourni
+    // Récupérer le system prompt depuis Supabase
     let systemPrompt = system;
     if (!systemPrompt) {
       const { data: config } = await supabase
@@ -79,6 +79,32 @@ module.exports = async (req, res) => {
         .eq('agent', agent)
         .single();
       systemPrompt = config?.system_prompt || '';
+    }
+
+    // Enrichir le system prompt avec le contexte de l'entreprise cliente
+    // Priorité : userContext du frontend, sinon données Supabase
+    const { data: clientData } = await supabase
+      .from('clients')
+      .select('full_name, company_name, sector, plan')
+      .eq('id', client.id)
+      .single();
+
+    const company   = userContext.company   || clientData?.company_name || '';
+    const sector    = userContext.sector    || clientData?.sector       || '';
+    const firstname = userContext.firstname || (clientData?.full_name || '').split(' ')[0] || '';
+    const plan      = userContext.plan      || clientData?.plan         || '';
+
+    if (company || sector || firstname) {
+      const ctx = [
+        firstname ? `Prénom du dirigeant : ${firstname}` : '',
+        company   ? `Entreprise : ${company}`            : '',
+        sector    ? `Secteur d'activité : ${sector}`     : '',
+        plan      ? `Plan Feelsyst : ${plan}`            : '',
+      ].filter(Boolean).join(' | ');
+
+      systemPrompt = systemPrompt
+        ? `${systemPrompt}\n\nContexte client : ${ctx}`
+        : `Contexte client : ${ctx}`;
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
