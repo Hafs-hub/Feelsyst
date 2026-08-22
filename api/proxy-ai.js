@@ -115,25 +115,20 @@ module.exports = async (req, res) => {
     const tokensOut = data.usage?.output_tokens || 0;
     const cost = (tokensIn * 0.000003) + (tokensOut * 0.000015);
 
-    supabase.from('usage').upsert([{
-      client_id: client.id,
-      agent,
+    // Tracer l'usage — fire and forget sans bloquer la réponse
+    const usageData = {
+      client_id: client.id, agent,
       date: new Date().toISOString().split('T')[0],
-      messages_count: 1,
-      tokens_input: tokensIn,
-      tokens_output: tokensOut,
-      estimated_cost: cost,
-    }], { onConflict: 'client_id,agent,date', ignoreDuplicates: false })
-    .then(({ error }) => {
+      messages_count: 1, tokens_input: tokensIn,
+      tokens_output: tokensOut, estimated_cost: cost,
+    };
+    supabase.from('usage').upsert([usageData], {
+      onConflict: 'client_id,agent,date', ignoreDuplicates: false
+    }).then(({ error }) => {
       if (error) {
-        supabase.from('usage').insert([{
-          client_id: client.id, agent,
-          date: new Date().toISOString().split('T')[0],
-          messages_count: 1, tokens_input: tokensIn,
-          tokens_output: tokensOut, estimated_cost: cost,
-        }]).catch(() => {});
+        supabase.from('usage').insert([usageData]).then(() => {}).catch(() => {});
       }
-    });
+    }).catch(() => {});
 
     return res.status(200).json(data);
 
