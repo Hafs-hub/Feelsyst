@@ -711,6 +711,29 @@ body {
 
 .mobile-nav { display: none; }
 
+/* ── SETTINGS MODAL ── */
+.settings-section { margin-bottom: 24px; }
+.settings-section h3 { font-family:var(--display); font-size:14px; font-weight:700; margin-bottom:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+.settings-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(37,42,66,0.5); }
+.settings-row:last-child { border-bottom:none; }
+.settings-label { font-size:13px; color:var(--text); }
+.settings-value { font-size:13px; color:var(--muted); }
+.integ-status { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:3px 10px; border-radius:12px; }
+.integ-ok  { background:rgba(34,211,165,.12); color:var(--green); }
+.integ-no  { background:rgba(107,107,138,.12); color:var(--muted); }
+.settings-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:8px 12px; color:var(--text); font-family:var(--body); font-size:13px; outline:none; margin-top:6px; }
+.settings-input:focus { border-color:var(--accent); }
+
+/* ── FILE UPLOAD ── */
+.upload-btn { width:32px; height:32px; background:none; border:1px solid var(--border); border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:16px; transition:all .15s; flex-shrink:0; align-self:flex-end; }
+.upload-btn:hover { color:var(--accent); border-color:var(--accent); }
+.file-preview { display:flex; align-items:center; gap:6px; background:rgba(124,92,252,.08); border:1px solid rgba(124,92,252,.2); border-radius:6px; padding:5px 10px; font-size:12px; margin-bottom:8px; }
+.file-preview .rm { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:0 2px; }
+
+/* ── DOWNLOAD BUTTON ── */
+.download-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:11px; padding:2px 6px; border-radius:4px; transition:all .15s; }
+.download-btn:hover { background:var(--card); color:var(--text); }
+
 @media (min-width: 769px) {
   .mobile-nav { display: none !important; }
 }
@@ -743,6 +766,7 @@ body {
       <div class="user-name" id="userName">…</div>
       <span class="plan-badge" id="planBadge">…</span>
     </div>
+    <a href="#" class="btn-icon" title="Paramètres" onclick="openSettings()">⚙</a>
     <a href="#" class="btn-icon" title="Déconnexion" onclick="logout()">⬤</a>
   </div>
 </div>
@@ -792,7 +816,13 @@ body {
 
     <!-- INPUT -->
     <div class="input-area" id="inputArea">
+      <div id="filePreviewArea" style="display:none" class="file-preview">
+        <span id="filePreviewName">fichier.jpg</span>
+        <button class="rm" onclick="removeFile()">×</button>
+      </div>
       <div class="input-wrap">
+        <button class="upload-btn" id="uploadBtn" onclick="triggerUpload()" disabled title="Joindre un fichier">📎</button>
+        <input type="file" id="fileInput" accept="image/*,.pdf" style="display:none" onchange="handleFile(this)">
         <textarea id="msgInput" placeholder="Écrivez votre message…" rows="1" disabled></textarea>
         <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>↑</button>
       </div>
@@ -831,6 +861,95 @@ body {
 <nav class="mobile-nav" id="mobileNav"></nav>
 
 <!-- TOASTS -->
+<!-- ── SETTINGS MODAL ── -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal" style="width:500px;max-height:85vh;overflow-y:auto">
+    <div class="modal-header">
+      <h3>Paramètres</h3>
+      <button class="modal-close" onclick="closeSettings()">×</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Profil</h3>
+      <div class="form-group">
+        <label>Prénom</label>
+        <input class="settings-input" id="setFirstname" placeholder="Prénom">
+      </div>
+      <div class="form-group">
+        <label>Entreprise</label>
+        <input class="settings-input" id="setCompany" placeholder="Nom de l'entreprise">
+      </div>
+      <div class="form-group">
+        <label>Secteur</label>
+        <input class="settings-input" id="setSector" placeholder="Secteur d'activité">
+      </div>
+      <button class="btn btn-primary" onclick="saveProfile()" style="margin-top:8px">Enregistrer</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Abonnement</h3>
+      <div class="settings-row">
+        <span class="settings-label">Plan actuel</span>
+        <span class="settings-value" id="setPlan">—</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Messages ce mois</span>
+        <span class="settings-value" id="setMsgCount">—</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Essai</span>
+        <span class="settings-value" id="setTrial">—</span>
+      </div>
+      <a href="auth.html?upgrade=1" class="btn btn-primary" style="margin-top:12px;display:inline-flex;text-decoration:none">Changer de plan →</a>
+    </div>
+
+    <div class="settings-section">
+      <h3>Intégrations</h3>
+      <div class="settings-row">
+        <span class="settings-label">📧 Brevo (Email)</span>
+        <span class="integ-status integ-ok">● Connecté</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">💳 Stripe (Paiement)</span>
+        <span class="integ-status integ-ok">● Connecté</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">📊 Supabase (Données)</span>
+        <span class="integ-status integ-ok">● Connecté</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">📝 Notion</span>
+        <span class="integ-status integ-no">○ Bientôt</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">💬 WhatsApp Business</span>
+        <span class="integ-status integ-no">○ Bientôt</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">⚡ Zapier</span>
+        <span class="integ-status integ-no">○ Bientôt</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">📈 Google Analytics</span>
+        <span class="integ-status integ-no">○ Bientôt</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Compte</h3>
+      <div class="settings-row">
+        <span class="settings-label">Email</span>
+        <span class="settings-value" id="setEmail">—</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Mot de passe</span>
+        <a href="/api/change-password" style="color:var(--accent);font-size:13px">Changer →</a>
+      </div>
+      <button class="btn btn-ghost" onclick="logout()" style="margin-top:12px;color:var(--red);border-color:var(--red)">Déconnexion</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
@@ -873,6 +992,22 @@ let history = [];
 let isLoading = false;
 let msgCount = 0;
 
+// ── Persistance msgCount via localStorage ──
+function loadMsgCount() {
+  const key = 'feelsyst_msg_' + (user?.id || 'anon');
+  try {
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    const month = new Date().toISOString().slice(0, 7);
+    return saved.month === month ? (saved.count || 0) : 0;
+  } catch(e) { return 0; }
+}
+
+function saveMsgCount() {
+  const key = 'feelsyst_msg_' + (user?.id || 'anon');
+  const month = new Date().toISOString().slice(0, 7);
+  localStorage.setItem(key, JSON.stringify({ count: msgCount, month }));
+}
+
 // ══════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════════
@@ -908,6 +1043,9 @@ function initUI() {
   const initials = (user.firstname || user.email || '?')[0].toUpperCase();
   document.getElementById('userAvatar').textContent = initials;
   document.getElementById('userName').textContent = user.firstname || user.email;
+
+  // Charger le compteur de messages persisté
+  msgCount = loadMsgCount();
 
   // Badge plan
   const badge = document.getElementById('planBadge');
@@ -1002,6 +1140,9 @@ function selectAgent(agent) {
   currentAgent = agent;
   localStorage.setItem('feelsyst_last_agent', agent.id);
 
+  // Charger l'historique persisté pour cet agent
+  history = loadConvHistory(agent);
+
   // Mettre à jour les couleurs accent
   document.documentElement.style.setProperty('--accent', agent.accent);
   document.documentElement.style.setProperty('--accent2', adjustColor(agent.accent, -20));
@@ -1026,6 +1167,7 @@ function selectAgent(agent) {
   input.placeholder = `Parlez à ${agent.name}…`;
   input.disabled = false;
   document.getElementById('sendBtn').disabled = false;
+  document.getElementById('uploadBtn').disabled = false;
   input.focus();
 
   // Afficher l'écran de bienvenue ou restaurer l'historique
@@ -1063,6 +1205,7 @@ function renderMessages() {
         <div class="msg-bubble">${escHtml(m.content)}</div>
         <div class="msg-actions">
           <button class="msg-action-btn" onclick="copyMsg(${i})">Copier</button>
+          ${m.role === 'assistant' ? `<button class="download-btn" onclick="downloadMsg(${i})">⬇ Télécharger</button>` : ''}
         </div>
         <div class="msg-time">${formatTime(m.time)}</div>
       </div>
@@ -1085,6 +1228,7 @@ async function sendMessage() {
 
   // Ajouter le message utilisateur
   history.push({ role: 'user', content: text, time: new Date() });
+  saveHistory();
   renderMessages();
   showTyping();
   isLoading = true;
@@ -1092,19 +1236,38 @@ async function sendMessage() {
 
   try {
     const token = localStorage.getItem('feelsyst_token');
+    // Construire les messages avec ou sans fichier joint
+    const userContent = pendingFile
+      ? [
+          { type: pendingFile.mediaType.startsWith('image/') ? 'image' : 'document',
+            source: { type: 'base64', media_type: pendingFile.mediaType, data: pendingFile.base64 } },
+          { type: 'text', text: text || 'Analyse ce fichier.' }
+        ]
+      : text;
+
+    const apiMessages = history.slice(0, -1).map(m => ({
+      role: m.role,
+      content: typeof m.content === 'string' ? m.content : m.content
+    })).concat([{ role: 'user', content: userContent }]);
+
     const r = await fetch('/api/proxy-ai', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({
         agent: currentAgent.id,
-        messages: history.slice(0, -1).map(m => ({ role: m.role, content: m.content }))
-          .concat([{ role: 'user', content: text }]),
+        messages: apiMessages,
         max_tokens: 1000,
+        userContext: {
+          company:   user?.company   || '',
+          sector:    user?.sector    || '',
+          firstname: user?.firstname || '',
+          plan:      user?.plan      || '',
+        },
       }),
     });
+
+    // Nettoyer le fichier joint après envoi
+    if (pendingFile) removeFile();
 
     removeTyping();
 
@@ -1130,6 +1293,8 @@ async function sendMessage() {
 
     history.push({ role: 'assistant', content: reply, time: new Date() });
     msgCount++;
+    saveMsgCount();
+    saveHistory();   // ← sauvegarder l'historique complet
     updateQuota();
     renderMessages();
 
@@ -1258,6 +1423,127 @@ document.getElementById('msgInput').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 document.getElementById('msgInput').addEventListener('input', function() { autoResize(this); });
+
+// ══════════════════════════════════════════════════════════════
+// HISTORIQUE PERSISTANT (localStorage par agent)
+// ══════════════════════════════════════════════════════════════
+function saveHistory() {
+  if (!user || !currentAgent) return;
+  const key = `feelsyst_hist_${user.id}_${currentAgent.id}`;
+  try {
+    // Garder les 30 derniers messages max pour éviter de saturer localStorage
+    const toSave = history.slice(-30).map(m => ({
+      role: m.role, content: m.content, time: m.time
+    }));
+    localStorage.setItem(key, JSON.stringify(toSave));
+  } catch(e) { console.warn('Historique non sauvegardé:', e); }
+}
+
+function loadConvHistory(agent) {
+  if (!user) return [];
+  const key = `feelsyst_hist_${user.id}_${agent.id}`;
+  try {
+    const saved = JSON.parse(localStorage.getItem(key) || '[]');
+    return saved.map(m => ({ ...m, time: m.time ? new Date(m.time) : new Date() }));
+  } catch(e) { return []; }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════════════════════
+function openSettings() {
+  if (!user) return;
+  document.getElementById('setFirstname').value  = user.firstname  || '';
+  document.getElementById('setCompany').value    = user.company    || '';
+  document.getElementById('setSector').value     = user.sector     || '';
+  document.getElementById('setEmail').textContent = user.email     || '';
+  document.getElementById('setPlan').textContent  = user.plan      || '';
+  document.getElementById('setMsgCount').textContent = msgCount + ' / ' + ({trial:500,starter:500,pro:2000,unlimited:'∞'}[user.plan]||500);
+  document.getElementById('setTrial').textContent = user.trialEndsAt
+    ? 'Expire le ' + new Date(user.trialEndsAt).toLocaleDateString('fr-FR')
+    : 'N/A';
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+async function saveProfile() {
+  const firstname = document.getElementById('setFirstname').value.trim();
+  const company   = document.getElementById('setCompany').value.trim();
+  const sector    = document.getElementById('setSector').value.trim();
+  try {
+    const r = await fetch('/api/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${localStorage.getItem('feelsyst_token')}` },
+      body: JSON.stringify({ firstname, company, sector }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    user.firstname = data.user.firstname;
+    user.company   = data.user.company;
+    user.sector    = data.user.sector;
+    document.getElementById('userName').textContent = user.firstname || user.email;
+    document.getElementById('userAvatar').textContent = (user.firstname || '?')[0].toUpperCase();
+    closeSettings();
+    showToast('Profil mis à jour', 'ok');
+  } catch(e) { showToast('Erreur: ' + e.message, 'err'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// UPLOAD FICHIER / IMAGE
+// ══════════════════════════════════════════════════════════════
+let pendingFile = null; // { base64, mediaType, name }
+
+function triggerUpload() {
+  document.getElementById('fileInput').click();
+}
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('Fichier trop volumineux (max 5 Mo)', 'err'); return; }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const base64 = e.target.result.split(',')[1];
+    const mediaType = file.type || 'application/octet-stream';
+    pendingFile = { base64, mediaType, name: file.name };
+    document.getElementById('filePreviewName').textContent = file.name;
+    document.getElementById('filePreviewArea').style.display = 'flex';
+    showToast('Fichier joint : ' + file.name, 'ok');
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function removeFile() {
+  pendingFile = null;
+  document.getElementById('filePreviewArea').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════
+// DOWNLOAD RÉPONSE AGENT
+// ══════════════════════════════════════════════════════════════
+function downloadMsg(index) {
+  const msg = history[index];
+  if (!msg) return;
+  const agentName = currentAgent?.name || 'agent';
+  const filename = `${agentName}_reponse_${new Date().toISOString().slice(0,10)}.txt`;
+  const blob = new Blob([msg.content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Téléchargement : ' + filename, 'ok');
+}
+
+// Fermer settings en cliquant en dehors
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
 </script>
 </body>
 </html>
