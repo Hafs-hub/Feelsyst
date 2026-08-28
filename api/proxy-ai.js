@@ -1,5 +1,5 @@
-// api/proxy-ai.js — Proxy sécurisé vers Anthropic — Optimisé v3
-// Réduit de 4 appels Supabase séquentiels à 2 appels parallèles
+// api/proxy-ai.js — Proxy Anthropic — v4
+// Intègre : shared_memory (Kimi K3), matrice capacités agents, CommonJS
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -7,6 +7,18 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
+
+// ── Matrice des capacités agents (concept Kimi K3 adapté) ──
+const AGENT_CAPS = {
+  aria:  { readImg: false, memory: true,  history: true  },
+  nova:  { readImg: true,  memory: true,  history: true  },
+  rex:   { readImg: false, memory: true,  history: true  },
+  vera:  { readImg: true,  memory: true,  history: true  }, // peut lire des factures/tableaux
+  lumi:  { readImg: true,  memory: true,  history: true  },
+  lex:   { readImg: true,  memory: true,  history: true  }, // peut lire des contrats
+  pulse: { readImg: true,  memory: true,  history: true  }, // peut analyser des graphiques
+  atlas: { readImg: false, memory: true,  history: true  },
+};
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,9 +30,8 @@ module.exports = async (req, res) => {
   const ANTHROPIC_KEY = process.env.CLAUDE_API_KEY;
   if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'Clé API non configurée.' });
 
-  // ── Étape 1 : vérifier le token (1 seul appel au lieu de 2) ──
-  const auth = req.headers['authorization'] || '';
-  const token = auth.replace('Bearer ', '').trim();
+  // ── Auth : 1 seul appel Supabase (sessions + clients en JOIN) ──
+  const token = (req.headers['authorization'] || '').replace('Bearer ', '').trim();
   if (!token) return res.status(401).json({ error: 'Non authentifié.' });
 
   const { data: session } = await supabase
@@ -36,16 +47,12 @@ module.exports = async (req, res) => {
   const client = session.clients;
   if (!client) return res.status(401).json({ error: 'Client introuvable.' });
 
-  // Vérifications compte
   if (client.status === 'suspended' || client.status === 'cancelled') {
     return res.status(403).json({ error: 'Compte suspendu. Contactez le support.' });
   }
   if (client.plan === 'trial' && client.trial_ends_at) {
     if (new Date() > new Date(client.trial_ends_at)) {
-      return res.status(403).json({
-        error: 'Période d\'essai terminée. Choisissez un plan pour continuer.',
-        trialExpired: true,
-      });
+      return res.status(403).json({ error: 'Période d\'essai terminée.', trialExpired: true });
     }
   }
 
@@ -54,9 +61,20 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'messages[] requis' });
   }
 
+  const caps = AGENT_CAPS[agent] || { readImg: false, memory: true, history: true };
+
+  // Vérifier que le contenu image n'est envoyé qu'à un agent capable
+  const hasImage = messages.some(m =>
+    Array.isArray(m.content) && m.content.some(c => c.type === 'image')
+  );
+  if (hasImage && !caps.readImg) {
+    return res.status(400).json({
+      error: `L'agent ${agent} ne peut pas analyser d'images. Utilisez Nova, Vera, Lex ou Pulse.`
+    });
+  }
+
   try {
-    // ── Étape 2 : récupérer agent_config en parallèle avec l'appel Anthropic ──
-    // On ne fait qu'1 appel Supabase ici (agent_configs) — tout le reste vient de session.clients
+    // ── System prompt + contexte entreprise + shared_memory ──
     let systemPrompt = system;
 
     if (!systemPrompt) {
@@ -64,30 +82,48 @@ module.exports = async (req, res) => {
         .from('agent_configs')
         .select('system_prompt')
         .eq('agent', agent)
+        .eq('is_active', true)
         .single();
       systemPrompt = config?.system_prompt || '';
     }
 
-    // Construire le contexte client depuis les données déjà récupérées (0 appel supplémentaire)
+    // Contexte client de base
     const company   = userContext.company   || client.company_name || '';
     const sector    = userContext.sector    || client.sector       || '';
     const firstname = userContext.firstname || (client.full_name || '').split(' ')[0] || '';
     const plan      = userContext.plan      || client.plan         || '';
 
-    if (company || sector || firstname) {
-      const ctx = [
-        firstname ? `Prénom : ${firstname}` : '',
-        company   ? `Entreprise : ${company}` : '',
-        sector    ? `Secteur : ${sector}` : '',
-        plan      ? `Plan : ${plan}` : '',
-      ].filter(Boolean).join(' | ');
+    let contextLines = [];
+    if (firstname) contextLines.push(`Prénom dirigeant : ${firstname}`);
+    if (company)   contextLines.push(`Entreprise : ${company}`);
+    if (sector)    contextLines.push(`Secteur : ${sector}`);
+    if (plan)      contextLines.push(`Plan : ${plan}`);
 
-      systemPrompt = systemPrompt
-        ? `${systemPrompt}\n\nContexte client : ${ctx}`
-        : `Contexte client : ${ctx}`;
+    // ── Shared memory (concept Kimi K3) ──
+    if (caps.memory) {
+      const { data: memories } = await supabase
+        .from('shared_memory')
+        .select('content, category, importance')
+        .eq('client_id', client.id)
+        .order('importance', { ascending: false })
+        .limit(10);
+
+      if (memories && memories.length > 0) {
+        const memStr = memories
+          .map(m => `[${m.category}] ${m.content}`)
+          .join('\n');
+        contextLines.push(`\nMémoire entreprise :\n${memStr}`);
+      }
     }
 
-    // ── Étape 3 : appel Anthropic ──
+    // Injecter le contexte dans le system prompt
+    if (contextLines.length > 0 && systemPrompt) {
+      systemPrompt = `${systemPrompt}\n\nContexte client :\n${contextLines.join('\n')}`;
+    } else if (contextLines.length > 0) {
+      systemPrompt = `Contexte client :\n${contextLines.join('\n')}`;
+    }
+
+    // ── Appel Anthropic ──
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -106,16 +142,29 @@ module.exports = async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Anthropic API error:', data);
+      console.error('Anthropic error:', data);
       return res.status(response.status).json({ error: data.error?.message || 'Erreur API Anthropic' });
     }
 
-    // ── Tracer l'usage en arrière-plan (non bloquant) ──
+    // ── Sauvegarder dans conversations (async, non bloquant) ──
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+    const replyText   = data.content?.[0]?.text || '';
+
+    if (lastUserMsg && replyText) {
+      const userContent  = typeof lastUserMsg.content === 'string' ? lastUserMsg.content : '[Media]';
+      const sessionId    = token.slice(0, 16);
+
+      supabase.from('conversations').insert([
+        { client_id: client.id, agent_id: agent, role: 'user',      content: userContent, session_id: sessionId },
+        { client_id: client.id, agent_id: agent, role: 'assistant', content: replyText,   session_id: sessionId },
+      ]).then(() => {}).catch(() => {});
+    }
+
+    // ── Tracer l'usage (async) ──
     const tokensIn  = data.usage?.input_tokens  || 0;
     const tokensOut = data.usage?.output_tokens || 0;
     const cost = (tokensIn * 0.000003) + (tokensOut * 0.000015);
 
-    // Tracer l'usage — fire and forget sans bloquer la réponse
     const usageData = {
       client_id: client.id, agent,
       date: new Date().toISOString().split('T')[0],
@@ -124,13 +173,12 @@ module.exports = async (req, res) => {
     };
     supabase.from('usage').upsert([usageData], {
       onConflict: 'client_id,agent,date', ignoreDuplicates: false
-    }).then(({ error }) => {
-      if (error) {
-        supabase.from('usage').insert([usageData]).then(() => {}).catch(() => {});
-      }
-    }).catch(() => {});
+    }).then(() => {}).catch(() => {});
 
-    return res.status(200).json(data);
+    return res.status(200).json({
+      ...data,
+      agent_caps: caps, // retourner les capacités au frontend
+    });
 
   } catch (error) {
     console.error('Proxy AI error:', error);
