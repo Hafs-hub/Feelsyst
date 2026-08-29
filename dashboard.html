@@ -7,817 +7,318 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── TOKENS ── */
-:root {
-  --bg:      #0c0f1e;
-  --surface: #141827;
-  --card:    #1c2035;
-  --border:  #252a42;
-  --text:    #e8e8f4;
-  --muted:   #6b7290;
-  --green:   #22d3a5;
-  --red:     #fc5c5c;
-  --display: 'Syne', sans-serif;
-  --body:    'Inter', sans-serif;
-
-  /* Agent accent — dynamique via JS */
-  --accent:  #7c5cfc;
-  --accent2: #6a46e8;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--body);
-  font-size: 14px;
-  line-height: 1.5;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ── TOPBAR ── */
-.topbar {
-  height: 52px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  flex-shrink: 0;
-  gap: 12px;
-}
-
-.topbar-logo {
-  font-family: var(--display);
-  font-size: 17px;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--accent), #fc5c7d);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.topbar-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  justify-content: flex-end;
-}
-
-.user-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 5px 12px;
-  font-size: 12px;
-  max-width: 200px;
-}
-
-.user-avatar {
-  width: 22px; height: 22px;
-  background: rgba(124,92,252,0.2);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent);
-  flex-shrink: 0;
-}
-
-.user-name {
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.plan-badge {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  padding: 2px 7px;
-  border-radius: 10px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.badge-trial  { background: rgba(245,200,66,0.15); color: #f5c842; }
-.badge-starter { background: rgba(124,92,252,0.15); color: #a78bfa; }
-.badge-pro    { background: rgba(34,211,165,0.15); color: var(--green); }
-.badge-unlimited { background: rgba(252,92,125,0.15); color: #fc5c7d; }
-
-.quota-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.quota-track {
-  width: 60px; height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.quota-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 2px;
-  transition: width 0.3s;
-}
-
-.quota-fill.warn { background: #f5c842; }
-.quota-fill.danger { background: var(--red); }
-
-.btn-icon {
-  width: 32px; height: 32px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 14px;
-  transition: all 0.15s;
-  flex-shrink: 0;
-  text-decoration: none;
-}
-.btn-icon:hover { color: var(--text); border-color: var(--border); background: var(--surface); }
-
-/* ── TRIAL BANNER ── */
-.trial-banner {
-  background: rgba(245,200,66,0.1);
-  border-bottom: 1px solid rgba(245,200,66,0.2);
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 12.5px;
-  flex-shrink: 0;
-}
-.trial-banner.hidden { display: none; }
-.trial-banner-text { color: #f5c842; }
-.trial-banner a { color: #f5c842; font-weight: 600; text-decoration: underline; cursor: pointer; }
-
-/* ── MAIN LAYOUT ── */
-.app-body {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  min-height: 0;
-}
-
-/* ── SIDEBAR ── */
-.sidebar {
-  width: 200px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  overflow-y: auto;
-}
-
-.sidebar-section {
-  padding: 12px 10px 4px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: var(--muted);
-}
-
-.agent-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  margin: 1px 6px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
-  border: none;
-  background: none;
-  color: var(--muted);
-  width: calc(100% - 12px);
-  text-align: left;
-  font-family: var(--body);
-  font-size: 13px;
-  position: relative;
-}
-
-.agent-btn:hover { background: var(--card); color: var(--text); }
-
-.agent-btn.active {
-  background: rgba(var(--accent-rgb, 124,92,252), 0.15);
-  color: var(--text);
-}
-
-.agent-btn.active::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 20%; bottom: 20%;
-  width: 2px;
-  background: var(--accent);
-  border-radius: 2px;
-}
-
-.agent-ico {
-  font-size: 18px;
-  width: 28px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.agent-info { flex: 1; min-width: 0; }
-.agent-label { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.agent-sublabel { font-size: 10.5px; color: var(--muted); }
-
-.online-dot {
-  width: 6px; height: 6px;
-  background: var(--green);
-  border-radius: 50%;
-  flex-shrink: 0;
-  animation: blink 2.5s infinite;
-}
-
-@keyframes blink { 0%,100%{opacity:1} 60%{opacity:.3} }
-
-.sidebar-footer {
-  margin-top: auto;
-  padding: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.sidebar-footer a {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 13px;
-  transition: all 0.15s;
-  cursor: pointer;
-}
-.sidebar-footer a:hover { background: var(--card); color: var(--text); }
-
-/* ── CHAT AREA ── */
-.chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0;
-}
-
-/* ── CHAT HEADER ── */
-.chat-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
-  background: var(--surface);
-  transition: background 0.3s;
-}
-
-.chat-agent-ico {
-  width: 42px; height: 42px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
-  background: rgba(var(--accent-rgb, 124,92,252), 0.15);
-  transition: background 0.3s;
-}
-
-.chat-agent-name {
-  font-family: var(--display);
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.chat-agent-role { font-size: 12px; color: var(--muted); }
-
-.chat-header-actions {
-  margin-left: auto;
-  display: flex;
-  gap: 6px;
-}
-
-/* ── MESSAGES ── */
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  scroll-behavior: smooth;
-}
-
-.messages::-webkit-scrollbar { width: 4px; }
-.messages::-webkit-scrollbar-track { background: transparent; }
-.messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-/* Welcome screen */
-.welcome {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 40px 20px;
-  gap: 20px;
-}
-
-.welcome-ico {
-  width: 72px; height: 72px;
-  background: rgba(var(--accent-rgb, 124,92,252), 0.12);
-  border-radius: 20px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 34px;
-}
-
-.welcome h2 {
-  font-family: var(--display);
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.welcome p { font-size: 13.5px; color: var(--muted); max-width: 360px; line-height: 1.65; }
-
-.suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  max-width: 480px;
-}
-
-.suggestion {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 7px 14px;
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: all 0.15s;
-  color: var(--text);
-}
-.suggestion:hover {
-  border-color: var(--accent);
-  background: rgba(var(--accent-rgb,124,92,252),0.08);
-  color: var(--accent);
-}
-
-/* Messages */
-.msg {
-  display: flex;
-  gap: 10px;
-  max-width: 85%;
-  animation: fadeUp 0.2s ease;
-}
-
-@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-
-.msg.user { align-self: flex-end; flex-direction: row-reverse; }
-.msg.agent { align-self: flex-start; }
-
-.msg-avatar {
-  width: 32px; height: 32px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.msg.agent .msg-avatar {
-  background: rgba(var(--accent-rgb,124,92,252), 0.15);
-}
-
-.msg.user .msg-avatar {
-  background: rgba(124,92,252,0.15);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.msg-body { display: flex; flex-direction: column; gap: 4px; }
-
-.msg-bubble {
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 13.5px;
-  line-height: 1.65;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.msg.agent .msg-bubble {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-bottom-left-radius: 4px;
-  color: var(--text);
-}
-
-.msg.user .msg-bubble {
-  background: rgba(var(--accent-rgb,124,92,252), 0.18);
-  border: 1px solid rgba(var(--accent-rgb,124,92,252), 0.25);
-  border-bottom-right-radius: 4px;
-  color: var(--text);
-}
-
-.msg-time {
-  font-size: 10px;
-  color: var(--muted);
-  padding: 0 4px;
-}
-
-.msg.user .msg-time { text-align: right; }
-
-.msg-actions {
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.msg:hover .msg-actions { opacity: 1; }
-
-.msg-action-btn {
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: all 0.15s;
-}
-.msg-action-btn:hover { background: var(--card); color: var(--text); }
-
-/* Typing indicator */
-.typing-indicator {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 0;
-  animation: fadeUp 0.2s ease;
-}
-
-.typing-avatar {
-  width: 32px; height: 32px;
-  border-radius: 10px;
-  background: rgba(var(--accent-rgb,124,92,252), 0.15);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.typing-dots {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  border-bottom-left-radius: 4px;
-  padding: 10px 14px;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.typing-dots span {
-  width: 5px; height: 5px;
-  background: var(--muted);
-  border-radius: 50%;
-  animation: dot 1.2s infinite;
-}
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes dot { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
-
-/* ── INPUT AREA ── */
-.input-area {
-  padding: 14px 20px;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-  flex-shrink: 0;
-}
-
-.input-wrap {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 14px;
-  transition: border-color 0.2s;
-}
-
-.input-wrap:focus-within {
-  border-color: var(--accent);
-}
-
-#msgInput {
-  flex: 1;
-  background: none;
-  border: none;
-  color: var(--text);
-  font-family: var(--body);
-  font-size: 13.5px;
-  resize: none;
-  outline: none;
-  max-height: 120px;
-  line-height: 1.5;
-  scrollbar-width: none;
-}
-#msgInput::placeholder { color: var(--muted); }
-#msgInput::-webkit-scrollbar { display: none; }
-
-.send-btn {
-  width: 34px; height: 34px;
-  background: var(--accent);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff;
-  font-size: 16px;
-  flex-shrink: 0;
-  transition: all 0.15s;
-  align-self: flex-end;
-}
-.send-btn:hover { background: var(--accent2); transform: scale(1.05); }
-.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-.input-hint { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; }
-
-/* ── RIGHT PANEL ── */
-.right-panel {
-  width: 240px;
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  flex-shrink: 0;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.rp-section h3 {
-  font-family: var(--display);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-
-.rp-stat {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 8px;
-}
-
-.rp-stat-val {
-  font-family: var(--display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.rp-stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-.rp-agent-list { display: flex; flex-direction: column; gap: 6px; }
-.rp-agent-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  padding: 6px 8px;
-  border-radius: 7px;
-  cursor: pointer;
-  transition: background 0.15s;
-  color: var(--muted);
-}
-.rp-agent-item:hover { background: var(--card); color: var(--text); }
-.rp-agent-item .dot { width:5px; height:5px; background:var(--green); border-radius:50%; flex-shrink:0; }
-
-.upgrade-card {
-  background: rgba(var(--accent-rgb,124,92,252),0.08);
-  border: 1px solid rgba(var(--accent-rgb,124,92,252),0.2);
-  border-radius: 10px;
-  padding: 14px;
-}
-.upgrade-card h4 { font-family:var(--display); font-size:13px; font-weight:700; margin-bottom:6px; }
-.upgrade-card p { font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.55; }
-.upgrade-card a { display:block; text-align:center; background:var(--accent); color:#fff; padding:8px; border-radius:7px; font-size:12.5px; font-weight:600; text-decoration:none; transition:all 0.15s; }
-.upgrade-card a:hover { background:var(--accent2); }
-
-/* ── EMPTY / LOADING ── */
-.full-screen-loader {
-  position: fixed; inset: 0;
-  background: var(--bg);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 16px; z-index: 999;
-}
-
-.spinner {
-  width: 36px; height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.loader-text { font-size: 14px; color: var(--muted); }
-
-/* ── MOBILE ── */
-@media (max-width: 768px) {
-  .sidebar { display: none; }
-  .right-panel { display: none; }
-  .chat-area { width: 100%; }
-
-  .mobile-nav {
-    display: flex !important;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 8px 4px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
-    gap: 2px;
-    z-index: 50;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .mobile-nav::-webkit-scrollbar { display: none; }
-
-  .mobile-agent-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 6px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    border: none;
-    background: none;
-    color: var(--muted);
-    font-size: 11px;
-    font-family: var(--body);
-    min-width: 52px;
-    flex-shrink: 0;
-    transition: all 0.15s;
-  }
-
-  .mobile-agent-btn.active { color: var(--accent); background: rgba(var(--accent-rgb,124,92,252),0.1); }
-  .mobile-agent-btn span:first-child { font-size: 20px; }
-
-  .messages { padding-bottom: 80px; }
-  .input-area { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
-
-  .quota-bar { display: none; }
-  .user-name { max-width: 80px; }
-}
-
-.mobile-nav { display: none; }
-
-/* ── SETTINGS MODAL ── */
-.settings-section { margin-bottom: 24px; }
-.settings-section h3 { font-family:var(--display); font-size:14px; font-weight:700; margin-bottom:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
-.settings-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(37,42,66,0.5); }
-.settings-row:last-child { border-bottom:none; }
-.settings-label { font-size:13px; color:var(--text); }
-.settings-value { font-size:13px; color:var(--muted); }
-.integ-status { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:3px 10px; border-radius:12px; }
-.integ-ok  { background:rgba(34,211,165,.12); color:var(--green); }
-.integ-no  { background:rgba(107,107,138,.12); color:var(--muted); }
-.settings-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:8px 12px; color:var(--text); font-family:var(--body); font-size:13px; outline:none; margin-top:6px; }
-.settings-input:focus { border-color:var(--accent); }
-
-/* ── FILE UPLOAD ── */
-.upload-btn { width:32px; height:32px; background:none; border:1px solid var(--border); border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:16px; transition:all .15s; flex-shrink:0; align-self:flex-end; }
-.upload-btn:hover { color:var(--accent); border-color:var(--accent); }
-.file-preview { display:flex; align-items:center; gap:6px; background:rgba(124,92,252,.08); border:1px solid rgba(124,92,252,.2); border-radius:6px; padding:5px 10px; font-size:12px; margin-bottom:8px; }
-.file-preview .rm { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:0 2px; }
-
-/* ── DOWNLOAD BUTTON ── */
-.download-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:11px; padding:2px 6px; border-radius:4px; transition:all .15s; }
-.download-btn:hover { background:var(--card); color:var(--text); }
-
-@media (min-width: 769px) {
-  .mobile-nav { display: none !important; }
-}
-
-/* ── TOAST ── */
-.toast-wrap { position:fixed; bottom:80px; right:16px; z-index:200; display:flex; flex-direction:column; gap:6px; }
-.toast { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-size:13px; display:flex; align-items:center; gap:8px; animation:fadeUp 0.2s ease; min-width:200px; }
-.toast.ok  { border-left:3px solid var(--green); }
-.toast.err { border-left:3px solid var(--red); }
+:root{
+  --bg:#0c0f1e; --surface:#141827; --card:#1c2035; --border:#252a42;
+  --text:#e8e8f4; --muted:#6b7290; --green:#22d3a5; --red:#fc5c5c; --yellow:#f5c842;
+  --accent:#7c5cfc; --accent2:#6a46e8; --accent-rgb:124,92,252;
+  --display:'Syne',sans-serif; --body:'Inter',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;display:flex;flex-direction:column;}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 14px;flex-shrink:0;z-index:10;}
+.logo{font-family:var(--display);font-size:17px;font-weight:800;background:linear-gradient(135deg,var(--accent),#fc5c7d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;white-space:nowrap;}
+.quota-bar{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);white-space:nowrap;}
+.quota-track{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.quota-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
+.quota-fill.warn{background:var(--yellow);}
+.quota-fill.danger{background:var(--red);}
+.spacer{flex:1;}
+.user-pill{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:12px;max-width:180px;}
+.user-av{width:22px;height:22px;background:rgba(var(--accent-rgb),.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0;}
+.user-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;}
+.plan-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;}
+.badge-trial{background:rgba(245,200,66,.15);color:var(--yellow);}
+.badge-starter{background:rgba(124,92,252,.15);color:#a78bfa;}
+.badge-pro{background:rgba(34,211,165,.15);color:var(--green);}
+.badge-unlimited{background:rgba(252,92,125,.15);color:#fc5c7d;}
+.icon-btn{width:32px;height:32px;background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:15px;transition:all .15s;flex-shrink:0;text-decoration:none;border:1px solid var(--border);}
+.icon-btn:hover{color:var(--text);border-color:var(--accent);}
+
+/* TRIAL BANNER */
+.trial-banner{background:rgba(245,200,66,.1);border-bottom:1px solid rgba(245,200,66,.2);padding:7px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12.5px;flex-shrink:0;}
+.trial-banner.hidden{display:none;}
+.trial-banner a{color:var(--yellow);font-weight:600;text-decoration:underline;cursor:pointer;}
+
+/* APP BODY */
+.app{flex:1;display:flex;overflow:hidden;min-height:0;}
+
+/* SIDEBAR */
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-label{padding:12px 12px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);}
+.ag-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;margin:1px 6px;border-radius:8px;cursor:pointer;transition:all .15s;border:none;background:none;color:var(--muted);width:calc(100% - 12px);text-align:left;font-family:var(--body);font-size:13px;position:relative;}
+.ag-btn:hover{background:var(--card);color:var(--text);}
+.ag-btn.active{background:rgba(var(--accent-rgb),.15);color:var(--text);}
+.ag-btn.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:2px;background:var(--accent);border-radius:2px;}
+.ag-ico{font-size:17px;width:26px;text-align:center;flex-shrink:0;}
+.ag-label{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ag-sub{font-size:10.5px;color:var(--muted);}
+.online-dot{width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;animation:blink 2.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}60%{opacity:.3}}
+.sidebar-footer{margin-top:auto;padding:10px;border-top:1px solid var(--border);}
+.sidebar-footer a{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:13px;transition:all .15s;cursor:pointer;border:none;background:none;width:100%;font-family:var(--body);}
+.sidebar-footer a:hover{background:var(--card);color:var(--text);}
+
+/* CHAT */
+.chat{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.chat-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--surface);}
+.chat-header.hidden{display:none;}
+.ch-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;background:rgba(var(--accent-rgb),.12);}
+.ch-name{font-family:var(--display);font-size:15px;font-weight:700;}
+.ch-role{font-size:12px;color:var(--muted);}
+.ch-actions{margin-left:auto;display:flex;gap:6px;}
+
+/* MESSAGES */
+.msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;}
+.msgs::-webkit-scrollbar{width:4px;}
+.msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;gap:16px;}
+.welcome-ico{width:70px;height:70px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;background:rgba(var(--accent-rgb),.1);}
+.welcome h2{font-family:var(--display);font-size:20px;font-weight:700;}
+.welcome p{font-size:13.5px;color:var(--muted);max-width:340px;line-height:1.6;}
+.suggestions{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:460px;}
+.suggestion{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:7px 13px;font-size:12.5px;cursor:pointer;transition:all .15s;color:var(--text);}
+.suggestion:hover{border-color:var(--accent);background:rgba(var(--accent-rgb),.08);color:var(--accent);}
+.msg{display:flex;gap:9px;max-width:85%;animation:fadeUp .2s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg.agent{align-self:flex-start;}
+.msg-av{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-top:2px;background:rgba(var(--accent-rgb),.12);}
+.msg.user .msg-av{background:rgba(var(--accent-rgb),.12);font-size:11px;font-weight:700;color:var(--accent);}
+.msg-body{display:flex;flex-direction:column;gap:3px;}
+.msg-bubble{padding:9px 13px;border-radius:11px;font-size:13.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+.msg.agent .msg-bubble{background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.msg.user .msg-bubble{background:rgba(var(--accent-rgb),.16);border:1px solid rgba(var(--accent-rgb),.25);border-bottom-right-radius:4px;}
+.msg-time{font-size:10px;color:var(--muted);padding:0 3px;}
+.msg.user .msg-time{text-align:right;}
+.msg-actions{display:flex;gap:3px;opacity:0;transition:opacity .15s;}
+.msg:hover .msg-actions{opacity:1;}
+.ma-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 5px;border-radius:4px;transition:all .15s;}
+.ma-btn:hover{background:var(--card);color:var(--text);}
+.typing{display:flex;align-items:center;gap:9px;padding:3px 0;animation:fadeUp .2s ease;}
+.typing-av{width:30px;height:30px;border-radius:9px;background:rgba(var(--accent-rgb),.12);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.typing-dots{background:var(--card);border:1px solid var(--border);border-radius:11px;border-bottom-left-radius:4px;padding:9px 13px;display:flex;gap:4px;align-items:center;}
+.typing-dots span{width:5px;height:5px;background:var(--muted);border-radius:50%;animation:dot 1.2s infinite;}
+.typing-dots span:nth-child(2){animation-delay:.2s;}
+.typing-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes dot{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* INPUT */
+.input-area{padding:12px 18px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.file-preview{display:flex;align-items:center;gap:6px;background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.2);border-radius:6px;padding:5px 10px;font-size:12px;margin-bottom:7px;}
+.file-preview .rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
+.input-wrap{display:flex;align-items:flex-end;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:9px 12px;transition:border-color .2s;}
+.input-wrap:focus-within{border-color:var(--accent);}
+.upload-btn{width:30px;height:30px;background:none;border:1px solid var(--border);border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px;transition:all .15s;flex-shrink:0;align-self:flex-end;}
+.upload-btn:hover:not(:disabled){color:var(--accent);border-color:var(--accent);}
+.upload-btn:disabled{opacity:.3;cursor:not-allowed;}
+#msgInput{flex:1;background:none;border:none;color:var(--text);font-family:var(--body);font-size:13.5px;resize:none;outline:none;max-height:120px;line-height:1.5;scrollbar-width:none;}
+#msgInput::placeholder{color:var(--muted);}
+.send-btn{width:32px;height:32px;background:var(--accent);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;transition:all .15s;align-self:flex-end;}
+.send-btn:hover:not(:disabled){background:var(--accent2);transform:scale(1.05);}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.input-hint{font-size:11px;color:var(--muted);margin-top:7px;text-align:center;}
+
+/* RIGHT PANEL */
+.right-panel{width:220px;background:var(--surface);border-left:1px solid var(--border);flex-shrink:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:16px;}
+.rp-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.rp-stat{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:7px;}
+.rp-val{font-family:var(--display);font-size:20px;font-weight:700;color:var(--accent);}
+.rp-label{font-size:11px;color:var(--muted);margin-top:2px;}
+.upgrade-card{background:rgba(var(--accent-rgb),.07);border:1px solid rgba(var(--accent-rgb),.2);border-radius:9px;padding:13px;}
+.upgrade-card h4{font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:5px;}
+.upgrade-card p{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+.upgrade-card a{display:block;text-align:center;background:var(--accent);color:#fff;padding:7px;border-radius:7px;font-size:12.5px;font-weight:600;text-decoration:none;}
+
+/* SETTINGS PANEL — slide in from right */
+.settings-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);display:none;}
+.settings-overlay.open{display:flex;justify-content:flex-end;}
+.settings-panel{width:min(100vw, 540px);height:100%;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;animation:slideIn .25s ease;}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}
+
+.sp-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.sp-header h2{font-family:var(--display);font-size:17px;font-weight:700;}
+.sp-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;}
+.sp-close:hover{color:var(--text);}
+
+/* Settings tabs */
+.sp-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.sp-tabs::-webkit-scrollbar{display:none;}
+.sp-tab{padding:10px 14px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border:none;background:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;font-family:var(--body);}
+.sp-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.sp-tab:hover{color:var(--text);}
+
+.sp-body{flex:1;overflow-y:auto;padding:20px;}
+.sp-section{margin-bottom:24px;}
+.sp-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.sp-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(37,42,61,.5);}
+.sp-row:last-child{border-bottom:none;}
+.sp-row-label{font-size:13px;}
+.sp-row-val{font-size:13px;color:var(--muted);}
+.sp-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;margin-top:6px;transition:border-color .15s;}
+.sp-input:focus{border-color:var(--accent);}
+.sp-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;margin-top:6px;appearance:none;}
+.sp-select:focus{border-color:var(--accent);}
+.sp-label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-top:12px;margin-bottom:2px;}
+.sp-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;resize:vertical;min-height:80px;margin-top:6px;}
+.sp-btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:var(--body);}
+.sp-btn-primary{background:var(--accent);color:#fff;}
+.sp-btn-primary:hover{background:var(--accent2);}
+.sp-btn-ghost{background:var(--card);color:var(--muted);border:1px solid var(--border);}
+.sp-btn-ghost:hover{color:var(--text);}
+.sp-btn-danger{background:rgba(252,92,92,.1);color:var(--red);border:1px solid rgba(252,92,92,.2);}
+
+/* Toggle switch */
+.toggle-wrap{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
+.toggle-label{font-size:13px;}
+.toggle{position:relative;width:38px;height:21px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:21px;transition:.2s;}
+.toggle-slider:before{content:'';position:absolute;width:15px;height:15px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+.toggle input:checked + .toggle-slider{background:var(--green);}
+.toggle input:checked + .toggle-slider:before{transform:translateX(17px);}
+
+/* Checkbox */
+.check-item{display:flex;align-items:center;gap:9px;padding:7px 0;cursor:pointer;}
+.check-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+.check-item span{font-size:13px;}
+
+/* Plan cards */
+.plan-card-sm{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.plan-card-sm.current{border-color:var(--accent);background:rgba(var(--accent-rgb),.07);}
+.plan-name-sm{font-weight:700;font-size:14px;}
+.plan-price-sm{font-size:12px;color:var(--muted);}
+
+/* Agent config tabs */
+.agent-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.agent-tab-btn{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;font-family:var(--body);color:var(--muted);}
+.agent-tab-btn.active{border-color:var(--accent);background:rgba(var(--accent-rgb),.12);color:var(--accent);}
+.agent-config-panel{display:none;}
+.agent-config-panel.active{display:block;}
+
+/* Consumption bar */
+.usage-bar{background:var(--border);border-radius:20px;height:20px;overflow:hidden;margin:8px 0;}
+.usage-fill{height:100%;background:linear-gradient(90deg,var(--accent),#fc5c7d);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;transition:width .5s;}
+.usage-breakdown{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+.usage-item{font-size:12px;display:flex;align-items:center;gap:5px;}
+.usage-dot{width:8px;height:8px;border-radius:50%;}
+
+/* LOADER */
+.full-loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999;}
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MOBILE */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:6px 2px;padding-bottom:calc(6px + env(safe-area-inset-bottom));gap:2px;z-index:50;overflow-x:auto;scrollbar-width:none;}
+.mobile-nav::-webkit-scrollbar{display:none;}
+.mb-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 7px;border-radius:7px;cursor:pointer;border:none;background:none;color:var(--muted);font-size:11px;font-family:var(--body);min-width:50px;flex-shrink:0;transition:all .15s;}
+.mb-btn span:first-child{font-size:19px;}
+.mb-btn.active{color:var(--accent);background:rgba(var(--accent-rgb),.1);}
+@media(max-width:768px){
+  .sidebar,.right-panel{display:none;}
+  .mobile-nav{display:flex;}
+  .msgs{padding-bottom:75px;}
+  .input-area{padding-bottom:calc(65px + env(safe-area-inset-bottom));}
+  .quota-bar{display:none;}
+  .user-name{max-width:70px;}
+  .settings-panel{width:100%;}
+}
+@media(min-width:769px){.mobile-nav{display:none!important;}}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:20px;right:16px;z-index:600;display:flex;flex-direction:column;gap:6px;}
+.toast{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 15px;font-size:13px;display:flex;align-items:center;gap:8px;animation:fadeUp .2s ease;min-width:200px;}
+.toast.ok{border-left:3px solid var(--green);}
+.toast.err{border-left:3px solid var(--red);}
+
+/* Tabs content */
+.sp-tab-content{display:none;}
+.sp-tab-content.active{display:block;}
+
+/* Memory items */
+.mem-item{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:7px 10px;margin-bottom:6px;}
+.mem-cat{font-size:10px;background:rgba(var(--accent-rgb),.15);color:var(--accent);padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.mem-text{font-size:12.5px;flex:1;color:#b8b8cc;}
+.mem-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
+
+/* Agent usage dots */
+.rp-agent-row{display:flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 0;cursor:pointer;color:var(--muted);transition:color .15s;}
+.rp-agent-row:hover{color:var(--text);}
+.rp-dot{width:5px;height:5px;background:var(--green);border-radius:50%;}
 </style>
 </head>
 <body>
 
 <!-- LOADER -->
-<div class="full-screen-loader" id="loader">
+<div class="full-loader" id="loader">
   <div class="spinner"></div>
-  <div class="loader-text">Connexion à votre équipe IA…</div>
+  <div style="font-size:14px;color:var(--muted)">Connexion à votre équipe IA…</div>
 </div>
 
 <!-- TOPBAR -->
 <div class="topbar" id="topbar" style="display:none">
-  <a href="/" class="topbar-logo">Feelsyst</a>
-  <div class="topbar-user">
-    <div class="quota-bar" id="quotaBar" style="display:none">
-      <span id="quotaText">0/500</span>
-      <div class="quota-track"><div class="quota-fill" id="quotaFill" style="width:0%"></div></div>
-    </div>
-    <div class="user-pill">
-      <div class="user-avatar" id="userAvatar">?</div>
-      <div class="user-name" id="userName">…</div>
-      <span class="plan-badge" id="planBadge">…</span>
-    </div>
-    <a href="#" class="btn-icon" title="Paramètres" onclick="openSettings()">⚙</a>
-    <a href="#" class="btn-icon" title="Déconnexion" onclick="logout()">⬤</a>
+  <a href="/" class="logo">Feelsyst</a>
+  <div class="quota-bar" id="quotaBar">
+    <span id="quotaText">0/500</span>
+    <div class="quota-track"><div class="quota-fill" id="quotaFill" style="width:0%"></div></div>
   </div>
+  <div class="spacer"></div>
+  <div class="user-pill">
+    <div class="user-av" id="userAv">?</div>
+    <div class="user-name" id="userName">…</div>
+    <span class="plan-badge" id="planBadge">…</span>
+  </div>
+  <button class="icon-btn" onclick="openSettings()" title="Paramètres">⚙</button>
+  <button class="icon-btn" onclick="logout()" title="Déconnexion" style="font-size:13px">↩</button>
 </div>
 
 <!-- TRIAL BANNER -->
 <div class="trial-banner hidden" id="trialBanner">
-  <span class="trial-banner-text" id="trialText">⏰ Votre période d'essai se termine bientôt.</span>
-  <a href="#" onclick="showUpgrade()">Choisir un plan →</a>
+  <span id="trialText">⏰ Votre essai expire bientôt.</span>
+  <a onclick="openSettings('abonnement')">Choisir un plan →</a>
 </div>
 
-<!-- APP BODY -->
-<div class="app-body" id="appBody" style="display:none">
+<!-- APP -->
+<div class="app" id="appBody" style="display:none">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sidebar-section">Vos agents</div>
+    <div class="sidebar-label">Vos agents</div>
     <div id="sidebarAgents"></div>
     <div class="sidebar-footer">
-      <a href="/" >🏠 Accueil</a>
-      <a href="#" onclick="clearChat()">🗑️ Effacer la conversation</a>
-      <a href="#" onclick="logout()">← Déconnexion</a>
+      <a onclick="clearChat()">🗑 Effacer la conversation</a>
+      <a href="/">🏠 Accueil</a>
+      <a onclick="logout()">↩ Déconnexion</a>
     </div>
   </aside>
 
-  <!-- CHAT AREA -->
-  <div class="chat-area">
-    <!-- CHAT HEADER -->
-    <div class="chat-header" id="chatHeader" style="display:none">
-      <div class="chat-agent-ico" id="chatIco">🧠</div>
+  <!-- CHAT -->
+  <div class="chat">
+    <div class="chat-header hidden" id="chatHeader">
+      <div class="ch-ico" id="chIco">✨</div>
       <div>
-        <div class="chat-agent-name" id="chatName">Agent</div>
-        <div class="chat-agent-role" id="chatRole">Rôle</div>
+        <div class="ch-name" id="chName">Agent</div>
+        <div class="ch-role" id="chRole">Rôle</div>
       </div>
-      <div class="chat-header-actions">
-        <button class="btn-icon" onclick="clearChat()" title="Nouvelle conversation">↺</button>
+      <div class="ch-actions">
+        <button class="icon-btn" onclick="clearChat()" title="Nouvelle conversation" style="font-size:13px">↺</button>
+        <button class="icon-btn" onclick="openAgentSettings()" title="Configurer cet agent" style="font-size:13px">⚙</button>
       </div>
     </div>
 
-    <!-- MESSAGES -->
-    <div class="messages" id="messages">
+    <div class="msgs" id="msgs">
       <div class="welcome" id="welcomeScreen">
         <div class="welcome-ico" id="welcomeIco">✨</div>
         <h2 id="welcomeTitle">Choisissez un agent</h2>
-        <p id="welcomeDesc">Sélectionnez l'un de vos 8 agents dans le menu pour commencer une conversation.</p>
+        <p id="welcomeDesc">Sélectionnez l'un de vos 8 agents dans le menu pour commencer.</p>
       </div>
     </div>
 
-    <!-- INPUT -->
-    <div class="input-area" id="inputArea">
-      <div id="filePreviewArea" style="display:none" class="file-preview">
-        <span id="filePreviewName">fichier.jpg</span>
+    <div class="input-area">
+      <div id="filePreview" style="display:none" class="file-preview">
+        <span id="fileName">fichier</span>
         <button class="rm" onclick="removeFile()">×</button>
       </div>
       <div class="input-wrap">
@@ -831,28 +332,20 @@ body {
   </div>
 
   <!-- RIGHT PANEL -->
-  <aside class="right-panel" id="rightPanel">
-    <div class="rp-section">
-      <h3>Votre compte</h3>
-      <div class="rp-stat">
-        <div class="rp-stat-val" id="rpMessages">—</div>
-        <div class="rp-stat-label">Messages ce mois</div>
-      </div>
-      <div class="rp-stat">
-        <div class="rp-stat-val" id="rpPlan">—</div>
-        <div class="rp-stat-label">Plan actuel</div>
-      </div>
+  <aside class="right-panel">
+    <div>
+      <div class="rp-title">Votre compte</div>
+      <div class="rp-stat"><div class="rp-val" id="rpMsgs">0</div><div class="rp-label">Messages ce mois</div></div>
+      <div class="rp-stat"><div class="rp-val" id="rpPlan" style="font-size:14px">—</div><div class="rp-label">Plan actuel</div></div>
     </div>
-
-    <div class="rp-section">
-      <h3>Agents disponibles</h3>
-      <div class="rp-agent-list" id="rpAgentList"></div>
+    <div>
+      <div class="rp-title">Agents disponibles</div>
+      <div id="rpAgents"></div>
     </div>
-
     <div class="upgrade-card" id="upgradeCard" style="display:none">
-      <h4>Passez au niveau supérieur</h4>
-      <p>Débloquez les messages illimités, les intégrations et le mode multi-agents.</p>
-      <a href="auth.html?upgrade=1">Voir les plans →</a>
+      <h4>Passer au niveau sup.</h4>
+      <p>Messages illimités, intégrations, rapports PDF.</p>
+      <a onclick="openSettings('abonnement')">Voir les plans →</a>
     </div>
   </aside>
 </div>
@@ -860,211 +353,420 @@ body {
 <!-- MOBILE NAV -->
 <nav class="mobile-nav" id="mobileNav"></nav>
 
+<!-- ══════════════════════════════
+     SETTINGS PANEL (slide-in)
+══════════════════════════════ -->
+<div class="settings-overlay" id="settingsOverlay" onclick="closeSettingsIfOutside(event)">
+  <div class="settings-panel">
+    <div class="sp-header">
+      <h2>⚙ Paramètres</h2>
+      <button class="sp-close" onclick="closeSettings()">×</button>
+    </div>
+
+    <div class="sp-tabs">
+      <button class="sp-tab active" onclick="switchTab('profil')">Profil</button>
+      <button class="sp-tab" onclick="switchTab('securite')">Sécurité</button>
+      <button class="sp-tab" onclick="switchTab('abonnement')">Abonnement</button>
+      <button class="sp-tab" onclick="switchTab('notifications')">Notifications</button>
+      <button class="sp-tab" onclick="switchTab('agents')">Agents IA</button>
+      <button class="sp-tab" onclick="switchTab('memoire')">Mémoire</button>
+    </div>
+
+    <div class="sp-body">
+
+      <!-- ── PROFIL ── -->
+      <div class="sp-tab-content active" id="tab-profil">
+        <div class="sp-section">
+          <div class="sp-section-title">🏢 Profil Entreprise</div>
+          <label class="sp-label">Nom de la société</label>
+          <input class="sp-input" id="pCompany" placeholder="Ex: Boulangerie Dupont">
+          <label class="sp-label">SIRET</label>
+          <input class="sp-input" id="pSiret" placeholder="123 456 789 00012">
+          <label class="sp-label">Secteur d'activité</label>
+          <select class="sp-select" id="pSector">
+            <option value="">Choisir…</option>
+            <option>E-commerce & Retail</option>
+            <option>SaaS & Tech</option>
+            <option>Conseil & Consulting</option>
+            <option>Immobilier</option>
+            <option>Restauration & Food</option>
+            <option>Santé & Bien-être</option>
+            <option>Éducation & Formation</option>
+            <option>Artisanat & BTP</option>
+            <option>Finance & Assurance</option>
+            <option>Juridique & Notariat</option>
+            <option>Communication & Marketing</option>
+            <option>Industrie & Manufacture</option>
+            <option>Autre</option>
+          </select>
+          <label class="sp-label">Description de l'activité (pour personnaliser les agents)</label>
+          <textarea class="sp-textarea" id="pDesc" placeholder="Décrivez votre activité en 2-3 phrases pour que les agents vous donnent des conseils sur-mesure…"></textarea>
+          <label class="sp-label">Site web</label>
+          <input class="sp-input" id="pWeb" placeholder="https://…">
+          <label class="sp-label">Téléphone</label>
+          <input class="sp-input" id="pPhone" placeholder="+33 6 12 34 56 78">
+        </div>
+        <div class="sp-section">
+          <div class="sp-section-title">👤 Informations personnelles</div>
+          <label class="sp-label">Prénom</label>
+          <input class="sp-input" id="pFirstname" placeholder="Salim">
+          <label class="sp-label">Nom</label>
+          <input class="sp-input" id="pLastname" placeholder="Hafif">
+          <label class="sp-label">Email</label>
+          <input class="sp-input" id="pEmail" readonly style="opacity:.6">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="sp-btn sp-btn-primary" onclick="saveProfile()">💾 Enregistrer les modifications</button>
+          <button class="sp-btn sp-btn-ghost" onclick="closeSettings()">Annuler</button>
+        </div>
+      </div>
+
+      <!-- ── SÉCURITÉ ── -->
+      <div class="sp-tab-content" id="tab-securite">
+        <div class="sp-section">
+          <div class="sp-section-title">🔒 Mot de passe</div>
+          <div class="sp-row"><span class="sp-row-label">Mot de passe actuel</span><span class="sp-row-val">••••••••</span></div>
+          <button class="sp-btn sp-btn-ghost" onclick="showToast('Fonctionnalité bientôt disponible','err')" style="margin-top:10px">Modifier</button>
+        </div>
+        <div class="sp-section">
+          <div class="sp-section-title">🛡 Authentification à deux facteurs (2FA)</div>
+          <div class="sp-row"><span class="sp-row-label">Statut</span><span style="color:var(--red);font-size:13px">Désactivé</span></div>
+          <button class="sp-btn sp-btn-ghost" onclick="showToast('2FA bientôt disponible','err')" style="margin-top:10px">Activer</button>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Recommandé pour sécuriser l'accès à vos données entreprise.</p>
+        </div>
+        <div class="sp-section">
+          <div class="sp-section-title">🗂 Données personnelles (RGPD)</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Exporter toutes mes données (conversations, profil, factures)</p>
+          <button class="sp-btn sp-btn-ghost" onclick="exportData()">⬇ Télécharger JSON</button>
+          <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+            <p style="font-size:13px;color:var(--red);margin-bottom:10px">Supprimer définitivement mon compte et toutes mes données</p>
+            <button class="sp-btn sp-btn-danger" onclick="confirmDelete()">Supprimer mon compte</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ABONNEMENT ── -->
+      <div class="sp-tab-content" id="tab-abonnement">
+        <div class="sp-section">
+          <div class="sp-section-title">💳 Plan actuel</div>
+          <div id="currentPlanCard"></div>
+        </div>
+        <div class="sp-section">
+          <div class="sp-section-title">📊 Consommation</div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+            <span id="usageLbl">0 / 500 messages</span>
+            <span id="usagePct" style="color:var(--muted)">0%</span>
+          </div>
+          <div class="usage-bar"><div class="usage-fill" id="usageFill" style="width:0%">0%</div></div>
+          <div class="usage-breakdown" id="usageBreakdown"></div>
+          <div id="usageAlert" style="display:none;margin-top:10px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:8px;padding:10px 13px;font-size:13px;color:var(--yellow)"></div>
+        </div>
+        <div class="sp-section">
+          <div class="sp-section-title">🚀 Changer de plan</div>
+          <div class="plan-card-sm"><div><div class="plan-name-sm">Starter</div><div class="plan-price-sm">29€/mois · 500 messages</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('starter')">Choisir</button></div>
+          <div class="plan-card-sm"><div><div class="plan-name-sm">Pro</div><div class="plan-price-sm">79€/mois · 2000 messages</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('pro')">Choisir</button></div>
+          <div class="plan-card-sm"><div><div class="plan-name-sm">Illimité</div><div class="plan-price-sm">179€/mois · Messages illimités</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('unlimited')">Choisir</button></div>
+        </div>
+      </div>
+
+      <!-- ── NOTIFICATIONS ── -->
+      <div class="sp-tab-content" id="tab-notifications">
+        <div class="sp-section">
+          <div class="sp-section-title">🔔 Préférences de notification</div>
+          <label class="check-item"><input type="checkbox" id="notifQuota" checked><span>Alerte quand mon quota atteint 80%</span></label>
+          <label class="check-item"><input type="checkbox" id="notifWeekly" checked><span>Résumé hebdomadaire d'activité</span></label>
+          <label class="check-item"><input type="checkbox" id="notifTrial"><span>Notification email à l'expiration du trial (J-3)</span></label>
+          <label class="check-item"><input type="checkbox" id="notifNews"><span>Nouveautés produit et mises à jour agents</span></label>
+          <label class="check-item"><input type="checkbox" id="notifPayment" checked><span>Confirmation de paiement et factures</span></label>
+        </div>
+        <div class="sp-section">
+          <div class="sp-section-title">📱 Dans l'application</div>
+          <div class="toggle-wrap"><span class="toggle-label">Son à la réception d'un message</span><label class="toggle"><input type="checkbox" id="notifSound" checked><span class="toggle-slider"></span></label></div>
+          <div class="toggle-wrap"><span class="toggle-label">Mode vocal activé par défaut</span><label class="toggle"><input type="checkbox" id="notifVoice"><span class="toggle-slider"></span></label></div>
+        </div>
+        <button class="sp-btn sp-btn-primary" onclick="saveNotifications()">💾 Enregistrer</button>
+      </div>
+
+      <!-- ── CONFIG AGENTS ── -->
+      <div class="sp-tab-content" id="tab-agents">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Configurez chaque agent selon les besoins spécifiques de votre entreprise.</p>
+        <div class="agent-tabs" id="agentConfigTabs"></div>
+
+        <!-- Aria -->
+        <div class="agent-config-panel active" id="cfg-aria">
+          <div class="sp-section">
+            <div class="sp-section-title">🎯 Vision & Objectifs</div>
+            <label class="sp-label">Vision de l'entreprise (1 phrase)</label>
+            <input class="sp-input" id="aria-vision" placeholder="Devenir le leader de la boulangerie artisanale en ligne">
+            <label class="sp-label">Objectif prioritaire</label>
+            <select class="sp-select" id="aria-obj"><option>Croissance du CA</option><option>Réduction des coûts</option><option>Expansion géographique</option><option>Lancement produit</option><option>Fidélisation clients</option></select>
+            <label class="sp-label">Horizon stratégique</label>
+            <select class="sp-select" id="aria-horizon"><option>3 mois</option><option>6 mois</option><option>1 an</option><option>3 ans</option></select>
+            <label class="sp-label">Concurrents principaux à surveiller</label>
+            <textarea class="sp-textarea" id="aria-concurrents" placeholder="Boulangerie Paul, Maison Kayser, artisans locaux…"></textarea>
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">⚙ Préférences de réponse</div>
+            <div class="toggle-wrap"><span class="toggle-label">Inclure toujours une roadmap actionnable</span><label class="toggle"><input type="checkbox" id="aria-roadmap" checked><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap"><span class="toggle-label">Analyser les risques à chaque recommandation</span><label class="toggle"><input type="checkbox" id="aria-risks" checked><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap"><span class="toggle-label">Proposer des benchmarks secteur</span><label class="toggle"><input type="checkbox" id="aria-bench" checked><span class="toggle-slider"></span></label></div>
+          </div>
+        </div>
+
+        <!-- Nova -->
+        <div class="agent-config-panel" id="cfg-nova">
+          <div class="sp-section">
+            <div class="sp-section-title">🎨 Identité de marque</div>
+            <label class="sp-label">Ton de communication</label>
+            <select class="sp-select" id="nova-ton"><option>Professionnel & sérieux</option><option>Chaleureux & accessible</option><option>Moderne & dynamique</option><option>Expert & technique</option><option>Créatif & original</option></select>
+            <label class="sp-label">Cible principale</label>
+            <select class="sp-select" id="nova-cible"><option>B2B</option><option>B2C</option><option>B2B2C</option></select>
+            <label class="sp-label">Proposition de valeur unique</label>
+            <input class="sp-input" id="nova-pvp" placeholder="Des viennoiseries artisanales livrées en 2h">
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">📱 Canaux prioritaires</div>
+            <label class="check-item"><input type="checkbox" id="nova-linkedin" checked><span>LinkedIn</span></label>
+            <label class="check-item"><input type="checkbox" id="nova-insta"><span>Instagram / TikTok</span></label>
+            <label class="check-item"><input type="checkbox" id="nova-email"><span>Email marketing</span></label>
+            <label class="check-item"><input type="checkbox" id="nova-ads"><span>Google Ads / SEO</span></label>
+            <label class="check-item"><input type="checkbox" id="nova-presse"><span>Presse locale / Partenariats</span></label>
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">📅 Calendrier éditorial</div>
+            <label class="sp-label">Fréquence de publication</label>
+            <select class="sp-select" id="nova-freq"><option>Quotidienne</option><option>3×/semaine</option><option>Hebdomadaire</option><option>Bimensuelle</option></select>
+            <label class="sp-label">Budget mensuel estimé (€)</label>
+            <input class="sp-input" id="nova-budget" type="number" placeholder="500">
+          </div>
+        </div>
+
+        <!-- Rex -->
+        <div class="agent-config-panel" id="cfg-rex">
+          <div class="sp-section">
+            <div class="sp-section-title">🎯 Cible de prospection</div>
+            <label class="sp-label">Secteur cible</label>
+            <input class="sp-input" id="rex-secteur" placeholder="Restauration, Hôtellerie, Retail…">
+            <label class="sp-label">Zone géographique</label>
+            <input class="sp-input" id="rex-zone" placeholder="Paris + 50km">
+            <label class="sp-label">Taille entreprise cible</label>
+            <select class="sp-select" id="rex-taille"><option>TPE (1-10)</option><option>PME (10-250)</option><option>ETI (250-5000)</option><option>Toutes tailles</option></select>
+            <label class="sp-label">Langue de prospection</label>
+            <select class="sp-select" id="rex-langue"><option>Français</option><option>Anglais</option><option>Espagnol</option></select>
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">📧 Méthode & Script</div>
+            <label class="sp-label">Approche préférée</label>
+            <select class="sp-select" id="rex-approche"><option>Email + relance téléphonique</option><option>Email uniquement</option><option>LinkedIn + email</option><option>Appel direct</option></select>
+            <label class="sp-label">Accroche personnalisée (optionnel)</label>
+            <textarea class="sp-textarea" id="rex-accroche" placeholder="Je vous contacte car j'ai remarqué que…"></textarea>
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">📈 Objectifs commerciaux</div>
+            <label class="sp-label">Contacts à générer / mois</label>
+            <input class="sp-input" id="rex-contacts" type="number" placeholder="50">
+            <label class="sp-label">Taux de conversion visé (%)</label>
+            <input class="sp-input" id="rex-conv" type="number" placeholder="10">
+          </div>
+        </div>
+
+        <!-- Vera -->
+        <div class="agent-config-panel" id="cfg-vera">
+          <div class="sp-section">
+            <div class="sp-section-title">💰 Paramètres financiers</div>
+            <label class="sp-label">Devise principale</label>
+            <select class="sp-select" id="vera-devise"><option>EUR (€)</option><option>USD ($)</option><option>GBP (£)</option></select>
+            <label class="sp-label">Exercice fiscal</label>
+            <select class="sp-select" id="vera-fiscal"><option>Janvier — Décembre</option><option>Avril — Mars</option><option>Juillet — Juin</option></select>
+            <label class="sp-label">Seuil d'alerte trésorerie (€)</label>
+            <input class="sp-input" id="vera-seuil" type="number" placeholder="5000">
+            <label class="sp-label">CA mensuel approximatif (€)</label>
+            <input class="sp-input" id="vera-ca" type="number" placeholder="15000">
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">🔔 Rapports & Alertes</div>
+            <div class="toggle-wrap"><span class="toggle-label">Alerte si trésorerie sous le seuil</span><label class="toggle"><input type="checkbox" id="vera-alerte" checked><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap"><span class="toggle-label">Rappel échéances clients</span><label class="toggle"><input type="checkbox" id="vera-echeances" checked><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap"><span class="toggle-label">Analyse mensuelle de la marge</span><label class="toggle"><input type="checkbox" id="vera-marge"><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap"><span class="toggle-label">Prévision de trésorerie 3 mois</span><label class="toggle"><input type="checkbox" id="vera-prev"><span class="toggle-slider"></span></label></div>
+          </div>
+        </div>
+
+        <!-- Lumi -->
+        <div class="agent-config-panel" id="cfg-lumi">
+          <div class="sp-section">
+            <div class="sp-section-title">💬 Paramètres Support</div>
+            <label class="sp-label">Heures d'ouverture</label>
+            <input class="sp-input" id="lumi-heures" placeholder="Lun-Ven 9h-18h">
+            <label class="sp-label">SLA visé (temps de réponse)</label>
+            <select class="sp-select" id="lumi-sla"><option>&lt; 1 heure</option><option>&lt; 4 heures</option><option>&lt; 24 heures</option><option>Best effort</option></select>
+            <label class="sp-label">FAQ / Questions fréquentes internes</label>
+            <textarea class="sp-textarea" id="lumi-faq" placeholder="1. Comment réinitialiser mon mot de passe ?&#10;2. Où trouver ma facture ?"></textarea>
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">📡 Canaux de support</div>
+            <label class="check-item"><input type="checkbox" id="lumi-chat" checked><span>Chat en ligne</span></label>
+            <label class="check-item"><input type="checkbox" id="lumi-email" checked><span>Email</span></label>
+            <label class="check-item"><input type="checkbox" id="lumi-tel"><span>Téléphone</span></label>
+            <label class="check-item"><input type="checkbox" id="lumi-wa"><span>WhatsApp Business</span></label>
+          </div>
+        </div>
+
+        <!-- Lex -->
+        <div class="agent-config-panel" id="cfg-lex">
+          <div class="sp-section">
+            <div class="sp-section-title">⚖ Contexte juridique</div>
+            <label class="sp-label">Forme juridique</label>
+            <select class="sp-select" id="lex-forme"><option>SAS</option><option>SARL</option><option>EI / Auto-entrepreneur</option><option>EURL</option><option>SA</option><option>SNC</option></select>
+            <label class="sp-label">Secteur réglementé</label>
+            <select class="sp-select" id="lex-reglemente"><option>Non</option><option>Finance / Banque</option><option>Santé</option><option>Pharmacie</option><option>Immobilier</option><option>Autre</option></select>
+            <label class="sp-label">Types de contrats fréquents</label>
+            <textarea class="sp-textarea" id="lex-contrats" placeholder="CGV, contrats de prestation, baux commerciaux, contrats de travail…"></textarea>
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">⚙ Préférences</div>
+            <div class="toggle-wrap"><span class="toggle-label">Inclure les articles du Code applicable</span><label class="toggle"><input type="checkbox" id="lex-articles" checked><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap"><span class="toggle-label">Proposer des modèles de clauses</span><label class="toggle"><input type="checkbox" id="lex-modeles" checked><span class="toggle-slider"></span></label></div>
+            <div class="toggle-wrap"><span class="toggle-label">Vérifier la conformité RGPD systématiquement</span><label class="toggle"><input type="checkbox" id="lex-rgpd" checked><span class="toggle-slider"></span></label></div>
+          </div>
+        </div>
+
+        <!-- Pulse -->
+        <div class="agent-config-panel" id="cfg-pulse">
+          <div class="sp-section">
+            <div class="sp-section-title">📊 KPIs à suivre</div>
+            <label class="check-item"><input type="checkbox" id="pulse-ca" checked><span>Chiffre d'affaires</span></label>
+            <label class="check-item"><input type="checkbox" id="pulse-marge" checked><span>Marge brute</span></label>
+            <label class="check-item"><input type="checkbox" id="pulse-acq" checked><span>Acquisition clients</span></label>
+            <label class="check-item"><input type="checkbox" id="pulse-conv"><span>Taux de conversion</span></label>
+            <label class="check-item"><input type="checkbox" id="pulse-panier"><span>Panier moyen</span></label>
+            <label class="check-item"><input type="checkbox" id="pulse-nps"><span>Satisfaction client (NPS)</span></label>
+            <label class="check-item"><input type="checkbox" id="pulse-prod"><span>Productivité équipe</span></label>
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">📋 Rapports</div>
+            <label class="sp-label">Fréquence des rapports</label>
+            <select class="sp-select" id="pulse-freq"><option>Quotidien</option><option>Hebdomadaire</option><option>Mensuel</option></select>
+            <label class="sp-label">Format préféré</label>
+            <select class="sp-select" id="pulse-format"><option>Tableau de bord visuel</option><option>Rapport texte</option><option>Export CSV</option></select>
+          </div>
+        </div>
+
+        <!-- Atlas -->
+        <div class="agent-config-panel" id="cfg-atlas">
+          <div class="sp-section">
+            <div class="sp-section-title">👥 Équipe à former</div>
+            <label class="sp-label">Nombre de collaborateurs</label>
+            <input class="sp-input" id="atlas-nb" type="number" placeholder="12">
+            <label class="sp-label">Niveau moyen digital</label>
+            <select class="sp-select" id="atlas-niveau"><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select>
+            <label class="sp-label">Compétences à développer</label>
+            <textarea class="sp-textarea" id="atlas-comp" placeholder="Excel avancé, gestion de projet, communication client, RGPD…"></textarea>
+          </div>
+          <div class="sp-section">
+            <div class="sp-section-title">📚 Format de formation</div>
+            <label class="sp-label">Type de contenu préféré</label>
+            <select class="sp-select" id="atlas-type"><option>Micro-learning (5-10 min)</option><option>Modules complets (30-60 min)</option><option>Fiches pratiques</option><option>Quiz & évaluations</option></select>
+            <label class="sp-label">Fréquence</label>
+            <select class="sp-select" id="atlas-freq"><option>À la demande</option><option>Hebdomadaire</option><option>Mensuelle</option></select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+          <button class="sp-btn sp-btn-ghost" onclick="resetAgentConfig()">Réinitialiser</button>
+          <button class="sp-btn sp-btn-primary" onclick="saveAgentConfig()">💾 Enregistrer les configurations</button>
+        </div>
+      </div>
+
+      <!-- ── MÉMOIRE PARTAGÉE ── -->
+      <div class="sp-tab-content" id="tab-memoire">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Informations que tous vos agents connaîtront automatiquement lors de chaque conversation.</p>
+        <div id="memoryList" style="margin-bottom:14px"></div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select id="memCat" class="sp-select" style="flex:1;margin-top:0">
+            <option value="vision">Vision</option>
+            <option value="produits">Produits</option>
+            <option value="clients_cibles">Clients cibles</option>
+            <option value="valeurs">Valeurs</option>
+            <option value="concurrents">Concurrents</option>
+            <option value="objectifs">Objectifs</option>
+            <option value="processus">Processus</option>
+            <option value="autre">Autre</option>
+          </select>
+          <input id="memInput" class="sp-input" placeholder="Ex: Notre produit phare est X" style="flex:3;margin-top:0">
+        </div>
+        <button class="sp-btn sp-btn-primary" onclick="addMemory()" style="width:100%;justify-content:center">+ Ajouter à la mémoire</button>
+      </div>
+
+    </div><!-- /sp-body -->
+  </div><!-- /settings-panel -->
+</div><!-- /settings-overlay -->
+
 <!-- TOASTS -->
-<!-- ── SETTINGS MODAL ── -->
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal" style="width:500px;max-height:85vh;overflow-y:auto">
-    <div class="modal-header">
-      <h3>Paramètres</h3>
-      <button class="modal-close" onclick="closeSettings()">×</button>
-    </div>
-
-    <div class="settings-section">
-      <h3>Profil</h3>
-      <div class="form-group">
-        <label>Prénom</label>
-        <input class="settings-input" id="setFirstname" placeholder="Prénom">
-      </div>
-      <div class="form-group">
-        <label>Entreprise</label>
-        <input class="settings-input" id="setCompany" placeholder="Nom de l'entreprise">
-      </div>
-      <div class="form-group">
-        <label>Secteur</label>
-        <input class="settings-input" id="setSector" placeholder="Secteur d'activité">
-      </div>
-      <button class="btn btn-primary" onclick="saveProfile()" style="margin-top:8px">Enregistrer</button>
-    </div>
-
-    <div class="settings-section">
-      <h3>Abonnement</h3>
-      <div class="settings-row">
-        <span class="settings-label">Plan actuel</span>
-        <span class="settings-value" id="setPlan">—</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">Messages ce mois</span>
-        <span class="settings-value" id="setMsgCount">—</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">Essai</span>
-        <span class="settings-value" id="setTrial">—</span>
-      </div>
-      <a href="auth.html?upgrade=1" class="btn btn-primary" style="margin-top:12px;display:inline-flex;text-decoration:none">Changer de plan →</a>
-    </div>
-
-    <div class="settings-section">
-      <h3>Intégrations</h3>
-      <div class="settings-row">
-        <span class="settings-label">📧 Brevo (Email)</span>
-        <span class="integ-status integ-ok">● Connecté</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">💳 Stripe (Paiement)</span>
-        <span class="integ-status integ-ok">● Connecté</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">📊 Supabase (Données)</span>
-        <span class="integ-status integ-ok">● Connecté</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">📝 Notion</span>
-        <span class="integ-status integ-no">○ Bientôt</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">💬 WhatsApp Business</span>
-        <span class="integ-status integ-no">○ Bientôt</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">⚡ Zapier</span>
-        <span class="integ-status integ-no">○ Bientôt</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">📈 Google Analytics</span>
-        <span class="integ-status integ-no">○ Bientôt</span>
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <h3>Mémoire partagée</h3>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px">
-        Informations que tous vos agents connaîtront automatiquement (vision, produits, clients cibles…)
-      </p>
-      <div id="memoryList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
-      <div style="display:flex;gap:8px">
-        <select id="memoryCategory" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;color:var(--text);font-size:12px">
-          <option value="vision">Vision</option>
-          <option value="produits">Produits</option>
-          <option value="clients_cibles">Clients cibles</option>
-          <option value="valeurs">Valeurs</option>
-          <option value="concurrents">Concurrents</option>
-          <option value="objectifs">Objectifs</option>
-          <option value="processus">Processus</option>
-          <option value="autre">Autre</option>
-        </select>
-        <input id="memoryInput" class="settings-input" placeholder="Ex: Notre produit phare est X" style="flex:3;margin-top:0">
-      </div>
-      <button class="btn btn-primary" onclick="addMemory()" style="margin-top:8px;width:100%;justify-content:center">+ Ajouter à la mémoire</button>
-    </div>
-
-    <div class="settings-section">
-      <h3>Compte</h3>
-      <div class="settings-row">
-        <span class="settings-label">Email</span>
-        <span class="settings-value" id="setEmail">—</span>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">Mot de passe</span>
-        <a href="/api/change-password" style="color:var(--accent);font-size:13px">Changer →</a>
-      </div>
-      <button class="btn btn-ghost" onclick="logout()" style="margin-top:12px;color:var(--red);border-color:var(--red)">Déconnexion</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-// ══════════════════════════════════════════════════════════════
-// CONFIG AGENTS
-// ══════════════════════════════════════════════════════════════
-// ── Matrice capacités agents (concept Kimi K3 intégré) ──
+// ════════════════════════════════════
+// AGENTS CONFIG + CAPS
+// ════════════════════════════════════
 const AGENT_CAPS = {
-  aria:  { readImg: false, memory: true },
-  nova:  { readImg: true,  memory: true },
-  rex:   { readImg: false, memory: true },
-  vera:  { readImg: true,  memory: true },
-  lumi:  { readImg: true,  memory: true },
-  lex:   { readImg: true,  memory: true },
-  pulse: { readImg: true,  memory: true },
-  atlas: { readImg: false, memory: true },
+  aria:{readImg:false,memory:true},nova:{readImg:true,memory:true},
+  rex:{readImg:false,memory:true},vera:{readImg:true,memory:true},
+  lumi:{readImg:true,memory:true},lex:{readImg:true,memory:true},
+  pulse:{readImg:true,memory:true},atlas:{readImg:false,memory:true},
 };
 
 const AGENTS = [
-  { id:'aria',  emoji:'🧠', name:'Aria',  role:'Directrice Stratégie',    accent:'#7c5cfc', rgb:'124,92,252',
-    desc:'Demande-moi une analyse de ton marché, un plan stratégique ou une roadmap.',
-    suggestions:['Analyse mes concurrents principaux','Crée ma roadmap pour les 90 prochains jours','Aide-moi à définir mon positionnement'] },
-  { id:'nova',  emoji:'✨', name:'Nova',  role:'Directrice Marketing',    accent:'#fc5c7d', rgb:'252,92,125',
-    desc:'Je génère ton contenu, tes campagnes et ta stratégie marketing.',
-    suggestions:['Rédige un post LinkedIn pour mon lancement','Crée une campagne email pour mes clients','Aide-moi à définir mon persona cible'] },
-  { id:'rex',   emoji:'💼', name:'Rex',   role:'Directeur Commercial',    accent:'#f5c842', rgb:'245,200,66',
-    desc:'Je trouve tes prospects, rédige tes emails d\'approche et gère ton pipeline.',
-    suggestions:['Génère 20 prospects dans mon secteur','Rédige un email de prospection','Aide-moi à qualifier mes leads'] },
-  { id:'vera',  emoji:'📊', name:'Vera',  role:'Directrice Finance',      accent:'#22d3a5', rgb:'34,211,165',
-    desc:'Je gère ta facturation, projette ta trésorerie et analyse ta rentabilité.',
-    suggestions:['Génère une facture pour mon client','Analyse ma trésorerie du trimestre','Aide-moi à fixer mes prix'] },
-  { id:'lumi',  emoji:'💬', name:'Lumi',  role:'Responsable Support',     accent:'#60a5fa', rgb:'96,165,250',
-    desc:'Je réponds à tes clients, gère les tickets et escalade les cas complexes.',
-    suggestions:['Rédige une réponse à ce client mécontent','Crée une FAQ pour mon produit','Aide-moi à structurer mon support'] },
-  { id:'lex',   emoji:'⚖️', name:'Lex',   role:'Conseiller Juridique',    accent:'#e879f9', rgb:'232,121,249',
-    desc:'Je rédige tes documents légaux, analyse tes contrats et veille à ta conformité RGPD.',
-    suggestions:['Rédige mes CGV e-commerce','Analyse ce contrat pour moi','Vérifie ma conformité RGPD'] },
-  { id:'pulse', emoji:'📈', name:'Pulse', role:'Analyste & Reporting',    accent:'#38bdf8', rgb:'56,189,248',
-    desc:'Je génère tes rapports de performance, analyse tes données et identifie les tendances.',
-    suggestions:['Génère mon rapport de performance mensuel','Analyse ces chiffres de vente','Identifie mes KPIs prioritaires'] },
-  { id:'atlas', emoji:'🎓', name:'Atlas', role:'Responsable Formation',   accent:'#fb923c', rgb:'251,146,60',
-    desc:'Je crée tes supports de formation, guides d\'intégration et documentation interne.',
-    suggestions:['Crée un guide d\'intégration pour mes nouveaux employés','Rédige une procédure pour mon équipe','Crée une FAQ produit'] },
+  {id:'aria', emoji:'🧠',name:'Aria', role:'Directrice Stratégie',  accent:'#7c5cfc',rgb:'124,92,252',
+   desc:'Demande-moi une analyse de ton marché, un plan stratégique ou une roadmap.',
+   suggestions:['Analyse mes concurrents principaux','Crée ma roadmap pour les 90 prochains jours','Aide-moi à définir mon positionnement']},
+  {id:'nova', emoji:'✨',name:'Nova', role:'Directrice Marketing',   accent:'#fc5c7d',rgb:'252,92,125',
+   desc:'Je génère ton contenu, tes campagnes et ta stratégie marketing.',
+   suggestions:['Rédige un post LinkedIn pour mon lancement','Crée une campagne email','Aide-moi à définir mon persona cible']},
+  {id:'rex',  emoji:'💼',name:'Rex',  role:'Directeur Commercial',   accent:'#f5c842',rgb:'245,200,66',
+   desc:'Je trouve tes prospects, rédige tes emails et gère ton pipeline.',
+   suggestions:['Génère 20 prospects dans mon secteur','Rédige un email de prospection','Aide-moi à qualifier mes leads']},
+  {id:'vera', emoji:'📊',name:'Vera', role:'Directrice Finance',     accent:'#22d3a5',rgb:'34,211,165',
+   desc:'Je gère ta facturation, projette ta trésorerie et analyse ta rentabilité.',
+   suggestions:['Génère une facture pour mon client','Analyse ma trésorerie','Aide-moi à fixer mes prix']},
+  {id:'lumi', emoji:'💬',name:'Lumi', role:'Responsable Support',    accent:'#60a5fa',rgb:'96,165,250',
+   desc:'Je réponds à tes clients, gère les tickets et escalade les cas complexes.',
+   suggestions:['Rédige une réponse à ce client mécontent','Crée une FAQ pour mon produit','Structure mon support']},
+  {id:'lex',  emoji:'⚖️',name:'Lex',  role:'Conseiller Juridique',   accent:'#e879f9',rgb:'232,121,249',
+   desc:'Je rédige tes documents légaux, analyse tes contrats et veille à ta conformité RGPD.',
+   suggestions:['Rédige mes CGV e-commerce','Analyse ce contrat pour moi','Vérifie ma conformité RGPD']},
+  {id:'pulse',emoji:'📈',name:'Pulse',role:'Analyste & Reporting',   accent:'#38bdf8',rgb:'56,189,248',
+   desc:'Je génère tes rapports de performance, analyse tes données et identifie les tendances.',
+   suggestions:['Génère mon rapport mensuel','Analyse ces chiffres de vente','Identifie mes KPIs prioritaires']},
+  {id:'atlas',emoji:'🎓',name:'Atlas',role:'Responsable Formation',  accent:'#fb923c',rgb:'251,146,60',
+   desc:'Je crée tes supports de formation, guides d\'intégration et documentation interne.',
+   suggestions:['Crée un guide d\'intégration','Rédige une procédure pour mon équipe','Crée une FAQ produit']},
 ];
 
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════
 // STATE
-// ══════════════════════════════════════════════════════════════
-let user = null;
-let currentAgent = null;
-let history = [];
-let isLoading = false;
-let msgCount = 0;
+// ════════════════════════════════════
+let user = null, currentAgent = null, history = [], isLoading = false;
+let msgCount = 0, pendingFile = null;
+let currentAgentConfigTab = 'aria';
 
-// ── Persistance msgCount via localStorage ──
-function loadMsgCount() {
-  const key = 'feelsyst_msg_' + (user?.id || 'anon');
-  try {
-    const saved = JSON.parse(localStorage.getItem(key) || '{}');
-    const month = new Date().toISOString().slice(0, 7);
-    return saved.month === month ? (saved.count || 0) : 0;
-  } catch(e) { return 0; }
-}
-
-function saveMsgCount() {
-  const key = 'feelsyst_msg_' + (user?.id || 'anon');
-  const month = new Date().toISOString().slice(0, 7);
-  localStorage.setItem(key, JSON.stringify({ count: msgCount, month }));
-}
-
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════
 window.addEventListener('load', async () => {
-  // Gérer le token d'impersonation
-  const urlParams = new URLSearchParams(window.location.search);
-  const impToken = urlParams.get('impersonate_token');
-  if (impToken) {
-    localStorage.setItem('feelsyst_token', impToken);
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-
+  const params = new URLSearchParams(location.search);
+  const imp = params.get('impersonate_token');
+  if (imp) { localStorage.setItem('feelsyst_token', imp); history.pushState({}, '', location.pathname); }
   const token = localStorage.getItem('feelsyst_token');
-  if (!token) { window.location.href = 'auth.html'; return; }
-
+  if (!token) { location.href = 'auth.html'; return; }
   try {
-    const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (!r.ok) { localStorage.removeItem('feelsyst_token'); window.location.href = 'auth.html'; return; }
+    const r = await fetch('/api/me', { headers:{'Authorization':`Bearer ${token}`} });
+    if (!r.ok) { localStorage.removeItem('feelsyst_token'); location.href = 'auth.html'; return; }
     user = (await r.json()).user;
     initUI();
   } catch(e) {
-    showToast('Impossible de se connecter. Vérifiez votre connexion.', 'err');
-    setTimeout(() => { window.location.href = 'auth.html'; }, 2000);
+    showToast('Erreur de connexion','err');
+    setTimeout(()=>{ location.href='auth.html'; }, 2000);
   }
 });
 
@@ -1073,202 +775,157 @@ function initUI() {
   document.getElementById('topbar').style.display = 'flex';
   document.getElementById('appBody').style.display = 'flex';
 
-  // Infos utilisateur
-  const initials = (user.firstname || user.email || '?')[0].toUpperCase();
-  document.getElementById('userAvatar').textContent = initials;
+  const init = (user.firstname || user.email || '?')[0].toUpperCase();
+  document.getElementById('userAv').textContent = init;
   document.getElementById('userName').textContent = user.firstname || user.email;
+  const pb = document.getElementById('planBadge');
+  pb.textContent = user.plan; pb.className = 'plan-badge badge-'+user.plan;
 
-  // Charger le compteur de messages persisté
   msgCount = loadMsgCount();
+  updateQuota();
+  buildAgentLists();
+  buildRightPanel();
 
-  // Badge plan
-  const badge = document.getElementById('planBadge');
-  badge.textContent = user.plan;
-  badge.className = 'plan-badge badge-' + user.plan;
-
-  // Trial banner
   if (user.plan === 'trial' && user.trialEndsAt) {
-    const daysLeft = Math.ceil((new Date(user.trialEndsAt) - Date.now()) / 86400000);
-    if (daysLeft <= 3 && daysLeft >= 0) {
-      const banner = document.getElementById('trialBanner');
-      banner.classList.remove('hidden');
-      document.getElementById('trialText').textContent =
-        `⏰ Votre essai expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}. Choisissez un plan pour continuer.`;
+    const d = Math.ceil((new Date(user.trialEndsAt) - Date.now())/86400000);
+    if (d >= 0 && d <= 3) {
+      document.getElementById('trialBanner').classList.remove('hidden');
+      document.getElementById('trialText').textContent = `⏰ Votre essai expire dans ${d} jour${d>1?'s':''}. Choisissez un plan pour continuer.`;
     }
   }
 
-  // Quota bar
-  const limits = { trial: 500, starter: 500, pro: 2000, unlimited: -1 };
-  const limit = limits[user.plan] || 500;
-  if (limit > 0) {
-    document.getElementById('quotaBar').style.display = 'flex';
-    document.getElementById('quotaText').textContent = `${msgCount}/${limit}`;
-    const pct = Math.min((msgCount / limit) * 100, 100);
-    const fill = document.getElementById('quotaFill');
-    fill.style.width = pct + '%';
-    fill.className = 'quota-fill' + (pct > 90 ? ' danger' : pct > 70 ? ' warn' : '');
-  }
-
-  // Panel droit
-  document.getElementById('rpPlan').textContent = user.plan;
-  document.getElementById('rpMessages').textContent = msgCount;
-  if (user.plan === 'trial' || user.plan === 'starter') {
-    document.getElementById('upgradeCard').style.display = 'block';
-  }
-
-  // Construire les listes d'agents
-  buildAgentLists();
-
-  // Restaurer le dernier agent
   const lastAgent = localStorage.getItem('feelsyst_last_agent');
-  if (lastAgent) {
-    const found = AGENTS.find(a => a.id === lastAgent);
-    if (found) selectAgent(found);
-  }
+  if (lastAgent) { const a = AGENTS.find(x=>x.id===lastAgent); if(a) selectAgent(a); }
 }
 
-// ══════════════════════════════════════════════════════════════
-// BUILD AGENT LISTS
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════
+// BUILD LISTS
+// ════════════════════════════════════
 function buildAgentLists() {
-  // Sidebar
-  const sidebar = document.getElementById('sidebarAgents');
-  sidebar.innerHTML = AGENTS.map(a => `
-    <button class="agent-btn" id="sb-${a.id}" onclick="selectAgent(AGENTS.find(x=>x.id==='${a.id}'))">
-      <span class="agent-ico">${a.emoji}</span>
-      <div class="agent-info">
-        <div class="agent-label">${a.name}</div>
-        <div class="agent-sublabel">${a.role.split(' ')[0]} ${a.role.split(' ')[1] || ''}</div>
+  const sb = document.getElementById('sidebarAgents');
+  sb.innerHTML = AGENTS.map(a => `
+    <button class="ag-btn" id="sb-${a.id}" onclick="selectAgent(AGENTS.find(x=>x.id==='${a.id}'))">
+      <span class="ag-ico">${a.emoji}</span>
+      <div style="flex:1;min-width:0">
+        <div class="ag-label">${a.name}</div>
+        <div class="ag-sub">${a.role.split(' ')[0]}</div>
       </div>
       <div class="online-dot"></div>
     </button>`).join('');
 
-  // Mobile nav
-  const mobileNav = document.getElementById('mobileNav');
-  mobileNav.innerHTML = AGENTS.map(a => `
-    <button class="mobile-agent-btn" id="mb-${a.id}" onclick="selectAgent(AGENTS.find(x=>x.id==='${a.id}'))">
-      <span>${a.emoji}</span>
-      <span>${a.name}</span>
+  const mn = document.getElementById('mobileNav');
+  mn.innerHTML = AGENTS.map(a => `
+    <button class="mb-btn" id="mb-${a.id}" onclick="selectAgent(AGENTS.find(x=>x.id==='${a.id}'))">
+      <span>${a.emoji}</span><span>${a.name}</span>
     </button>`).join('');
 
-  // Right panel agent list
-  const rpList = document.getElementById('rpAgentList');
-  rpList.innerHTML = AGENTS.map(a => `
-    <div class="rp-agent-item" onclick="selectAgent(AGENTS.find(x=>x.id==='${a.id}'))">
-      <div class="dot"></div>
-      <span>${a.emoji} ${a.name}</span>
-    </div>`).join('');
+  // Agent config tabs
+  const act = document.getElementById('agentConfigTabs');
+  act.innerHTML = AGENTS.map(a => `
+    <button class="agent-tab-btn ${a.id==='aria'?'active':''}" id="acttab-${a.id}" onclick="switchAgentConfigTab('${a.id}')">
+      ${a.emoji} ${a.name}
+    </button>`).join('');
 }
 
-// ══════════════════════════════════════════════════════════════
+function buildRightPanel() {
+  const rp = document.getElementById('rpAgents');
+  rp.innerHTML = AGENTS.map(a => `
+    <div class="rp-agent-row" onclick="selectAgent(AGENTS.find(x=>x.id==='${a.id}'))">
+      <div class="rp-dot" style="background:${a.accent}"></div>
+      <span>${a.emoji} ${a.name}</span>
+    </div>`).join('');
+  document.getElementById('rpPlan').textContent = user.plan;
+  document.getElementById('rpMsgs').textContent = msgCount;
+  if (user.plan==='trial'||user.plan==='starter') document.getElementById('upgradeCard').style.display='block';
+}
+
+// ════════════════════════════════════
 // SELECT AGENT
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════
 function selectAgent(agent) {
   if (!agent) return;
-
-  // Si on change d'agent → sauvegarder historique et réinitialiser
-  if (currentAgent && currentAgent.id !== agent.id) {
-    history = [];
-  }
-
+  if (currentAgent && currentAgent.id !== agent.id) history = [];
   currentAgent = agent;
   localStorage.setItem('feelsyst_last_agent', agent.id);
 
-  // Charger l'historique persisté pour cet agent
-  history = loadConvHistory(agent);
-
-  // Mettre à jour les couleurs accent
   document.documentElement.style.setProperty('--accent', agent.accent);
-  document.documentElement.style.setProperty('--accent2', adjustColor(agent.accent, -20));
   document.documentElement.style.setProperty('--accent-rgb', agent.rgb);
+  document.documentElement.style.setProperty('--accent2', agent.accent+'cc');
 
-  // Activer les boutons
-  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.mobile-agent-btn').forEach(b => b.classList.remove('active'));
-  const sb = document.getElementById('sb-' + agent.id);
-  const mb = document.getElementById('mb-' + agent.id);
-  if (sb) sb.classList.add('active');
-  if (mb) mb.classList.add('active');
+  document.querySelectorAll('.ag-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.mb-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sb-'+agent.id)?.classList.add('active');
+  document.getElementById('mb-'+agent.id)?.classList.add('active');
 
-  // Mettre à jour le chat header
-  document.getElementById('chatHeader').style.display = 'flex';
-  document.getElementById('chatIco').textContent = agent.emoji;
-  document.getElementById('chatName').textContent = agent.name;
-  document.getElementById('chatRole').textContent = agent.role;
+  document.getElementById('chatHeader').classList.remove('hidden');
+  document.getElementById('chIco').textContent = agent.emoji;
+  document.getElementById('chName').textContent = agent.name;
+  document.getElementById('chRole').textContent = agent.role;
 
-  // Activer l'input
   const input = document.getElementById('msgInput');
   input.placeholder = `Parlez à ${agent.name}…`;
   input.disabled = false;
   document.getElementById('sendBtn').disabled = false;
-  // Activer upload seulement si l'agent peut lire des images
-  const caps = AGENT_CAPS[agent.id] || {};
-  const uploadBtn = document.getElementById('uploadBtn');
-  uploadBtn.disabled = !caps.readImg;
-  uploadBtn.title = caps.readImg
-    ? 'Joindre une image ou un PDF'
-    : `${agent.name} ne peut pas analyser de fichiers`;
-  uploadBtn.style.opacity = caps.readImg ? '1' : '0.3';
-  input.focus();
 
-  // Afficher l'écran de bienvenue ou restaurer l'historique
+  const caps = AGENT_CAPS[agent.id]||{};
+  const ub = document.getElementById('uploadBtn');
+  ub.disabled = !caps.readImg;
+  ub.title = caps.readImg ? 'Joindre une image ou un PDF' : `${agent.name} ne peut pas analyser de fichiers`;
+  ub.style.opacity = caps.readImg ? '1' : '0.3';
+
+  history = loadConvHistory(agent.id);
   renderMessages();
+  input.focus();
 }
 
-// ══════════════════════════════════════════════════════════════
-// RENDER MESSAGES
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════
+// MESSAGES
+// ════════════════════════════════════
 function renderMessages() {
-  const container = document.getElementById('messages');
-
+  const c = document.getElementById('msgs');
   if (!currentAgent) return;
-
   if (history.length === 0) {
-    // Welcome screen
-    container.innerHTML = `
-      <div class="welcome" id="welcomeScreen">
+    c.innerHTML = `
+      <div class="welcome">
         <div class="welcome-ico">${currentAgent.emoji}</div>
         <h2>Bonjour, je suis ${currentAgent.name}</h2>
         <p>${currentAgent.desc}</p>
         <div class="suggestions">
-          ${currentAgent.suggestions.map(s => `
-            <div class="suggestion" onclick="useSuggestion('${s.replace(/'/g, "\\'")}')">${s}</div>
-          `).join('')}
+          ${currentAgent.suggestions.map(s=>`<div class="suggestion" onclick="useSuggestion('${s.replace(/'/g,"\\'")}')">${s}</div>`).join('')}
         </div>
       </div>`;
     return;
   }
-
-  container.innerHTML = history.map((m, i) => `
-    <div class="msg ${m.role === 'user' ? 'user' : 'agent'}">
-      <div class="msg-avatar">${m.role === 'user' ? (user?.firstname || '?')[0].toUpperCase() : currentAgent.emoji}</div>
+  c.innerHTML = history.map((m,i) => `
+    <div class="msg ${m.role==='user'?'user':'agent'}">
+      <div class="msg-av">${m.role==='user'?(user?.firstname||'?')[0].toUpperCase():currentAgent.emoji}</div>
       <div class="msg-body">
         <div class="msg-bubble">${escHtml(m.content)}</div>
         <div class="msg-actions">
-          <button class="msg-action-btn" onclick="copyMsg(${i})">Copier</button>
-          ${m.role === 'assistant' ? `<button class="download-btn" onclick="downloadMsg(${i})">⬇ Télécharger</button>` : ''}
+          <button class="ma-btn" onclick="copyMsg(${i})">Copier</button>
+          ${m.role==='assistant'?`<button class="ma-btn" onclick="downloadMsg(${i})">⬇</button>`:''}
         </div>
-        <div class="msg-time">${formatTime(m.time)}</div>
+        <div class="msg-time">${fmtTime(m.time)}</div>
       </div>
     </div>`).join('');
-
-  scrollToBottom();
+  scrollBottom();
 }
 
-// ══════════════════════════════════════════════════════════════
-// SEND MESSAGE
-// ══════════════════════════════════════════════════════════════
 async function sendMessage() {
   if (!currentAgent || isLoading) return;
   const input = document.getElementById('msgInput');
   const text = input.value.trim();
-  if (!text) return;
+  if (!text && !pendingFile) return;
+  input.value = ''; autoResize(input);
 
-  input.value = '';
-  autoResize(input);
+  const userContent = pendingFile
+    ? [{type:pendingFile.mediaType.startsWith('image/')?'image':'document',
+        source:{type:'base64',media_type:pendingFile.mediaType,data:pendingFile.base64}},
+       {type:'text',text:text||'Analyse ce fichier.'}]
+    : text;
 
-  // Ajouter le message utilisateur
-  history.push({ role: 'user', content: text, time: new Date() });
+  history.push({role:'user',content:pendingFile?text||'[Fichier joint]':text,time:new Date()});
+  if (pendingFile) removeFile();
   saveHistory();
   renderMessages();
   showTyping();
@@ -1276,74 +933,36 @@ async function sendMessage() {
   document.getElementById('sendBtn').disabled = true;
 
   try {
-    const token = localStorage.getItem('feelsyst_token');
-    // Construire les messages avec ou sans fichier joint
-    const userContent = pendingFile
-      ? [
-          { type: pendingFile.mediaType.startsWith('image/') ? 'image' : 'document',
-            source: { type: 'base64', media_type: pendingFile.mediaType, data: pendingFile.base64 } },
-          { type: 'text', text: text || 'Analyse ce fichier.' }
-        ]
-      : text;
-
-    const apiMessages = history.slice(0, -1).map(m => ({
-      role: m.role,
-      content: typeof m.content === 'string' ? m.content : m.content
-    })).concat([{ role: 'user', content: userContent }]);
+    const apiMsgs = history.slice(0,-1).map(m=>({role:m.role,content:typeof m.content==='string'?m.content:m.content}))
+      .concat([{role:'user',content:userContent}]);
 
     const r = await fetch('/api/proxy-ai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({
-        agent: currentAgent.id,
-        messages: apiMessages,
-        max_tokens: 1000,
-        userContext: {
-          company:   user?.company   || '',
-          sector:    user?.sector    || '',
-          firstname: user?.firstname || '',
-          plan:      user?.plan      || '',
-        },
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('feelsyst_token')}`},
+      body:JSON.stringify({
+        agent:currentAgent.id, messages:apiMsgs, max_tokens:1000,
+        userContext:{company:user?.company||'',sector:user?.sector||'',firstname:user?.firstname||'',plan:user?.plan||''},
       }),
     });
-
-    // Nettoyer le fichier joint après envoi
-    if (pendingFile) removeFile();
-
     removeTyping();
 
-    if (r.status === 401 || r.status === 403) {
-      const data = await r.json();
-      if (data.trialExpired) {
-        showTrialExpired();
-      } else {
-        localStorage.removeItem('feelsyst_token');
-        window.location.href = 'auth.html';
-      }
+    if (r.status===401||r.status===403) {
+      const d = await r.json();
+      if (d.trialExpired) showTrialExpired();
+      else { localStorage.removeItem('feelsyst_token'); location.href='auth.html'; }
       return;
     }
-
-    if (!r.ok) {
-      const err = await r.json();
-      showToast(err.error || 'Erreur de l\'agent', 'err');
-      history.pop(); renderMessages(); return;
-    }
+    if (!r.ok) { const e=await r.json(); showToast(e.error||'Erreur agent','err'); history.pop(); renderMessages(); return; }
 
     const data = await r.json();
-    const reply = data.content?.[0]?.text || 'Désolé, je n\'ai pas pu traiter votre demande.';
-
-    history.push({ role: 'assistant', content: reply, time: new Date() });
-    msgCount++;
-    saveMsgCount();
-    saveHistory();   // ← sauvegarder l'historique complet
-    updateQuota();
+    const reply = data.content?.[0]?.text || 'Désolé, erreur de traitement.';
+    history.push({role:'assistant',content:reply,time:new Date()});
+    msgCount++; saveMsgCount(); saveHistory(); updateQuota();
     renderMessages();
-
   } catch(e) {
     removeTyping();
-    showToast('Erreur de connexion. Vérifiez votre réseau.', 'err');
-    history.pop();
-    renderMessages();
+    showToast('Erreur de connexion','err');
+    history.pop(); renderMessages();
   } finally {
     isLoading = false;
     document.getElementById('sendBtn').disabled = false;
@@ -1351,288 +970,228 @@ async function sendMessage() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════════════════════════════
-function showTyping() {
-  const container = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = 'typing-indicator'; div.id = 'typingIndicator';
-  div.innerHTML = `
-    <div class="typing-avatar">${currentAgent.emoji}</div>
-    <div class="typing-dots"><span></span><span></span><span></span></div>`;
-  container.appendChild(div);
-  scrollToBottom();
-}
-
-function removeTyping() {
-  const el = document.getElementById('typingIndicator');
-  if (el) el.remove();
-}
-
-function scrollToBottom() {
-  const c = document.getElementById('messages');
-  setTimeout(() => { c.scrollTop = c.scrollHeight; }, 50);
-}
-
-function clearChat() {
-  history = [];
-  renderMessages();
-}
-
-function logout() {
-  localStorage.removeItem('feelsyst_token');
-  window.location.href = 'auth.html';
-}
-
-function useSuggestion(text) {
-  const input = document.getElementById('msgInput');
-  input.value = text;
-  autoResize(input);
-  input.focus();
-}
-
-function copyMsg(index) {
-  navigator.clipboard.writeText(history[index]?.content || '');
-  showToast('Message copié', 'ok');
-}
-
-function escHtml(str) {
-  return str
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\n/g,'<br>');
-}
-
-function formatTime(d) {
-  if (!d) return '';
-  return new Date(d).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
-}
-
-function showToast(msg, type='ok') {
-  const wrap = document.getElementById('toastWrap');
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.innerHTML = `${type==='ok'?'✅':'❌'} ${msg}`;
-  wrap.appendChild(el);
-  setTimeout(() => el.remove(), 3500);
-}
-
-function showUpgrade() {
-  window.location.href = 'auth.html?upgrade=1';
-}
-
-function showTrialExpired() {
-  const container = document.getElementById('messages');
-  container.innerHTML = `
-    <div class="welcome">
-      <div class="welcome-ico">⏰</div>
-      <h2>Essai terminé</h2>
-      <p>Votre période d'essai de 7 jours est terminée. Choisissez un plan pour continuer à utiliser vos agents.</p>
-      <div class="suggestions">
-        <div class="suggestion" onclick="window.location.href='auth.html?upgrade=1'">Voir les plans →</div>
-      </div>
-    </div>`;
-}
-
-function updateQuota() {
-  const limits = { trial:500, starter:500, pro:2000, unlimited:-1 };
-  const limit = limits[user?.plan] || 500;
-  if (limit < 0) return;
-  document.getElementById('quotaText').textContent = `${msgCount}/${limit}`;
-  const pct = Math.min((msgCount / limit) * 100, 100);
-  const fill = document.getElementById('quotaFill');
-  fill.style.width = pct + '%';
-  fill.className = 'quota-fill' + (pct > 90 ? ' danger' : pct > 70 ? ' warn' : '');
-  document.getElementById('rpMessages').textContent = msgCount;
-}
-
-function adjustColor(hex, amount) {
-  const n = parseInt(hex.slice(1), 16);
-  const r = Math.max(0, Math.min(255, (n >> 16) + amount));
-  const g = Math.max(0, Math.min(255, ((n >> 8) & 0xff) + amount));
-  const b = Math.max(0, Math.min(255, (n & 0xff) + amount));
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
-// ── KEYBOARD ──
-document.getElementById('msgInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
-document.getElementById('msgInput').addEventListener('input', function() { autoResize(this); });
-
-// ══════════════════════════════════════════════════════════════
-// HISTORIQUE PERSISTANT (localStorage par agent)
-// ══════════════════════════════════════════════════════════════
-function saveHistory() {
-  if (!user || !currentAgent) return;
-  const key = `feelsyst_hist_${user.id}_${currentAgent.id}`;
-  try {
-    // Garder les 30 derniers messages max pour éviter de saturer localStorage
-    const toSave = history.slice(-30).map(m => ({
-      role: m.role, content: m.content, time: m.time
-    }));
-    localStorage.setItem(key, JSON.stringify(toSave));
-  } catch(e) { console.warn('Historique non sauvegardé:', e); }
-}
-
-function loadConvHistory(agent) {
-  if (!user) return [];
-  const key = `feelsyst_hist_${user.id}_${agent.id}`;
-  try {
-    const saved = JSON.parse(localStorage.getItem(key) || '[]');
-    return saved.map(m => ({ ...m, time: m.time ? new Date(m.time) : new Date() }));
-  } catch(e) { return []; }
-}
-
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════
 // SETTINGS
-// ══════════════════════════════════════════════════════════════
-async function openSettings() {
+// ════════════════════════════════════
+function openSettings(tab = 'profil') {
   if (!user) return;
-  document.getElementById('setFirstname').value  = user.firstname  || '';
-  document.getElementById('setCompany').value    = user.company    || '';
-  document.getElementById('setSector').value     = user.sector     || '';
-  document.getElementById('setEmail').textContent = user.email     || '';
-  document.getElementById('setPlan').textContent  = user.plan      || '';
-  document.getElementById('setMsgCount').textContent = msgCount + ' / ' + ({trial:500,starter:500,pro:2000,unlimited:'∞'}[user.plan]||500);
-  document.getElementById('setTrial').textContent = user.trialEndsAt
-    ? 'Expire le ' + new Date(user.trialEndsAt).toLocaleDateString('fr-FR')
-    : 'N/A';
-  document.getElementById('settingsModal').classList.add('open');
-  await loadSharedMemory();
+  document.getElementById('pFirstname').value = user.firstname || '';
+  document.getElementById('pLastname').value  = (user.lastname) || '';
+  document.getElementById('pEmail').value     = user.email || '';
+  document.getElementById('pCompany').value   = user.company || '';
+  document.getElementById('pSiret').value     = localStorage.getItem('feelsyst_siret_'+user.id) || '';
+  document.getElementById('pWeb').value       = localStorage.getItem('feelsyst_web_'+user.id) || '';
+  document.getElementById('pPhone').value     = localStorage.getItem('feelsyst_phone_'+user.id) || '';
+  document.getElementById('pDesc').value      = localStorage.getItem('feelsyst_desc_'+user.id) || '';
+
+  const sEl = document.getElementById('pSector');
+  Array.from(sEl.options).forEach(o=>{ if(o.text===user.sector||o.value===user.sector) o.selected=true; });
+
+  updateAbonnementTab();
+  loadAgentConfigs();
+  loadMemory();
+  switchTab(tab);
+  document.getElementById('settingsOverlay').classList.add('open');
 }
 
-// Charger et afficher la mémoire partagée
-async function loadSharedMemory() {
-  const token = localStorage.getItem('feelsyst_token');
-  const r = await fetch('/api/memory', {
-    headers: { 'Authorization': `Bearer ${token}` }
-  }).catch(() => null);
-  if (!r || !r.ok) return;
-  const { memories } = await r.json();
-  const list = document.getElementById('memoryList');
-  if (!memories || !memories.length) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--muted)">Aucune mémoire enregistrée.</div>';
-    return;
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
+function closeSettingsIfOutside(e) { if(e.target===document.getElementById('settingsOverlay')) closeSettings(); }
+function openAgentSettings() { if(currentAgent){ openSettings('agents'); switchAgentConfigTab(currentAgent.id); } }
+
+function switchTab(tab) {
+  document.querySelectorAll('.sp-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sp-tab-content').forEach(t=>t.classList.remove('active'));
+  const tabs = ['profil','securite','abonnement','notifications','agents','memoire'];
+  const idx = tabs.indexOf(tab);
+  if (idx>=0) document.querySelectorAll('.sp-tab')[idx]?.classList.add('active');
+  document.getElementById('tab-'+tab)?.classList.add('active');
+}
+
+function switchAgentConfigTab(agentId) {
+  currentAgentConfigTab = agentId;
+  document.querySelectorAll('.agent-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.agent-config-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('acttab-'+agentId)?.classList.add('active');
+  document.getElementById('cfg-'+agentId)?.classList.add('active');
+}
+
+function updateAbonnementTab() {
+  const limits = {trial:500,starter:500,pro:2000,unlimited:-1};
+  const names  = {trial:'Trial',starter:'Starter 29€/mois',pro:'Pro 79€/mois',unlimited:'Illimité 179€/mois'};
+  const limit  = limits[user.plan]||500;
+  const pct    = limit>0 ? Math.min(Math.round((msgCount/limit)*100),100) : 0;
+  document.getElementById('currentPlanCard').innerHTML = `
+    <div class="plan-card-sm current">
+      <div><div class="plan-name-sm">${names[user.plan]||user.plan}</div>
+      <div class="plan-price-sm">${user.trialEndsAt?'Expire le '+new Date(user.trialEndsAt).toLocaleDateString('fr-FR'):''}</div></div>
+      ${user.plan==='trial'?'<button class="sp-btn sp-btn-primary" onclick="openSettings(\'abonnement\')">Upgrader</button>':''}
+    </div>`;
+  const lbl = limit>0?`${msgCount} / ${limit} messages`:msgCount+' messages (illimité)';
+  document.getElementById('usageLbl').textContent = lbl;
+  document.getElementById('usagePct').textContent = limit>0?pct+'%':'';
+  const fill = document.getElementById('usageFill');
+  fill.style.width = (limit>0?pct:5)+'%';
+  fill.textContent = limit>0?pct+'%':'';
+  if (pct>=80) {
+    document.getElementById('usageAlert').style.display='block';
+    document.getElementById('usageAlert').textContent = `⚠ Alerte à 80% (${Math.round(limit*.8)} messages) — Pensez à upgrader.`;
   }
-  list.innerHTML = memories.map((m, i) => `
-    <div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:7px 10px">
-      <span style="font-size:10px;background:rgba(124,92,252,.15);color:var(--accent);padding:2px 6px;border-radius:4px">${m.category}</span>
-      <span style="font-size:12.5px;flex:1;color:#b8b8cc">${escHtml(m.content.slice(0,80))}</span>
-      <button onclick="deleteMemory('${m.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px">×</button>
-    </div>`).join('');
+}
+
+async function saveProfile() {
+  const firstname = document.getElementById('pFirstname').value.trim();
+  const company   = document.getElementById('pCompany').value.trim();
+  const sector    = document.getElementById('pSector').value;
+  localStorage.setItem('feelsyst_siret_'+user.id,  document.getElementById('pSiret').value);
+  localStorage.setItem('feelsyst_web_'+user.id,    document.getElementById('pWeb').value);
+  localStorage.setItem('feelsyst_phone_'+user.id,  document.getElementById('pPhone').value);
+  localStorage.setItem('feelsyst_desc_'+user.id,   document.getElementById('pDesc').value);
+  try {
+    const r = await fetch('/api/profile',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('feelsyst_token')}`},body:JSON.stringify({firstname,company,sector})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error);
+    user.firstname=d.user.firstname; user.company=d.user.company; user.sector=d.user.sector;
+    document.getElementById('userName').textContent = user.firstname||user.email;
+    document.getElementById('userAv').textContent   = (user.firstname||'?')[0].toUpperCase();
+    closeSettings(); showToast('Profil mis à jour','ok');
+  } catch(e){showToast('Erreur: '+e.message,'err');}
+}
+
+function saveNotifications() { showToast('Préférences enregistrées','ok'); closeSettings(); }
+
+function saveAgentConfig() {
+  const cfgs = {};
+  AGENTS.forEach(a=>{
+    const els = document.querySelectorAll(`#cfg-${a.id} input, #cfg-${a.id} select, #cfg-${a.id} textarea`);
+    const c={};
+    els.forEach(el=>{ if(el.type==='checkbox') c[el.id]=el.checked; else c[el.id]=el.value; });
+    cfgs[a.id] = c;
+  });
+  localStorage.setItem('feelsyst_agentcfg_'+user.id, JSON.stringify(cfgs));
+  showToast('Configurations agents enregistrées','ok');
+}
+
+function loadAgentConfigs() {
+  const saved = JSON.parse(localStorage.getItem('feelsyst_agentcfg_'+user.id)||'{}');
+  AGENTS.forEach(a=>{
+    const c = saved[a.id]||{};
+    Object.entries(c).forEach(([id,val])=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(el.type==='checkbox') el.checked=!!val;
+      else el.value=val||'';
+    });
+  });
+}
+
+function resetAgentConfig() {
+  document.querySelectorAll(`#cfg-${currentAgentConfigTab} input, #cfg-${currentAgentConfigTab} select, #cfg-${currentAgentConfigTab} textarea`).forEach(el=>{
+    if(el.type==='checkbox') el.checked=el.defaultChecked||false;
+    else el.value='';
+  });
+  showToast('Configuration réinitialisée','ok');
+}
+
+function upgradePlan(plan) { location.href='auth.html?plan='+plan; }
+function exportData() { showToast('Export RGPD bientôt disponible','err'); }
+function confirmDelete() { if(confirm('Supprimer définitivement votre compte ? Cette action est irréversible.')) showToast('Contactez contact@feelsyst.com pour la suppression','err'); }
+
+// ════════════════════════════════════
+// MÉMOIRE PARTAGÉE
+// ════════════════════════════════════
+async function loadMemory() {
+  const token = localStorage.getItem('feelsyst_token');
+  const r = await fetch('/api/memory',{headers:{'Authorization':`Bearer ${token}`}}).catch(()=>null);
+  if(!r||!r.ok){document.getElementById('memoryList').innerHTML='<div style="font-size:12px;color:var(--muted)">Aucune mémoire — fonctionnalité bientôt disponible.</div>';return;}
+  const {memories=[]} = await r.json();
+  document.getElementById('memoryList').innerHTML = memories.length
+    ? memories.map(m=>`<div class="mem-item"><span class="mem-cat">${m.category}</span><span class="mem-text">${escHtml((m.content||'').slice(0,80))}</span><button class="mem-rm" onclick="deleteMemory('${m.id}')">×</button></div>`).join('')
+    : '<div style="font-size:12px;color:var(--muted)">Aucune mémoire enregistrée.</div>';
 }
 
 async function addMemory() {
-  const category = document.getElementById('memoryCategory').value;
-  const content  = document.getElementById('memoryInput').value.trim();
-  if (!content) return;
+  const cat = document.getElementById('memCat').value;
+  const txt = document.getElementById('memInput').value.trim();
+  if(!txt) return;
   const token = localStorage.getItem('feelsyst_token');
-  const r = await fetch('/api/memory', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ category, content }),
-  });
-  if (r.ok) {
-    document.getElementById('memoryInput').value = '';
-    await loadSharedMemory();
-    showToast('Mémoire enregistrée ✅', 'ok');
-  } else { showToast('Erreur', 'err'); }
+  const r = await fetch('/api/memory',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({category:cat,content:txt})});
+  if(r.ok){document.getElementById('memInput').value='';await loadMemory();showToast('Mémoire enregistrée','ok');}
+  else showToast('Erreur','err');
 }
 
 async function deleteMemory(id) {
   const token = localStorage.getItem('feelsyst_token');
-  const r = await fetch(`/api/memory?id=${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` },
-  });
-  if (r.ok) { await loadSharedMemory(); showToast('Supprimé', 'ok'); }
+  const r = await fetch(`/api/memory?id=${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
+  if(r.ok){await loadMemory();showToast('Supprimé','ok');}
 }
 
-function closeSettings() {
-  document.getElementById('settingsModal').classList.remove('open');
+// ════════════════════════════════════
+// PERSISTANCE
+// ════════════════════════════════════
+function loadMsgCount() {
+  try{const k='feelsyst_msg_'+(user?.id||'x');const s=JSON.parse(localStorage.getItem(k)||'{}');const m=new Date().toISOString().slice(0,7);return s.month===m?s.count||0:0;}catch{return 0;}
+}
+function saveMsgCount() {
+  try{const k='feelsyst_msg_'+(user?.id||'x');const m=new Date().toISOString().slice(0,7);localStorage.setItem(k,JSON.stringify({count:msgCount,month:m}));}catch{}
+}
+function loadConvHistory(agentId) {
+  try{return JSON.parse(localStorage.getItem(`feelsyst_hist_${user?.id}_${agentId}`)||'[]').map(m=>({...m,time:m.time?new Date(m.time):new Date()}));}catch{return [];}
+}
+function saveHistory() {
+  if(!user||!currentAgent) return;
+  try{localStorage.setItem(`feelsyst_hist_${user.id}_${currentAgent.id}`,JSON.stringify(history.slice(-30).map(m=>({role:m.role,content:m.content,time:m.time}))));}catch{}
 }
 
-async function saveProfile() {
-  const firstname = document.getElementById('setFirstname').value.trim();
-  const company   = document.getElementById('setCompany').value.trim();
-  const sector    = document.getElementById('setSector').value.trim();
-  try {
-    const r = await fetch('/api/profile', {
-      method: 'PUT',
-      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${localStorage.getItem('feelsyst_token')}` },
-      body: JSON.stringify({ firstname, company, sector }),
-    });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error);
-    user.firstname = data.user.firstname;
-    user.company   = data.user.company;
-    user.sector    = data.user.sector;
-    document.getElementById('userName').textContent = user.firstname || user.email;
-    document.getElementById('userAvatar').textContent = (user.firstname || '?')[0].toUpperCase();
-    closeSettings();
-    showToast('Profil mis à jour', 'ok');
-  } catch(e) { showToast('Erreur: ' + e.message, 'err'); }
+// ════════════════════════════════════
+// UPLOAD / DOWNLOAD
+// ════════════════════════════════════
+function triggerUpload(){document.getElementById('fileInput').click();}
+function handleFile(input){
+  const f=input.files[0];if(!f)return;
+  if(f.size>5*1024*1024){showToast('Fichier trop volumineux (max 5 Mo)','err');return;}
+  const r=new FileReader();
+  r.onload=e=>{pendingFile={base64:e.target.result.split(',')[1],mediaType:f.type||'application/octet-stream',name:f.name};document.getElementById('fileName').textContent=f.name;document.getElementById('filePreview').style.display='flex';showToast('Fichier joint : '+f.name,'ok');};
+  r.readAsDataURL(f);input.value='';
+}
+function removeFile(){pendingFile=null;document.getElementById('filePreview').style.display='none';}
+function downloadMsg(i){
+  const m=history[i];if(!m)return;
+  const b=new Blob([m.content],{type:'text/plain;charset=utf-8'});
+  const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`${currentAgent?.name||'agent'}_${new Date().toISOString().slice(0,10)}.txt`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
 }
 
-// ══════════════════════════════════════════════════════════════
-// UPLOAD FICHIER / IMAGE
-// ══════════════════════════════════════════════════════════════
-let pendingFile = null; // { base64, mediaType, name }
-
-function triggerUpload() {
-  document.getElementById('fileInput').click();
+// ════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════
+function clearChat(){history=[];if(currentAgent)localStorage.removeItem(`feelsyst_hist_${user?.id}_${currentAgent.id}`);renderMessages();}
+function logout(){localStorage.removeItem('feelsyst_token');location.href='auth.html';}
+function useSuggestion(t){const i=document.getElementById('msgInput');i.value=t;autoResize(i);i.focus();}
+function copyMsg(i){navigator.clipboard.writeText(history[i]?.content||'');showToast('Copié','ok');}
+function showTyping(){const c=document.getElementById('msgs');const d=document.createElement('div');d.className='typing';d.id='typing';d.innerHTML=`<div class="typing-av">${currentAgent.emoji}</div><div class="typing-dots"><span></span><span></span><span></span></div>`;c.appendChild(d);scrollBottom();}
+function removeTyping(){document.getElementById('typing')?.remove();}
+function scrollBottom(){const c=document.getElementById('msgs');setTimeout(()=>{c.scrollTop=c.scrollHeight;},50);}
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+function fmtTime(d){if(!d)return '';return new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+function showToast(msg,type='ok'){const w=document.getElementById('toastWrap');const e=document.createElement('div');e.className=`toast ${type}`;e.innerHTML=`${type==='ok'?'✅':'❌'} ${msg}`;w.appendChild(e);setTimeout(()=>e.remove(),3500);}
+function showTrialExpired(){document.getElementById('msgs').innerHTML=`<div class="welcome"><div class="welcome-ico">⏰</div><h2>Essai terminé</h2><p>Choisissez un plan pour continuer.</p><div class="suggestions"><div class="suggestion" onclick="openSettings('abonnement')">Voir les plans →</div></div></div>`;}
+function updateQuota(){
+  const l={trial:500,starter:500,pro:2000,unlimited:-1};
+  const lim=l[user?.plan]||500;
+  if(lim<0){document.getElementById('quotaText').textContent=msgCount+' msg';}
+  else{
+    const p=Math.min(Math.round((msgCount/lim)*100),100);
+    document.getElementById('quotaText').textContent=`${msgCount}/${lim}`;
+    const f=document.getElementById('quotaFill');
+    f.style.width=p+'%';f.className='quota-fill'+(p>90?' danger':p>70?' warn':'');
+  }
+  document.getElementById('rpMsgs').textContent=msgCount;
 }
 
-function handleFile(input) {
-  const file = input.files[0];
-  if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { showToast('Fichier trop volumineux (max 5 Mo)', 'err'); return; }
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const base64 = e.target.result.split(',')[1];
-    const mediaType = file.type || 'application/octet-stream';
-    pendingFile = { base64, mediaType, name: file.name };
-    document.getElementById('filePreviewName').textContent = file.name;
-    document.getElementById('filePreviewArea').style.display = 'flex';
-    showToast('Fichier joint : ' + file.name, 'ok');
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-
-function removeFile() {
-  pendingFile = null;
-  document.getElementById('filePreviewArea').style.display = 'none';
-}
-
-// ══════════════════════════════════════════════════════════════
-// DOWNLOAD RÉPONSE AGENT
-// ══════════════════════════════════════════════════════════════
-function downloadMsg(index) {
-  const msg = history[index];
-  if (!msg) return;
-  const agentName = currentAgent?.name || 'agent';
-  const filename = `${agentName}_reponse_${new Date().toISOString().slice(0,10)}.txt`;
-  const blob = new Blob([msg.content], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-  showToast('Téléchargement : ' + filename, 'ok');
-}
-
-// Fermer settings en cliquant en dehors
-document.getElementById('settingsModal').addEventListener('click', function(e) {
-  if (e.target === this) closeSettings();
-});
+// Keyboard
+document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+document.getElementById('msgInput').addEventListener('input',function(){autoResize(this);});
 </script>
 </body>
 </html>
