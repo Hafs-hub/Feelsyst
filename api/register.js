@@ -1,4 +1,4 @@
-// api/register.js — Feelsyst V2 — Migré Supabase
+// api/register.js — Feelsyst V2 — Supabase + email awaité correctement
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -15,55 +15,89 @@ const STRIPE_LINKS = {
 };
 
 function hashPassword(password) {
-  return crypto.createHash('sha256').update(password + (process.env.PASSWORD_SALT || 'feelsyst2025')).digest('hex');
+  return crypto.createHash('sha256')
+    .update(password + (process.env.PASSWORD_SALT || 'feelsyst2025'))
+    .digest('hex');
 }
 
 function generateToken(email) {
-  return crypto.createHash('sha256').update(email + Date.now() + Math.random()).digest('hex');
+  return crypto.createHash('sha256')
+    .update(email + Date.now() + Math.random())
+    .digest('hex');
 }
 
-async function sendWelcomeEmail(user) {
+// ── Email de bienvenue — DOIT être awaité avant la réponse HTTP ──
+// Raison : Vercel termine la fonction serverless immédiatement après res.json()
+// Un appel fire-and-forget est tué avant d'atteindre Brevo
+async function sendWelcomeEmail(userData) {
   const BREVO_KEY = process.env.BREVO_API_KEY;
-  if (!BREVO_KEY) return;
 
-  const planNames = { trial: 'Découverte (7 jours gratuits)', starter: 'Starter', pro: 'Pro', unlimited: 'Illimité' };
+  if (!BREVO_KEY) {
+    console.error('❌ BREVO_API_KEY absente des variables Vercel — email non envoyé');
+    throw new Error('BREVO_API_KEY manquante');
+  }
 
-  const emailBody = `Bonjour ${user.firstname},
+  console.log(`📧 Envoi email de bienvenue à ${userData.email}...`);
+
+  const planNames = {
+    trial:     'Découverte (7 jours gratuits)',
+    starter:   'Starter',
+    pro:       'Pro',
+    unlimited: 'Illimité',
+  };
+
+  const emailBody = `Bonjour ${userData.firstname},
 
 Je suis Rex, votre agent commercial IA chez Feelsyst. 🤝
 
 Votre compte a été créé avec succès ! Voici vos informations :
 
-• Plan : ${planNames[user.plan] || user.plan}
-• Entreprise : ${user.company}
-• Secteur : ${user.sector}
+• Plan : ${planNames[userData.plan] || userData.plan}
+• Entreprise : ${userData.company}
+• Secteur : ${userData.sector}
 
-${user.plan === 'trial'
+${userData.plan === 'trial'
   ? 'Vous disposez de 7 jours pour tester nos agents IA en conditions réelles. Pas de carte bancaire requise.'
   : 'Votre abonnement est actif. Vos agents IA sont prêts à travailler pour vous.'}
 
 Accédez à votre tableau de bord : https://feelsyst.com/dashboard.html
 
-Vos agents IA qui vous attendent :
+Vos 8 agents IA qui vous attendent :
 🧠 Aria — Stratégie & Veille marché
 ✨ Nova — Marketing & Création de contenu
 💼 Rex — Ventes & Prospection (c'est moi !)
 📊 Vera — Finance & Facturation
 💬 Lumi — Support client 24h/7j
+⚖️ Lex — Juridique & Conformité RGPD
+📈 Pulse — Analytics & Reporting
+🎓 Atlas — Onboarding & Formation
 
 À très vite,
 Rex — Agent Commercial IA Feelsyst`;
 
-  await fetch('https://api.brevo.com/v3/smtp/email', {
+  const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'api-key': BREVO_KEY },
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': BREVO_KEY,
+    },
     body: JSON.stringify({
       sender: { name: 'Rex — Feelsyst', email: 'contact@feelsyst.com' },
-      to: [{ email: user.email, name: `${user.firstname} ${user.lastname}` }],
-      subject: `Bienvenue sur Feelsyst ${user.firstname} — Vos agents IA sont prêts 🚀`,
+      to: [{ email: userData.email, name: `${userData.firstname} ${userData.lastname}` }],
+      subject: `Bienvenue sur Feelsyst ${userData.firstname} — Vos agents IA sont prêts 🚀`,
       textContent: emailBody,
     }),
   });
+
+  const brevoData = await brevoRes.json();
+
+  if (!brevoRes.ok) {
+    console.error('❌ Brevo API erreur:', JSON.stringify(brevoData));
+    throw new Error(`Brevo ${brevoRes.status}: ${JSON.stringify(brevoData)}`);
+  }
+
+  console.log('✅ Email de bienvenue envoyé avec succès. MessageId:', brevoData.messageId);
+  return brevoData;
 }
 
 module.exports = async (req, res) => {
@@ -100,7 +134,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Un compte existe déjà avec cet email' });
     }
 
-    // Créer le client dans Supabase
+    // Créer le client
     const trialEndsAt = plan === 'trial'
       ? new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()
       : null;
@@ -115,37 +149,46 @@ module.exports = async (req, res) => {
         plan,
         status: plan === 'trial' ? 'trial' : 'active',
         trial_ends_at: trialEndsAt,
-        password_hash: hashPassword(password), // ← ajouter colonne password_hash à la table clients (voir note)
+        password_hash: hashPassword(password),
       }])
       .select()
       .single();
 
     if (insertError) throw insertError;
 
-    // Générer le token et le stocker dans Supabase
+    // Créer la session
     const token = generateToken(normalizedEmail);
-
     await supabase.from('sessions').insert([{
       token,
       client_id: newClient.id,
-      expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(), // 30 jours
+      expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
     }]);
 
-    // Email de bienvenue Rex
-    sendWelcomeEmail({
-      firstname: firstname.trim(),
-      lastname: lastname.trim(),
-      email: normalizedEmail,
-      company: company.trim(),
-      sector,
-      plan,
-    }).catch(e => console.error('Email error:', e));
+    // ── Email AWAITÉ avant la réponse ──
+    // Critique : ne pas mettre en fire-and-forget
+    // Vercel tue les fonctions immédiatement après res.json()
+    let emailSent = false;
+    try {
+      await sendWelcomeEmail({
+        firstname: firstname.trim(),
+        lastname: lastname.trim(),
+        email: normalizedEmail,
+        company: company.trim(),
+        sector,
+        plan,
+      });
+      emailSent = true;
+    } catch (emailErr) {
+      // L'email échoue → inscription réussie quand même
+      console.error('❌ Erreur envoi email bienvenue:', emailErr.message);
+    }
 
     const paymentUrl = plan !== 'trial' ? STRIPE_LINKS[plan] : null;
 
     return res.status(200).json({
       success: true,
       token,
+      emailSent,
       user: {
         id: newClient.id,
         firstname: firstname.trim(),
