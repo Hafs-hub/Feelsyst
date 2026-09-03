@@ -780,16 +780,37 @@ window.addEventListener('load', async () => {
   const token = localStorage.getItem('feelsyst_token');
   if (!token) { location.href = 'auth.html'; return; }
 
-  // Vérification basique du format JWT (3 parties séparées par des points)
+  // ── VÉRIFICATION CLIENT DU JWT ──
   const jwtParts = token.split('.');
   if (jwtParts.length !== 3) {
     localStorage.removeItem('feelsyst_token');
     location.href = 'auth.html';
     return;
   }
+  // Décoder le payload et vérifier l'expiration
+  try {
+    const payload = JSON.parse(atob(jwtParts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem('feelsyst_token');
+      location.href = 'auth.html';
+      return;
+    }
+  } catch(e) {
+    // Payload illisible → token invalide
+    localStorage.removeItem('feelsyst_token');
+    location.href = 'auth.html';
+    return;
+  }
 
-  // Timeout wrapper pour éviter loader infini
-  const fetchWithTimeout = (url, opts, timeout = 8000) => {
+  // ── TIMEOUT DE SECOURS ABSOLU ──
+  // Si après 5s le loader est toujours là, on force la redirection
+  const fallbackTimer = setTimeout(() => {
+    localStorage.removeItem('feelsyst_token');
+    location.href = 'auth.html';
+  }, 5000);
+
+  // ── FETCH AVEC TIMEOUT COURT ──
+  const fetchWithTimeout = (url, opts, timeout = 4000) => {
     return Promise.race([
       fetch(url, opts),
       new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
@@ -798,8 +819,8 @@ window.addEventListener('load', async () => {
 
   try {
     const r = await fetchWithTimeout('/api/me', { headers:{'Authorization':`Bearer ${token}`} });
+    clearTimeout(fallbackTimer); // Annuler le secours si le fetch a répondu
 
-    // 401/403 = token invalide → redirection immédiate
     if (r.status === 401 || r.status === 403) {
       localStorage.removeItem('feelsyst_token');
       location.href = 'auth.html';
@@ -808,13 +829,24 @@ window.addEventListener('load', async () => {
 
     if (!r.ok) {
       const d = await r.json().catch(() => ({}));
-      if (d.trialExpired) { showTrialExpired(); return; }
+      if (d.trialExpired) {
+        // Si le plan n'est pas trial côté client mais le backend dit trialExpired,
+        // c'est une incohérence de données (ex: changement admin). On nettoie.
+        if (user && user.plan !== 'trial') {
+          user.trialEndsAt = null;
+          initUI();
+          return;
+        }
+        showTrialExpired();
+        return;
+      }
       throw new Error(d.error || 'Erreur serveur');
     }
 
     user = (await r.json()).user;
     initUI();
   } catch(e) {
+    clearTimeout(fallbackTimer);
     // Afficher un écran d'erreur au lieu de loader infini
     document.getElementById('loader').innerHTML = `
       <div style="text-align:center;padding:40px 20px;max-width:320px">
@@ -1015,7 +1047,14 @@ async function sendMessage() {
 
     if (r.status===401||r.status===403) {
       const d = await r.json();
-      if (d.trialExpired) showTrialExpired();
+      if (d.trialExpired) {
+        if (user && user.plan !== 'trial') {
+          user.trialEndsAt = null;
+          showToast('Mise à jour de votre plan…','ok');
+          return;
+        }
+        showTrialExpired();
+      }
       else { localStorage.removeItem('feelsyst_token'); location.href='auth.html'; }
       return;
     }
@@ -1418,7 +1457,7 @@ function updateAbonnementTab() {
   document.getElementById('currentPlanCard').innerHTML = `
     <div class="plan-card-sm current">
       <div><div class="plan-name-sm">${names[user.plan]||user.plan}</div>
-      <div class="plan-price-sm">${user.trialEndsAt?'Expire le '+new Date(user.trialEndsAt).toLocaleDateString('fr-FR'):'Renouvellement mensuel'}</div></div>
+      <div class="plan-price-sm">${user.plan==='trial'&&user.trialEndsAt?'Expire le '+new Date(user.trialEndsAt).toLocaleDateString('fr-FR'):'Renouvellement mensuel'}</div></div>
       ${user.plan==='trial'?'<button class="sp-btn sp-btn-primary" onclick="openSettings('abonnement')">Upgrader</button>':''}
     </div>`;
 
@@ -1501,7 +1540,14 @@ sendMessage = async function() {
 
     if (r.status===401||r.status===403) {
       const d = await r.json();
-      if (d.trialExpired) showTrialExpired();
+      if (d.trialExpired) {
+        if (user && user.plan !== 'trial') {
+          user.trialEndsAt = null;
+          showToast('Mise à jour de votre plan…','ok');
+          return;
+        }
+        showTrialExpired();
+      }
       else { localStorage.removeItem('feelsyst_token'); location.href='auth.html'; }
       return;
     }
