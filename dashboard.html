@@ -779,18 +779,65 @@ window.addEventListener('load', async () => {
   if (imp) { localStorage.setItem('feelsyst_token', imp); history.pushState({}, '', location.pathname); }
   const token = localStorage.getItem('feelsyst_token');
   if (!token) { location.href = 'auth.html'; return; }
+
+  // Vérification basique du format JWT (3 parties séparées par des points)
+  const jwtParts = token.split('.');
+  if (jwtParts.length !== 3) {
+    localStorage.removeItem('feelsyst_token');
+    location.href = 'auth.html';
+    return;
+  }
+
+  // Timeout wrapper pour éviter loader infini
+  const fetchWithTimeout = (url, opts, timeout = 8000) => {
+    return Promise.race([
+      fetch(url, opts),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+    ]);
+  };
+
   try {
-    const r = await fetch('/api/me', { headers:{'Authorization':`Bearer ${token}`} });
-    if (!r.ok) { localStorage.removeItem('feelsyst_token'); location.href = 'auth.html'; return; }
+    const r = await fetchWithTimeout('/api/me', { headers:{'Authorization':`Bearer ${token}`} });
+
+    // 401/403 = token invalide → redirection immédiate
+    if (r.status === 401 || r.status === 403) {
+      localStorage.removeItem('feelsyst_token');
+      location.href = 'auth.html';
+      return;
+    }
+
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      if (d.trialExpired) { showTrialExpired(); return; }
+      throw new Error(d.error || 'Erreur serveur');
+    }
+
     user = (await r.json()).user;
     initUI();
   } catch(e) {
-    showToast('Erreur de connexion','err');
-    setTimeout(()=>{ location.href='auth.html'; }, 2000);
+    // Afficher un écran d'erreur au lieu de loader infini
+    document.getElementById('loader').innerHTML = `
+      <div style="text-align:center;padding:40px 20px;max-width:320px">
+        <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+        <div style="font-family:var(--display);font-size:18px;font-weight:700;margin-bottom:10px">Impossible de se connecter</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6">
+          ${e.message === 'Timeout' ? 'Le serveur met trop de temps à répondre.' : 'Votre session a expiré ou le serveur est inaccessible.'}
+        </div>
+        <button onclick="localStorage.removeItem('feelsyst_token');location.href='auth.html'" 
+                style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--body)">
+          Se reconnecter
+        </button>
+        <button onclick="location.href='/'" 
+                style="display:block;margin:12px auto 0;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--body)">
+          Retour à l'accueil
+        </button>
+      </div>
+    `;
   }
 });
 
 function initUI() {
+  if (!user) { localStorage.removeItem('feelsyst_token'); location.href = 'auth.html'; return; }
   document.getElementById('loader').style.display = 'none';
   document.getElementById('topbar').style.display = 'flex';
   document.getElementById('appBody').style.display = 'flex';
@@ -1035,28 +1082,7 @@ function switchAgentConfigTab(agentId) {
   document.getElementById('cfg-'+agentId)?.classList.add('active');
 }
 
-function updateAbonnementTab() {
-  const limits = {trial:500,starter:500,pro:2000,unlimited:-1};
-  const names  = {trial:'Trial',starter:'Starter 29€/mois',pro:'Pro 79€/mois',unlimited:'Illimité 179€/mois'};
-  const limit  = limits[user.plan]||500;
-  const pct    = limit>0 ? Math.min(Math.round((msgCount/limit)*100),100) : 0;
-  document.getElementById('currentPlanCard').innerHTML = `
-    <div class="plan-card-sm current">
-      <div><div class="plan-name-sm">${names[user.plan]||user.plan}</div>
-      <div class="plan-price-sm">${user.trialEndsAt?'Expire le '+new Date(user.trialEndsAt).toLocaleDateString('fr-FR'):''}</div></div>
-      ${user.plan==='trial'?'<button class="sp-btn sp-btn-primary" onclick="openSettings(\'abonnement\')">Upgrader</button>':''}
-    </div>`;
-  const lbl = limit>0?`${msgCount} / ${limit} messages`:msgCount+' messages (illimité)';
-  document.getElementById('usageLbl').textContent = lbl;
-  document.getElementById('usagePct').textContent = limit>0?pct+'%':'';
-  const fill = document.getElementById('usageFill');
-  fill.style.width = (limit>0?pct:5)+'%';
-  fill.textContent = limit>0?pct+'%':'';
-  if (pct>=80) {
-    document.getElementById('usageAlert').style.display='block';
-    document.getElementById('usageAlert').textContent = `⚠ Alerte à 80% (${Math.round(limit*.8)} messages) — Pensez à upgrader.`;
-  }
-}
+
 
 async function saveProfile() {
   const firstname = document.getElementById('pFirstname').value.trim();
@@ -1221,7 +1247,12 @@ function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 function fmtTime(d){if(!d)return '';return new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
 function showToast(msg,type='ok'){const w=document.getElementById('toastWrap');const e=document.createElement('div');e.className=`toast ${type}`;e.innerHTML=`${type==='ok'?'✅':'❌'} ${msg}`;w.appendChild(e);setTimeout(()=>e.remove(),3500);}
-function showTrialExpired(){document.getElementById('msgs').innerHTML=`<div class="welcome"><div class="welcome-ico">⏰</div><h2>Essai terminé</h2><p>Choisissez un plan pour continuer.</p><div class="suggestions"><div class="suggestion" onclick="openSettings('abonnement')">Voir les plans →</div></div></div>`;}
+function showTrialExpired(){
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('appBody').style.display = 'flex';
+  document.getElementById('msgs').innerHTML=`<div class="welcome"><div class="welcome-ico">⏰</div><h2>Essai terminé</h2><p>Choisissez un plan pour continuer.</p><div class="suggestions"><div class="suggestion" onclick="openSettings('abonnement')">Voir les plans →</div></div></div>`;
+}
 function updateQuota(){
   const l={trial:500,starter:500,pro:2000,unlimited:-1};
   const lim=l[user?.plan]||500;
