@@ -425,13 +425,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
       <div class="sp-tab-content" id="tab-securite">
         <div class="sp-section">
           <div class="sp-section-title">🔒 Mot de passe</div>
-          <div class="sp-row"><span class="sp-row-label">Mot de passe actuel</span><span class="sp-row-val">••••••••</span></div>
-          <button class="sp-btn sp-btn-ghost" onclick="showToast('Fonctionnalité bientôt disponible','err')" style="margin-top:10px">Modifier</button>
+          <label class="sp-label">Mot de passe actuel</label>
+          <input class="sp-input" id="pwdCurrent" type="password" placeholder="••••••••">
+          <label class="sp-label">Nouveau mot de passe</label>
+          <input class="sp-input" id="pwdNew" type="password" placeholder="Min. 8 caractères">
+          <label class="sp-label">Confirmer le nouveau mot de passe</label>
+          <input class="sp-input" id="pwdConfirm" type="password" placeholder="Répétez le mot de passe">
+          <div id="pwdError" style="display:none;color:var(--red);font-size:12px;margin-top:8px"></div>
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <button class="sp-btn sp-btn-primary" onclick="changePassword()">💾 Modifier le mot de passe</button>
+          </div>
         </div>
         <div class="sp-section">
           <div class="sp-section-title">🛡 Authentification à deux facteurs (2FA)</div>
-          <div class="sp-row"><span class="sp-row-label">Statut</span><span style="color:var(--red);font-size:13px">Désactivé</span></div>
-          <button class="sp-btn sp-btn-ghost" onclick="showToast('2FA bientôt disponible','err')" style="margin-top:10px">Activer</button>
+          <div class="sp-row"><span class="sp-row-label">Statut</span><span id="2faStatus" style="color:var(--red);font-size:13px">Désactivé</span></div>
+          <div id="2faSetup" style="display:none;margin-top:12px">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Scannez ce QR Code avec votre application d'authentification (Google Authenticator, Authy…)</p>
+            <div id="2faQr" style="background:#fff;border-radius:8px;padding:12px;display:inline-block;margin-bottom:10px;width:160px;height:160px;display:flex;align-items:center;justify-content:center">
+              <span style="color:#333;font-size:12px">Chargement…</span>
+            </div>
+            <label class="sp-label">Code de vérification (6 chiffres)</label>
+            <input class="sp-input" id="2faCode" type="text" maxlength="6" placeholder="123456" style="max-width:120px">
+            <div style="display:flex;gap:10px;margin-top:10px">
+              <button class="sp-btn sp-btn-primary" onclick="verify2FA()">✅ Activer le 2FA</button>
+              <button class="sp-btn sp-btn-ghost" onclick="cancel2FA()">Annuler</button>
+            </div>
+          </div>
+          <button id="2faBtn" class="sp-btn sp-btn-ghost" onclick="start2FA()" style="margin-top:10px">Activer</button>
           <p style="font-size:12px;color:var(--muted);margin-top:8px">Recommandé pour sécuriser l'accès à vos données entreprise.</p>
         </div>
         <div class="sp-section">
@@ -1057,7 +1077,7 @@ async function saveProfile() {
   } catch(e){showToast('Erreur: '+e.message,'err');}
 }
 
-function saveNotifications() { showToast('Préférences enregistrées','ok'); closeSettings(); }
+
 
 function saveAgentConfig() {
   const cfgs = {};
@@ -1092,7 +1112,33 @@ function resetAgentConfig() {
   showToast('Configuration réinitialisée','ok');
 }
 
-function upgradePlan(plan) { location.href='auth.html?plan='+plan; }
+async function upgradePlan(plan) {
+  if (!user) return;
+  // Si déjà sur ce plan, ne rien faire
+  if (user.plan === plan) { showToast('Vous êtes déjà sur ce plan','ok'); return; }
+
+  const token = localStorage.getItem('feelsyst_token');
+  const btn = event.target;
+  const originalText = btn.textContent;
+  btn.textContent = 'Chargement…';
+  btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ plan: plan, returnUrl: location.origin + location.pathname })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erreur de création de session');
+    if (d.url) { location.href = d.url; }
+    else { throw new Error('Aucune URL de redirection reçue'); }
+  } catch(e) {
+    showToast(e.message, 'err');
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
 function exportData() { showToast('Export RGPD bientôt disponible','err'); }
 function confirmDelete() { if(confirm('Supprimer définitivement votre compte ? Cette action est irréversible.')) showToast('Contactez contact@feelsyst.com pour la suppression','err'); }
 
@@ -1188,6 +1234,272 @@ function updateQuota(){
   }
   document.getElementById('rpMsgs').textContent=msgCount;
 }
+
+// ════════════════════════════════════
+// SÉCURITÉ — MOT DE PASSE
+// ════════════════════════════════════
+async function changePassword() {
+  const current = document.getElementById('pwdCurrent').value;
+  const neu     = document.getElementById('pwdNew').value;
+  const confirm = document.getElementById('pwdConfirm').value;
+  const errEl   = document.getElementById('pwdError');
+
+  if (!current || !neu || !confirm) {
+    errEl.textContent = 'Tous les champs sont requis.'; errEl.style.display = 'block'; return;
+  }
+  if (neu.length < 8) {
+    errEl.textContent = 'Le mot de passe doit faire au moins 8 caractères.'; errEl.style.display = 'block'; return;
+  }
+  if (neu !== confirm) {
+    errEl.textContent = 'Les mots de passe ne correspondent pas.'; errEl.style.display = 'block'; return;
+  }
+
+  errEl.style.display = 'none';
+  const token = localStorage.getItem('feelsyst_token');
+  try {
+    const r = await fetch('/api/password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ currentPassword: current, newPassword: neu })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erreur');
+    document.getElementById('pwdCurrent').value = '';
+    document.getElementById('pwdNew').value = '';
+    document.getElementById('pwdConfirm').value = '';
+    showToast('Mot de passe modifié avec succès', 'ok');
+  } catch(e) {
+    errEl.textContent = e.message; errEl.style.display = 'block';
+  }
+}
+
+// ════════════════════════════════════
+// SÉCURITÉ — 2FA
+// ════════════════════════════════════
+let _2faSecret = null;
+
+async function start2FA() {
+  const token = localStorage.getItem('feelsyst_token');
+  try {
+    const r = await fetch('/api/2fa/setup', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erreur');
+    _2faSecret = d.secret;
+    document.getElementById('2faQr').innerHTML = `<img src="${d.qrCodeUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4px" alt="QR Code 2FA">`;
+    document.getElementById('2faSetup').style.display = 'block';
+    document.getElementById('2faBtn').style.display = 'none';
+  } catch(e) {
+    showToast(e.message, 'err');
+  }
+}
+
+function cancel2FA() {
+  _2faSecret = null;
+  document.getElementById('2faSetup').style.display = 'none';
+  document.getElementById('2faBtn').style.display = 'inline-flex';
+  document.getElementById('2faCode').value = '';
+}
+
+async function verify2FA() {
+  const code = document.getElementById('2faCode').value.trim();
+  if (!/^\d{6}$/.test(code)) { showToast('Code invalide (6 chiffres)', 'err'); return; }
+  const token = localStorage.getItem('feelsyst_token');
+  try {
+    const r = await fetch('/api/2fa/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ secret: _2faSecret, code: code })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Code invalide');
+    document.getElementById('2faStatus').textContent = 'Activé';
+    document.getElementById('2faStatus').style.color = 'var(--green)';
+    document.getElementById('2faSetup').style.display = 'none';
+    document.getElementById('2faBtn').textContent = 'Désactiver';
+    document.getElementById('2faBtn').style.display = 'inline-flex';
+    document.getElementById('2faBtn').onclick = disable2FA;
+    showToast('2FA activé avec succès', 'ok');
+  } catch(e) {
+    showToast(e.message, 'err');
+  }
+}
+
+async function disable2FA() {
+  if (!confirm('Désactiver l'authentification à deux facteurs ?')) return;
+  const token = localStorage.getItem('feelsyst_token');
+  try {
+    const r = await fetch('/api/2fa', { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+    if (!r.ok) throw new Error('Erreur');
+    document.getElementById('2faStatus').textContent = 'Désactivé';
+    document.getElementById('2faStatus').style.color = 'var(--red)';
+    document.getElementById('2faBtn').textContent = 'Activer';
+    document.getElementById('2faBtn').onclick = start2FA;
+    showToast('2FA désactivé', 'ok');
+  } catch(e) {
+    showToast('Erreur lors de la désactivation', 'err');
+  }
+}
+
+// ════════════════════════════════════
+// NOTIFICATIONS — PERSISTANCE
+// ════════════════════════════════════
+function saveNotifications() {
+  const prefs = {
+    quota:   document.getElementById('notifQuota').checked,
+    weekly:  document.getElementById('notifWeekly').checked,
+    trial:   document.getElementById('notifTrial').checked,
+    news:    document.getElementById('notifNews').checked,
+    payment: document.getElementById('notifPayment').checked,
+    sound:   document.getElementById('notifSound').checked,
+    voice:   document.getElementById('notifVoice').checked,
+  };
+  localStorage.setItem('feelsyst_notif_' + (user?.id || 'x'), JSON.stringify(prefs));
+  showToast('Préférences enregistrées', 'ok');
+  closeSettings();
+}
+
+function loadNotifications() {
+  try {
+    const prefs = JSON.parse(localStorage.getItem('feelsyst_notif_' + (user?.id || 'x')) || '{}');
+    if ('quota'   in prefs) document.getElementById('notifQuota').checked   = prefs.quota;
+    if ('weekly'  in prefs) document.getElementById('notifWeekly').checked  = prefs.weekly;
+    if ('trial'   in prefs) document.getElementById('notifTrial').checked  = prefs.trial;
+    if ('news'    in prefs) document.getElementById('notifNews').checked    = prefs.news;
+    if ('payment' in prefs) document.getElementById('notifPayment').checked = prefs.payment;
+    if ('sound'   in prefs) document.getElementById('notifSound').checked  = prefs.sound;
+    if ('voice'   in prefs) document.getElementById('notifVoice').checked  = prefs.voice;
+  } catch(e) {}
+}
+
+// ════════════════════════════════════
+// CONSOMMATION — barre 0% fix
+// ════════════════════════════════════
+function updateAbonnementTab() {
+  const limits = {trial:500,starter:500,pro:2000,unlimited:-1};
+  const names  = {trial:'Trial',starter:'Starter 29€/mois',pro:'Pro 79€/mois',unlimited:'Illimité 179€/mois'};
+  const limit  = limits[user.plan]||500;
+  const pct    = limit>0 ? Math.min(Math.round((msgCount/limit)*100),100) : 0;
+
+  // Plan card
+  document.getElementById('currentPlanCard').innerHTML = `
+    <div class="plan-card-sm current">
+      <div><div class="plan-name-sm">${names[user.plan]||user.plan}</div>
+      <div class="plan-price-sm">${user.trialEndsAt?'Expire le '+new Date(user.trialEndsAt).toLocaleDateString('fr-FR'):'Renouvellement mensuel'}</div></div>
+      ${user.plan==='trial'?'<button class="sp-btn sp-btn-primary" onclick="openSettings('abonnement')">Upgrader</button>':''}
+    </div>`;
+
+  // Usage text
+  const lbl = limit>0?`${msgCount} / ${limit} messages`:msgCount+' messages (illimité)';
+  document.getElementById('usageLbl').textContent = lbl;
+  document.getElementById('usagePct').textContent = limit>0?pct+'%':'';
+
+  // Usage bar — FIX: min-width pour que le texte reste visible même à 0%
+  const fill = document.getElementById('usageFill');
+  const displayPct = limit>0 ? pct : 0;
+  fill.style.width = Math.max(displayPct, 3) + '%';
+  fill.textContent = limit>0 ? pct+'%' : '∞';
+  fill.style.whiteSpace = 'nowrap';
+
+  // Alert at 80%
+  if (pct>=80 && limit>0) {
+    document.getElementById('usageAlert').style.display='block';
+    document.getElementById('usageAlert').textContent = `⚠ Alerte à 80% (${Math.round(limit*.8)} messages) — Pensez à upgrader.`;
+  } else {
+    document.getElementById('usageAlert').style.display='none';
+  }
+}
+
+// ════════════════════════════════════
+// MÉMOIRE — injection dans le contexte conversation
+// ════════════════════════════════════
+async function fetchMemories() {
+  const token = localStorage.getItem('feelsyst_token');
+  try {
+    const r = await fetch('/api/memory', { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!r.ok) return [];
+    const d = await r.json();
+    return d.memories || [];
+  } catch(e) { return []; }
+}
+
+// Override sendMessage pour injecter les mémoires
+const _originalSendMessage = sendMessage;
+sendMessage = async function() {
+  if (!currentAgent || isLoading) return;
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text && !pendingFile) return;
+  input.value = ''; autoResize(input);
+
+  // Récupérer les mémoires
+  const memories = await fetchMemories();
+  const memoryContext = memories.length > 0 
+    ? '\n\n[INFORMATIONS ENTREPRISE]\n' + memories.map(m => `- ${m.category}: ${m.content}`).join('\n')
+    : '';
+
+  const userContent = pendingFile
+    ? [{type:pendingFile.mediaType.startsWith('image/')?'image':'document',
+        source:{type:'base64',media_type:pendingFile.mediaType,data:pendingFile.base64}},
+       {type:'text',text:(text||'Analyse ce fichier.') + memoryContext}]
+    : text + memoryContext;
+
+  history.push({role:'user',content:pendingFile?text||'[Fichier joint]':text,time:new Date()});
+  if (pendingFile) removeFile();
+  saveHistory();
+  renderMessages();
+  showTyping();
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  try {
+    const apiMsgs = history.slice(0,-1).map(m=>({role:m.role,content:typeof m.content==='string'?m.content:m.content}))
+      .concat([{role:'user',content:userContent}]);
+
+    const r = await fetch('/api/proxy-ai', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('feelsyst_token')}`},
+      body:JSON.stringify({
+        agent:currentAgent.id, messages:apiMsgs, max_tokens:1000,
+        userContext:{company:user?.company||'',sector:user?.sector||'',firstname:user?.firstname||'',plan:user?.plan||''},
+      }),
+    });
+    removeTyping();
+
+    if (r.status===401||r.status===403) {
+      const d = await r.json();
+      if (d.trialExpired) showTrialExpired();
+      else { localStorage.removeItem('feelsyst_token'); location.href='auth.html'; }
+      return;
+    }
+    if (!r.ok) { const e=await r.json(); showToast(e.error||'Erreur agent','err'); history.pop(); renderMessages(); return; }
+
+    const data = await r.json();
+    const reply = data.content?.[0]?.text || 'Désolé, erreur de traitement.';
+    history.push({role:'assistant',content:reply,time:new Date()});
+    msgCount++; saveMsgCount(); saveHistory(); updateQuota();
+    renderMessages();
+  } catch(e) {
+    removeTyping();
+    showToast('Erreur de connexion','err');
+    history.pop(); renderMessages();
+  } finally {
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('msgInput').focus();
+  }
+};
+
+// ════════════════════════════════════
+// OUVERTURE SETTINGS — charger les notifs
+// ════════════════════════════════════
+const _originalOpenSettings = openSettings;
+openSettings = function(tab) {
+  _originalOpenSettings(tab);
+  loadNotifications();
+};
 
 // Keyboard
 document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});

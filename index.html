@@ -142,29 +142,18 @@ section { padding: 80px 0; }
 .ag-caps li { font-size:12.5px; color:var(--text); display:flex; align-items:flex-start; gap:7px; line-height:1.4; }
 .ag-caps li::before { content:'→'; color:var(--violet); font-size:11px; flex-shrink:0; margin-top:2px; }
 
-/* ── COLLAB ── */
-.collab-box {
-  background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
-  padding: 36px; margin-top: 48px; position: relative; overflow: hidden;
-}
-.collab-box::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(124,92,252,0.06),rgba(252,92,125,0.04)); pointer-events:none; }
-.collab-flow { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-top:24px; }
-.cf-step { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-size:13px; }
-.cf-arrow { color:var(--violet); font-size:18px; }
-.collab-note { font-size:13px; color:var(--muted); margin-top:16px; line-height:1.6; }
+/* ── FEATURES STRIP ── */
+.features-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-top:48px; }
+.feat { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:24px; }
+.feat-icon { font-size:28px; margin-bottom:12px; }
+.feat h3 { font-family:var(--display); font-size:15px; font-weight:700; margin-bottom:6px; }
+.feat p { font-size:13px; color:var(--muted); line-height:1.6; }
 
 /* ── HOW IT WORKS ── */
 .steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:32px; margin-top:48px; }
 .step-num { width:44px; height:44px; background:rgba(124,92,252,0.12); border:1px solid rgba(124,92,252,0.25); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--display); font-size:16px; font-weight:800; color:var(--violet); margin-bottom:18px; }
 .step h3 { font-family:var(--display); font-size:17px; font-weight:700; margin-bottom:8px; }
 .step p { font-size:13.5px; color:var(--muted); line-height:1.65; }
-
-/* ── FEATURES STRIP ── */
-.features-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:48px; }
-.feat { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:24px; }
-.feat-icon { font-size:28px; margin-bottom:12px; }
-.feat h3 { font-family:var(--display); font-size:15px; font-weight:700; margin-bottom:6px; }
-.feat p { font-size:13px; color:var(--muted); line-height:1.6; }
 
 /* ── PRICING ── */
 .pricing-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:48px; align-items:start; }
@@ -184,10 +173,7 @@ section { padding: 80px 0; }
 .cta-outline:hover { border-color:var(--violet); color:var(--violet); }
 .cta-fill { background:linear-gradient(135deg,var(--violet),#6a46e8); color:#fff; box-shadow:0 4px 16px rgba(124,92,252,0.3); }
 .cta-fill:hover { box-shadow:0 6px 24px rgba(124,92,252,0.5); }
-
-/* ── INTEGRATIONS ── */
-.integ-grid { display:flex; flex-wrap:wrap; gap:12px; margin-top:36px; }
-.integ-pill { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:10px 18px; font-size:13px; font-weight:500; display:flex; align-items:center; gap:8px; }
+.price-old { text-decoration: line-through; color: var(--muted); font-size: 18px; margin-left: 8px; }
 
 /* ── FAQ ── */
 .faq-list { max-width:700px; margin:48px auto 0; }
@@ -225,8 +211,6 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
 @media(max-width:640px){
   .hero-ctas { flex-direction:column; align-items:center; }
   .hero-ctas .btn { width:100%; max-width:280px; justify-content:center; }
-  .collab-flow { flex-direction:column; align-items:flex-start; }
-  .cf-arrow { transform:rotate(90deg); }
   .footer-top { flex-direction:column; }
 }
 </style>
@@ -238,7 +222,7 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
   <a href="/" class="nav-logo"><span>Feelsyst</span></a>
   <ul class="nav-links">
     <li><a href="#agents">Agents</a></li>
-    <li><a href="#collaboration">Collaboration</a></li>
+    <li><a href="#fonctionnalites">Fonctionnalités</a></li>
     <li><a href="#comment">Comment ça marche</a></li>
     <li><a href="#tarifs">Tarifs</a></li>
     <li><a href="#faq">FAQ</a></li>
@@ -309,7 +293,7 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
           <div><div class="ag-name">Aria</div><div class="ag-role">Directrice Stratégie</div></div>
           <div class="ag-online"><div class="dot"></div>En ligne</div>
         </div>
-        <p class="ag-desc">Analyse votre marché, identifie vos opportunités et construit des plans d'action concrets adaptés à votre secteur et vos objectifs.</p>
+        <p class="ag-desc">Vous accompagne dans l'analyse de votre marché, l'identification de vos opportunités et la construction de plans d'action concrets adaptés à votre secteur.</p>
         <ul class="ag-caps">
           <li>Analyse concurrentielle et positionnement marché</li>
           <li>Roadmap produit et plan de développement 90 jours</li>
@@ -323,7 +307,7 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
           <div><div class="ag-name">Nova</div><div class="ag-role">Directrice Marketing</div></div>
           <div class="ag-online"><div class="dot"></div>En ligne</div>
         </div>
-        <p class="ag-desc">Génère du contenu, des campagnes et des idées marketing ciblées pour votre audience française, sans agence externe ni budget prohibitif.</p>
+        <p class="ag-desc">Rédige votre contenu, vos campagnes et vos idées marketing ciblées pour votre audience française, sans agence externe ni budget prohibitif.</p>
         <ul class="ag-caps">
           <li>Posts, emails, landing pages et scripts vidéo</li>
           <li>Calendrier éditorial et stratégie contenu</li>
@@ -337,11 +321,11 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
           <div><div class="ag-name">Rex</div><div class="ag-role">Directeur Commercial</div></div>
           <div class="ag-online"><div class="dot"></div>En ligne</div>
         </div>
-        <p class="ag-desc">Identifie des prospects B2B qualifiés, rédige des emails personnalisés et automatise votre pipeline commercial de A à Z.</p>
+        <p class="ag-desc">Vous accompagne dans votre prospection : rédaction d'emails d'approche, qualification de leads, structuration de votre pipeline commercial et conseils sur votre stratégie de vente.</p>
         <ul class="ag-caps">
-          <li>Génération de listes prospects par secteur et zone</li>
-          <li>Emails d'approche sur-mesure et relances</li>
-          <li>Scoring des leads et suivi du pipeline</li>
+          <li>Rédaction d'emails de prospection personnalisés</li>
+          <li>Conseils sur le scoring et le suivi des leads</li>
+          <li>Structuration du pipeline et objectifs commerciaux</li>
         </ul>
       </div>
 
@@ -351,9 +335,9 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
           <div><div class="ag-name">Vera</div><div class="ag-role">Directrice Finance</div></div>
           <div class="ag-online"><div class="dot"></div>En ligne</div>
         </div>
-        <p class="ag-desc">Gère votre facturation, analyse vos finances et envoie automatiquement vos factures avec TVA française après chaque paiement.</p>
+        <p class="ag-desc">Vous aide à structurer vos finances : modèles de factures avec TVA française, analyse de trésorerie, conseils sur la rentabilité et fixation de vos prix.</p>
         <ul class="ag-caps">
-          <li>Génération et envoi automatique de factures</li>
+          <li>Modèles de factures et devis avec TVA</li>
           <li>Projection de trésorerie et alertes</li>
           <li>Analyse de rentabilité par activité</li>
         </ul>
@@ -365,11 +349,11 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
           <div><div class="ag-name">Lumi</div><div class="ag-role">Responsable Support</div></div>
           <div class="ag-online"><div class="dot"></div>En ligne</div>
         </div>
-        <p class="ag-desc">Répond à vos clients instantanément en français, résout les problèmes courants et escalade les cas complexes avec un résumé complet.</p>
+        <p class="ag-desc">Vous aide à structurer votre support client : rédaction de réponses, création de FAQ, définition de procédures d'escalade et conseils sur votre expérience client.</p>
         <ul class="ag-caps">
-          <li>Support client 24h/7j en français</li>
-          <li>Base de connaissance entraînable</li>
-          <li>Escalade intelligente avec résumé automatique</li>
+          <li>Rédaction de réponses et de scripts support</li>
+          <li>Création de FAQ et base de connaissance</li>
+          <li>Structuration des procédures d'escalade</li>
         </ul>
       </div>
 
@@ -379,11 +363,11 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
           <div><div class="ag-name">Lex</div><div class="ag-role">Conseiller Juridique</div></div>
           <div class="ag-online"><div class="dot"></div>En ligne</div>
         </div>
-        <p class="ag-desc">Rédige vos documents légaux, analyse vos contrats et vous alerte sur vos obligations RGPD et légales — sans cabinet d'avocats.</p>
+        <p class="ag-desc">Rédige vos documents légaux, analyse vos contrats et vous conseille sur vos obligations RGPD et légales — pour vous faire gagner du temps sur les démarches courantes.</p>
         <ul class="ag-caps">
           <li>Rédaction CGV, CGU et mentions légales</li>
           <li>Analyse de contrats et détection de risques</li>
-          <li>Veille réglementaire et alertes conformité RGPD</li>
+          <li>Veille réglementaire et conseils conformité RGPD</li>
         </ul>
       </div>
 
@@ -393,11 +377,11 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
           <div><div class="ag-name">Pulse</div><div class="ag-role">Analyste & Reporting</div></div>
           <div class="ag-online"><div class="dot"></div>En ligne</div>
         </div>
-        <p class="ag-desc">Génère chaque lundi un rapport PDF de vos performances avec les tendances, anomalies et recommandations concrètes. Sans que vous fassiez quoi que ce soit.</p>
+        <p class="ag-desc">Analyse vos données et performances : identification de tendances, anomalies et recommandations concrètes. Vous fournissez les chiffres, il vous éclaire.</p>
         <ul class="ag-caps">
-          <li>Rapports hebdomadaires automatiques en PDF</li>
-          <li>Connexion GA4, Stripe et vos données</li>
-          <li>Alertes "ventes -12% cette semaine, voici pourquoi"</li>
+          <li>Analyse des chiffres de vente et de performance</li>
+          <li>Identification des KPIs prioritaires</li>
+          <li>Recommandations basées sur vos données</li>
         </ul>
       </div>
 
@@ -419,34 +403,8 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
   </div>
 </section>
 
-<!-- COLLABORATION -->
-<section id="collaboration">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-label">La vraie différence</div>
-      <h2 class="sec-title">Des agents qui <em>collaborent</em></h2>
-      <p class="sec-sub">Feelsyst ne propose pas juste des agents qui répondent. Ils agissent ensemble sur une seule commande.</p>
-    </div>
-
-    <div class="collab-box reveal">
-      <h3 style="font-family:var(--display);font-size:17px;font-weight:700;margin-bottom:6px">Exemple : "Lancez une campagne de prospection sur les PME tech en Île-de-France"</h3>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">En une commande, vos agents s'organisent automatiquement :</p>
-      <div class="collab-flow">
-        <div class="cf-step">💼 <strong>Rex</strong> génère 50 prospects qualifiés</div>
-        <div class="cf-arrow">→</div>
-        <div class="cf-step">✨ <strong>Nova</strong> rédige les emails personnalisés</div>
-        <div class="cf-arrow">→</div>
-        <div class="cf-step">📊 <strong>Vera</strong> prépare les devis</div>
-        <div class="cf-arrow">→</div>
-        <div class="cf-step">📈 <strong>Pulse</strong> suit les résultats</div>
-      </div>
-      <p class="collab-note">Pas de coordination manuelle. Pas de copier-coller entre outils. Vos agents se parlent et livrent le résultat complet.</p>
-    </div>
-  </div>
-</section>
-
 <!-- FEATURES -->
-<section class="sec-bg">
+<section id="fonctionnalites">
   <div class="container">
     <div class="reveal">
       <div class="sec-label">Fonctionnalités</div>
@@ -455,24 +413,19 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
 
     <div class="features-strip">
       <div class="feat reveal">
-        <div class="feat-icon">📄</div>
-        <h3>Rapports PDF automatiques</h3>
-        <p>Chaque lundi, Pulse génère un rapport complet de vos performances et le dépose dans votre tableau de bord.</p>
+        <div class="feat-icon">🎯</div>
+        <h3>Conseil sur-mesure</h3>
+        <p>Chaque agent connaît votre secteur et vos objectifs pour vous donner des réponses personnalisées et directement exploitables.</p>
       </div>
       <div class="feat reveal">
-        <div class="feat-icon">🔗</div>
-        <h3>Intégrations natives</h3>
-        <p>Brevo, Stripe, Notion, Google Workspace, WhatsApp Business et Zapier pour connecter vos outils existants.</p>
+        <div class="feat-icon">✍️</div>
+        <h3>Rédaction instantanée</h3>
+        <p>Emails, contrats, posts LinkedIn, factures, scripts support — vos agents rédigent vos documents en quelques secondes.</p>
       </div>
       <div class="feat reveal">
-        <div class="feat-icon">🧠</div>
-        <h3>Mémoire persistante</h3>
-        <p>Vos agents mémorisent le contexte de votre entreprise — secteur, clients, historique — pour des réponses toujours pertinentes.</p>
-      </div>
-      <div class="feat reveal">
-        <div class="feat-icon">🎙️</div>
-        <h3>Mode vocal</h3>
-        <p>Parlez à vos agents comme à un collègue. Idéal pour les dirigeants en déplacement ou qui n'ont pas le temps de taper.</p>
+        <div class="feat-icon">🌙</div>
+        <h3>Disponible 24h/7j</h3>
+        <p>Vos agents répondent à toute heure, sans jours fériés. Posez vos questions quand vous en avez besoin.</p>
       </div>
       <div class="feat reveal">
         <div class="feat-icon">🇫🇷</div>
@@ -489,7 +442,7 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
 </section>
 
 <!-- HOW IT WORKS -->
-<section id="comment">
+<section class="sec-bg" id="comment">
   <div class="container">
     <div class="reveal">
       <div class="sec-label">Simplicité</div>
@@ -516,28 +469,6 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
   </div>
 </section>
 
-<!-- INTEGRATIONS -->
-<section class="sec-bg">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-label">Intégrations</div>
-      <h2 class="sec-title">Connecté à vos outils</h2>
-      <p class="sec-sub">Feelsyst s'intègre nativement avec les outils que vous utilisez déjà.</p>
-    </div>
-    <div class="integ-grid reveal">
-      <div class="integ-pill">📧 Brevo</div>
-      <div class="integ-pill">💳 Stripe</div>
-      <div class="integ-pill">📝 Notion</div>
-      <div class="integ-pill">📊 Google Analytics</div>
-      <div class="integ-pill">📁 Google Drive</div>
-      <div class="integ-pill">💬 WhatsApp Business</div>
-      <div class="integ-pill">⚡ Zapier</div>
-      <div class="integ-pill">🔧 Make (Integromat)</div>
-      <div class="integ-pill">📮 HubSpot</div>
-    </div>
-  </div>
-</section>
-
 <!-- PRICING -->
 <section id="tarifs">
   <div class="container">
@@ -549,19 +480,21 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
 
     <div class="pricing-grid">
 
+      <!-- ── DÉCOUVERTE ── -->
       <div class="plan reveal">
         <div class="plan-name">Découverte</div>
         <div class="plan-price">0€ <small>/ 7 jours</small></div>
         <p class="plan-tagline">Accès complet. Sans carte bancaire.</p>
         <ul class="plan-feats">
-          <li>8 agents IA complets</li>
-          <li>500 messages inclus</li>
+          <li>8 agents IA disponibles</li>
+          <li>50 messages inclus</li>
           <li>Tableau de bord client</li>
-          <li>Support Lumi</li>
+          <li>Support Lumi en chat</li>
         </ul>
         <a href="auth.html" class="plan-cta cta-outline">Démarrer gratuitement</a>
       </div>
 
+      <!-- ── STARTER ── -->
       <div class="plan featured reveal">
         <div class="plan-badge">Le plus populaire</div>
         <div class="plan-name">Starter</div>
@@ -570,49 +503,49 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
         <ul class="plan-feats">
           <li>8 agents IA complets</li>
           <li>500 messages / mois</li>
-          <li>Facturation Vera automatique</li>
-          <li>Prospection Rex</li>
-          <li>Rapports Pulse hebdomadaires</li>
-          <li>Support prioritaire</li>
+          <li>Conseil stratégique (Aria)</li>
+          <li>Rédaction marketing (Nova)</li>
+          <li>Aide à la prospection (Rex)</li>
+          <li>Modèles de factures (Vera)</li>
+          <li>Support & FAQ (Lumi)</li>
+          <li>Documents juridiques (Lex)</li>
         </ul>
         <a href="auth.html?plan=starter" class="plan-cta cta-fill">Choisir Starter</a>
       </div>
 
+      <!-- ── PRO ── -->
       <div class="plan reveal">
         <div class="plan-name">Pro</div>
-        <div class="plan-price">79€ <small>/ mois</small></div>
+        <div class="plan-price">59€ <small>/ mois</small><span class="price-old">79€</span></div>
         <p class="plan-tagline">Pour les PME qui veulent accélérer.</p>
         <ul class="plan-feats">
           <li>8 agents IA complets</li>
           <li>2 000 messages / mois</li>
-          <li>Mode collaboration multi-agents</li>
-          <li>Intégrations (Brevo, Stripe, Notion)</li>
-          <li>Rapports PDF automatiques</li>
-          <li>WhatsApp Business (Lumi)</li>
+          <li>Historique des conversations illimité</li>
+          <li>Contexte entreprise mémorisé</li>
+          <li>Support prioritaire</li>
         </ul>
         <a href="auth.html?plan=pro" class="plan-cta cta-outline">Choisir Pro</a>
       </div>
 
+      <!-- ── ILLIMITÉ ── -->
       <div class="plan reveal">
         <div class="plan-name">Illimité</div>
-        <div class="plan-price">179€ <small>/ mois</small></div>
+        <div class="plan-price">99€ <small>/ mois</small><span class="price-old">179€</span></div>
         <p class="plan-tagline">Pour les PME qui veulent tout automatiser.</p>
         <ul class="plan-feats">
           <li>8 agents IA complets</li>
           <li>Messages illimités</li>
-          <li>Multi-utilisateurs</li>
-          <li>Personnalisation des agents</li>
-          <li>Mode vocal activé</li>
-          <li>Onboarding dédié par Atlas</li>
+          <li>Personnalisation des prompts agents</li>
+          <li>Onboarding guidé par Atlas</li>
+          <li>Accès anticipé aux nouvelles fonctionnalités</li>
         </ul>
         <a href="auth.html?plan=unlimited" class="plan-cta cta-outline">Choisir Illimité</a>
       </div>
 
     </div>
 
-    <div style="text-align:center;margin-top:24px">
-      <p style="font-size:13px;color:var(--muted)">Vous avez des besoins spécifiques ? <a href="mailto:contact@feelsyst.com" style="color:var(--violet);text-decoration:none">Contactez-nous pour un agent personnalisé →</a></p>
-    </div>
+
   </div>
 </section>
 
@@ -633,7 +566,7 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
 
       <div class="faq-item reveal">
         <button class="faq-q">Quelle est la différence entre Feelsyst et ChatGPT ?</button>
-        <div class="faq-a">Contrairement aux IA génériques, chaque agent Feelsyst connaît votre entreprise (secteur, clients, historique) et est spécialisé dans son domaine. Rex ne fait que de la prospection B2B. Lex ne fait que du juridique. Les résultats sont directement exploitables sans adaptation manuelle. Et vos agents peuvent collaborer entre eux sur des tâches complexes.</div>
+        <div class="faq-a">Contrairement aux IA génériques, chaque agent Feelsyst connaît votre entreprise (secteur, clients, historique) et est spécialisé dans son domaine. Rex ne fait que de la prospection B2B. Lex ne fait que du juridique. Les résultats sont directement exploitables sans adaptation manuelle.</div>
       </div>
 
       <div class="faq-item reveal">
@@ -647,18 +580,8 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
       </div>
 
       <div class="faq-item reveal">
-        <button class="faq-q">Comment fonctionne le mode collaboration multi-agents ?</button>
-        <div class="faq-a">En plan Pro et Illimité, vous pouvez donner une instruction globale et vos agents s'organisent entre eux pour l'exécuter. Par exemple : "préparez une campagne de prospection pour ce mois" — Rex trouve les prospects, Nova rédige les emails, Vera prépare les devis, Pulse suit les résultats. Tout automatiquement.</div>
-      </div>
-
-      <div class="faq-item reveal">
         <button class="faq-q">Lex peut-il remplacer un avocat ?</button>
         <div class="faq-a">Lex est un agent d'assistance juridique — il rédige vos CGV, CGU, analyse vos contrats et vous alerte sur vos obligations RGPD. Pour les litiges complexes ou décisions à fort enjeu, nous recommandons toujours de consulter un professionnel du droit. Lex vous fait gagner du temps et de l'argent sur les tâches juridiques courantes.</div>
-      </div>
-
-      <div class="faq-item reveal">
-        <button class="faq-q">Les rapports Pulse sont-ils vraiment automatiques ?</button>
-        <div class="faq-a">Oui. Chaque lundi matin, Pulse génère un rapport PDF complet de vos performances (ventes, usage, tendances, anomalies) et le dépose dans votre tableau de bord. Vous recevez aussi un email de synthèse. Aucune manipulation requise de votre part.</div>
       </div>
 
     </div>
@@ -695,7 +618,7 @@ footer { background:var(--surface); border-top:1px solid var(--border); padding:
         <h4>Produit</h4>
         <ul>
           <li><a href="#agents">Les 8 agents</a></li>
-          <li><a href="#collaboration">Collaboration</a></li>
+          <li><a href="#fonctionnalites">Fonctionnalités</a></li>
           <li><a href="#tarifs">Tarifs</a></li>
           <li><a href="auth.html">Connexion</a></li>
         </ul>
