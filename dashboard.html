@@ -344,7 +344,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
     </div>
     <div class="upgrade-card" id="upgradeCard" style="display:none">
       <h4>Passer au niveau sup.</h4>
-      <p>Messages illimités, intégrations, rapports PDF.</p>
+      <p>Personnalisez vos agents, upload de fichiers, analytics et support prioritaire.</p>
       <a onclick="openSettings('abonnement')">Voir les plans →</a>
     </div>
   </aside>
@@ -425,33 +425,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
       <div class="sp-tab-content" id="tab-securite">
         <div class="sp-section">
           <div class="sp-section-title">🔒 Mot de passe</div>
-          <label class="sp-label">Mot de passe actuel</label>
-          <input class="sp-input" id="pwdCurrent" type="password" placeholder="••••••••">
+          <div class="sp-row"><span class="sp-row-label">Mot de passe actuel</span><span class="sp-row-val">••••••••</span></div>
+          <label class="sp-label" style="margin-top:12px">Mot de passe actuel</label>
+          <input type="password" class="sp-input" id="pwdCurrent" placeholder="Votre mot de passe actuel">
           <label class="sp-label">Nouveau mot de passe</label>
-          <input class="sp-input" id="pwdNew" type="password" placeholder="Min. 8 caractères">
-          <label class="sp-label">Confirmer le nouveau mot de passe</label>
-          <input class="sp-input" id="pwdConfirm" type="password" placeholder="Répétez le mot de passe">
-          <div id="pwdError" style="display:none;color:var(--red);font-size:12px;margin-top:8px"></div>
-          <div style="display:flex;gap:10px;margin-top:12px">
-            <button class="sp-btn sp-btn-primary" onclick="changePassword()">💾 Modifier le mot de passe</button>
+          <input type="password" class="sp-input" id="pwdNew" placeholder="Min. 8 caractères" oninput="checkPwdStrength(this.value)">
+          <div class="pwd-strength" style="display:flex;gap:3px;margin-top:6px">
+            <div class="pwd-bar" id="dashBar1" style="flex:1;height:3px;background:var(--border);border-radius:2px"></div>
+            <div class="pwd-bar" id="dashBar2" style="flex:1;height:3px;background:var(--border);border-radius:2px"></div>
+            <div class="pwd-bar" id="dashBar3" style="flex:1;height:3px;background:var(--border);border-radius:2px"></div>
+            <div class="pwd-bar" id="dashBar4" style="flex:1;height:3px;background:var(--border);border-radius:2px"></div>
           </div>
+          <div class="pwd-label" id="dashPwdLabel" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+          <label class="sp-label">Confirmer le nouveau mot de passe</label>
+          <input type="password" class="sp-input" id="pwdConfirm" placeholder="Répétez le nouveau mot de passe">
+          <button class="sp-btn sp-btn-primary" onclick="changePassword()" style="margin-top:12px">💾 Modifier le mot de passe</button>
         </div>
         <div class="sp-section">
           <div class="sp-section-title">🛡 Authentification à deux facteurs (2FA)</div>
-          <div class="sp-row"><span class="sp-row-label">Statut</span><span id="2faStatus" style="color:var(--red);font-size:13px">Désactivé</span></div>
-          <div id="2faSetup" style="display:none;margin-top:12px">
-            <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Scannez ce QR Code avec votre application d'authentification (Google Authenticator, Authy…)</p>
-            <div id="2faQr" style="background:#fff;border-radius:8px;padding:12px;display:inline-block;margin-bottom:10px;width:160px;height:160px;display:flex;align-items:center;justify-content:center">
-              <span style="color:#333;font-size:12px">Chargement…</span>
-            </div>
-            <label class="sp-label">Code de vérification (6 chiffres)</label>
-            <input class="sp-input" id="2faCode" type="text" maxlength="6" placeholder="123456" style="max-width:120px">
-            <div style="display:flex;gap:10px;margin-top:10px">
-              <button class="sp-btn sp-btn-primary" onclick="verify2FA()">✅ Activer le 2FA</button>
-              <button class="sp-btn sp-btn-ghost" onclick="cancel2FA()">Annuler</button>
-            </div>
-          </div>
-          <button id="2faBtn" class="sp-btn sp-btn-ghost" onclick="start2FA()" style="margin-top:10px">Activer</button>
+          <div class="sp-row"><span class="sp-row-label">Statut</span><span style="color:var(--red);font-size:13px">Désactivé</span></div>
+          <button class="sp-btn sp-btn-ghost" onclick="toggle2FA()" style="margin-top:10px">Activer</button>
           <p style="font-size:12px;color:var(--muted);margin-top:8px">Recommandé pour sécuriser l'accès à vos données entreprise.</p>
         </div>
         <div class="sp-section">
@@ -483,9 +476,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
         </div>
         <div class="sp-section">
           <div class="sp-section-title">🚀 Changer de plan</div>
-          <div class="plan-card-sm"><div><div class="plan-name-sm">Starter</div><div class="plan-price-sm">29€/mois · 500 messages</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('starter')">Choisir</button></div>
-          <div class="plan-card-sm"><div><div class="plan-name-sm">Pro</div><div class="plan-price-sm">79€/mois · 2000 messages</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('pro')">Choisir</button></div>
-          <div class="plan-card-sm"><div><div class="plan-name-sm">Illimité</div><div class="plan-price-sm">179€/mois · Messages illimités</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('unlimited')">Choisir</button></div>
+          <div class="plan-card-sm"><div><div class="plan-name-sm">Découverte</div><div class="plan-price-sm">0€ · 7 jours · 30 messages · 5 agents</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('trial')">Choisir</button></div>
+          <div class="plan-card-sm"><div><div class="plan-name-sm">Starter</div><div class="plan-price-sm">29€/mois · 200 messages · 8 agents</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('starter')">Choisir</button></div>
+          <div class="plan-card-sm"><div><div class="plan-name-sm">Pro</div><div class="plan-price-sm"><span style="text-decoration:line-through;color:var(--muted)">79€</span> <strong>59€/mois</strong> · 800 messages · Personnalisation</div></div><button class="sp-btn sp-btn-ghost" onclick="upgradePlan('pro')">Choisir</button></div>
         </div>
       </div>
 
@@ -509,6 +502,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
 
       <!-- ── CONFIG AGENTS ── -->
       <div class="sp-tab-content" id="tab-agents">
+        <div id="agentUpgradeBanner" style="display:none;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--yellow)">
+          ⚡ La personnalisation des agents est réservée au plan <strong>Pro</strong>. <a onclick="upgradePlan('pro')" style="color:var(--yellow);text-decoration:underline;cursor:pointer">Upgrader maintenant →</a>
+        </div>
         <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Configurez chaque agent selon les besoins spécifiques de votre entreprise.</p>
         <div class="agent-tabs" id="agentConfigTabs"></div>
 
@@ -736,6 +732,18 @@ const AGENT_CAPS = {
   pulse:{readImg:true,memory:true},atlas:{readImg:false,memory:true},
 };
 
+// Permissions par plan
+const PLAN_PERMS = {
+  trial:   { agents: ['aria','nova','rex','vera','lumi'], maxHistory: 0, maxMemory: 0, canUpload: false, canCustomize: false, canAnalytics: false },
+  starter: { agents: ['aria','nova','rex','vera','lumi','lex','pulse','atlas'], maxHistory: 10, maxMemory: 3, canUpload: false, canCustomize: false, canAnalytics: false },
+  pro:     { agents: ['aria','nova','rex','vera','lumi','lex','pulse','atlas'], maxHistory: -1, maxMemory: -1, canUpload: true, canCustomize: true, canAnalytics: true },
+  unlimited:{agents: ['aria','nova','rex','vera','lumi','lex','pulse','atlas'], maxHistory: -1, maxMemory: -1, canUpload: true, canCustomize: true, canAnalytics: true },
+};
+
+function getPlanPerms() {
+  return PLAN_PERMS[user?.plan] || PLAN_PERMS.starter;
+}
+
 const AGENTS = [
   {id:'aria', emoji:'🧠',name:'Aria', role:'Directrice Stratégie',  accent:'#7c5cfc',rgb:'124,92,252',
    desc:'Demande-moi une analyse de ton marché, un plan stratégique ou une roadmap.',
@@ -779,105 +787,23 @@ window.addEventListener('load', async () => {
   if (imp) { localStorage.setItem('feelsyst_token', imp); history.pushState({}, '', location.pathname); }
   const token = localStorage.getItem('feelsyst_token');
   if (!token) { location.href = 'auth.html'; return; }
-
-  // ── VÉRIFICATION CLIENT DU JWT ──
-  const jwtParts = token.split('.');
-  if (jwtParts.length !== 3) {
-    localStorage.removeItem('feelsyst_token');
-    location.href = 'auth.html';
-    return;
-  }
-  // Décoder le payload et vérifier l'expiration
   try {
-    const payload = JSON.parse(atob(jwtParts[1].replace(/-/g, '+').replace(/_/g, '/')));
-    if (payload.exp && payload.exp * 1000 < Date.now()) {
-      localStorage.removeItem('feelsyst_token');
-      location.href = 'auth.html';
-      return;
-    }
-  } catch(e) {
-    // Payload illisible → token invalide
-    localStorage.removeItem('feelsyst_token');
-    location.href = 'auth.html';
-    return;
-  }
-
-  // ── TIMEOUT DE SECOURS ABSOLU ──
-  // Si après 12s le loader est toujours là, on force la redirection
-  const fallbackTimer = setTimeout(() => {
-    localStorage.removeItem('feelsyst_token');
-    location.href = 'auth.html';
-  }, 12000);
-
-  // ── FETCH AVEC ABORTCONTROLLER ──
-  const fetchWithTimeout = (url, opts, timeout = 10000) => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeout);
-    return fetch(url, { ...opts, signal: controller.signal })
-      .finally(() => clearTimeout(timer));
-  };
-
-  try {
-    const r = await fetchWithTimeout('/api/me', { 
-      headers:{
-        'Authorization':`Bearer ${token}`,
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
-      },
-      cache: 'no-store'
-    });
-    clearTimeout(fallbackTimer); // Annuler le secours si le fetch a répondu
-
-    if (r.status === 401 || r.status === 403) {
-      localStorage.removeItem('feelsyst_token');
-      location.href = 'auth.html';
-      return;
-    }
-
-    if (!r.ok) {
-      const d = await r.json().catch(() => ({}));
-      if (d.trialExpired) {
-        // Si le plan n'est pas trial côté client mais le backend dit trialExpired,
-        // c'est une incohérence de données (ex: changement admin). On nettoie.
-        if (user && user.plan !== 'trial') {
-          user.trialEndsAt = null;
-          initUI();
-          return;
-        }
-        showTrialExpired();
-        return;
-      }
-      throw new Error(d.error || 'Erreur serveur');
-    }
-
+    const r = await fetch('/api/me', { headers:{'Authorization':`Bearer ${token}`} });
+    if (!r.ok) { localStorage.removeItem('feelsyst_token'); location.href = 'auth.html'; return; }
     user = (await r.json()).user;
     initUI();
   } catch(e) {
-    clearTimeout(fallbackTimer);
-    // Afficher un écran d'erreur au lieu de loader infini
-    document.getElementById('loader').innerHTML = `
-      <div style="text-align:center;padding:40px 20px;max-width:320px">
-        <div style="font-size:48px;margin-bottom:16px">⚠️</div>
-        <div style="font-family:var(--display);font-size:18px;font-weight:700;margin-bottom:10px">Impossible de se connecter</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6">
-          ${e.message === 'Timeout' ? 'Le serveur met trop de temps à répondre.' : 'Votre session a expiré ou le serveur est inaccessible.'}
-        </div>
-        <button onclick="localStorage.removeItem('feelsyst_token');location.href='auth.html'" 
-                style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--body)">
-          Se reconnecter
-        </button>
-        <button onclick="location.href='/'" 
-                style="display:block;margin:12px auto 0;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--body)">
-          Retour à l'accueil
-        </button>
-      </div>
-    `;
+    showToast('Erreur de connexion','err');
+    setTimeout(()=>{ location.href='auth.html'; }, 2000);
   }
 });
 
 function initUI() {
-  if (!user) { localStorage.removeItem('feelsyst_token'); location.href = 'auth.html'; return; }
   document.getElementById('loader').style.display = 'none';
+  // Afficher le bandeau upgrade si plan insuffisant
+  const perms = getPlanPerms();
+  const upgradeBanner = document.getElementById('agentUpgradeBanner');
+  if (upgradeBanner && !perms.canCustomize) upgradeBanner.style.display = 'block';
   document.getElementById('topbar').style.display = 'flex';
   document.getElementById('appBody').style.display = 'flex';
 
@@ -886,6 +812,7 @@ function initUI() {
   document.getElementById('userName').textContent = user.firstname || user.email;
   const pb = document.getElementById('planBadge');
   pb.textContent = user.plan; pb.className = 'plan-badge badge-'+user.plan;
+  if (user.plan === 'trial') pb.textContent = 'Découverte';
 
   msgCount = loadMsgCount();
   updateQuota();
@@ -908,16 +835,22 @@ function initUI() {
 // BUILD LISTS
 // ════════════════════════════════════
 function buildAgentLists() {
+  const perms = getPlanPerms();
   const sb = document.getElementById('sidebarAgents');
-  sb.innerHTML = AGENTS.map(a => `
-    <button class="ag-btn" id="sb-${a.id}" onclick="selectAgent(AGENTS.find(x=>x.id==='${a.id}'))">
+  sb.innerHTML = AGENTS.map(a => {
+    const locked = !perms.agents.includes(a.id);
+    const opacity = locked ? 'opacity:.35;cursor:not-allowed;' : '';
+    const lockIcon = locked ? '🔒' : '';
+    const onlineDot = locked ? '' : '<div class="online-dot"></div>';
+    return `<button class="ag-btn" id="sb-${a.id}" onclick="${locked ? `showToast('${a.name} nécessite le plan Starter ou Pro','err')` : `selectAgent(AGENTS.find(x=>x.id==='${a.id}'))`}" style="${opacity}">
       <span class="ag-ico">${a.emoji}</span>
       <div style="flex:1;min-width:0">
-        <div class="ag-label">${a.name}</div>
-        <div class="ag-sub">${a.role.split(' ')[0]}</div>
+        <div class="ag-label">${a.name} ${lockIcon}</div>
+        <div class="ag-sub">${a.role.split(' ')[0]}${locked ? ' · Starter requis' : ''}</div>
       </div>
-      <div class="online-dot"></div>
-    </button>`).join('');
+      ${onlineDot}
+    </button>`;
+  }).join('');
 
   const mn = document.getElementById('mobileNav');
   mn.innerHTML = AGENTS.map(a => `
@@ -940,7 +873,7 @@ function buildRightPanel() {
       <div class="rp-dot" style="background:${a.accent}"></div>
       <span>${a.emoji} ${a.name}</span>
     </div>`).join('');
-  document.getElementById('rpPlan').textContent = user.plan;
+  document.getElementById('rpPlan').textContent = user.plan === 'trial' ? 'Découverte' : user.plan;
   document.getElementById('rpMsgs').textContent = msgCount;
   if (user.plan==='trial'||user.plan==='starter') document.getElementById('upgradeCard').style.display='block';
 }
@@ -950,6 +883,12 @@ function buildRightPanel() {
 // ════════════════════════════════════
 function selectAgent(agent) {
   if (!agent) return;
+  // Vérifier si l'agent est accessible avec le plan actuel
+  const perms = getPlanPerms();
+  if (!perms.agents.includes(agent.id)) {
+    showToast(`L'agent ${agent.name} nécessite le plan Starter ou Pro. Upgrader pour y accéder.`, 'err');
+    return;
+  }
   if (currentAgent && currentAgent.id !== agent.id) history = [];
   currentAgent = agent;
   localStorage.setItem('feelsyst_last_agent', agent.id);
@@ -974,10 +913,17 @@ function selectAgent(agent) {
   document.getElementById('sendBtn').disabled = false;
 
   const caps = AGENT_CAPS[agent.id]||{};
+  const perms = getPlanPerms();
   const ub = document.getElementById('uploadBtn');
-  ub.disabled = !caps.readImg;
-  ub.title = caps.readImg ? 'Joindre une image ou un PDF' : `${agent.name} ne peut pas analyser de fichiers`;
-  ub.style.opacity = caps.readImg ? '1' : '0.3';
+  const canUpload = caps.readImg && perms.canUpload;
+  ub.disabled = !canUpload;
+  if (!perms.canUpload) {
+    ub.title = 'L'upload de fichiers nécessite le plan Pro';
+    ub.style.opacity = '0.3';
+  } else {
+    ub.title = caps.readImg ? 'Joindre une image ou un PDF' : `${agent.name} ne peut pas analyser de fichiers`;
+    ub.style.opacity = caps.readImg ? '1' : '0.3';
+  }
 
   history = loadConvHistory(agent.id);
   renderMessages();
@@ -1054,14 +1000,7 @@ async function sendMessage() {
 
     if (r.status===401||r.status===403) {
       const d = await r.json();
-      if (d.trialExpired) {
-        if (user && user.plan !== 'trial') {
-          user.trialEndsAt = null;
-          showToast('Mise à jour de votre plan…','ok');
-          return;
-        }
-        showTrialExpired();
-      }
+      if (d.trialExpired) showTrialExpired();
       else { localStorage.removeItem('feelsyst_token'); location.href='auth.html'; }
       return;
     }
@@ -1088,6 +1027,20 @@ async function sendMessage() {
 // ════════════════════════════════════
 function openSettings(tab = 'profil') {
   if (!user) return;
+  const perms = getPlanPerms();
+  // Masquer l'onglet Agents IA si pas Pro
+  document.querySelectorAll('.sp-tab').forEach(t => {
+    if (t.textContent.includes('Agents IA') && !perms.canCustomize) {
+      t.style.display = 'none';
+    } else if (t.textContent.includes('Agents IA')) {
+      t.style.display = '';
+    }
+  });
+  // Rediriger vers profil si on essaie d'ouvrir Agents IA sans droit
+  if (tab === 'agents' && !perms.canCustomize) {
+    showToast('La personnalisation des agents est réservée au plan Pro','err');
+    tab = 'profil';
+  }
   document.getElementById('pFirstname').value = user.firstname || '';
   document.getElementById('pLastname').value  = (user.lastname) || '';
   document.getElementById('pEmail').value     = user.email || '';
@@ -1128,7 +1081,28 @@ function switchAgentConfigTab(agentId) {
   document.getElementById('cfg-'+agentId)?.classList.add('active');
 }
 
-
+function updateAbonnementTab() {
+  const limits = {trial:30,starter:200,pro:800};
+  const names  = {trial:'Découverte 0€/7j · 30 msg',starter:'Starter 29€/mois',pro:'Pro 59€/mois'};
+  const limit  = limits[user.plan]||500;
+  const pct    = limit>0 ? Math.min(Math.round((msgCount/limit)*100),100) : 0;
+  document.getElementById('currentPlanCard').innerHTML = `
+    <div class="plan-card-sm current">
+      <div><div class="plan-name-sm">${names[user.plan]||user.plan}</div>
+      <div class="plan-price-sm">${user.trialEndsAt?'Expire le '+new Date(user.trialEndsAt).toLocaleDateString('fr-FR'):''}</div></div>
+      ${user.plan==='trial'?'<button class="sp-btn sp-btn-primary" onclick="openSettings(\'abonnement\')">Upgrader</button>':''}
+    </div>`;
+  const lbl = limit>0?`${msgCount} / ${limit} messages`:msgCount+' messages (illimité)';
+  document.getElementById('usageLbl').textContent = lbl;
+  document.getElementById('usagePct').textContent = limit>0?pct+'%':'';
+  const fill = document.getElementById('usageFill');
+  fill.style.width = (limit>0?pct:5)+'%';
+  fill.textContent = limit>0?pct+'%':'';
+  if (pct>=80) {
+    document.getElementById('usageAlert').style.display='block';
+    document.getElementById('usageAlert').textContent = `⚠ Alerte à 80% (${Math.round(limit*.8)} messages) — Pensez à upgrader.`;
+  }
+}
 
 async function saveProfile() {
   const firstname = document.getElementById('pFirstname').value.trim();
@@ -1149,9 +1123,14 @@ async function saveProfile() {
   } catch(e){showToast('Erreur: '+e.message,'err');}
 }
 
-
+function saveNotifications() { showToast('Préférences enregistrées','ok'); closeSettings(); }
 
 function saveAgentConfig() {
+  const perms = getPlanPerms();
+  if (!perms.canCustomize) {
+    showToast('La personnalisation des agents nécessite le plan Pro','err');
+    return;
+  }
   const cfgs = {};
   AGENTS.forEach(a=>{
     const els = document.querySelectorAll(`#cfg-${a.id} input, #cfg-${a.id} select, #cfg-${a.id} textarea`);
@@ -1184,63 +1163,167 @@ function resetAgentConfig() {
   showToast('Configuration réinitialisée','ok');
 }
 
-async function upgradePlan(plan) {
-  if (!user) return;
-  // Si déjà sur ce plan, ne rien faire
-  if (user.plan === plan) { showToast('Vous êtes déjà sur ce plan','ok'); return; }
-
-  const token = localStorage.getItem('feelsyst_token');
-  const btn = event.target;
-  const originalText = btn.textContent;
-  btn.textContent = 'Chargement…';
-  btn.disabled = true;
-
+function upgradePlan(plan) { location.href='auth.html?plan='+plan; }
+function exportData() {
   try {
-    const r = await fetch('/api/checkout-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ plan: plan, returnUrl: location.origin + location.pathname })
+    const data = {
+      exportDate: new Date().toISOString(),
+      user: {
+        id: user?.id || null,
+        email: user?.email || '',
+        firstname: user?.firstname || '',
+        lastname: user?.lastname || '',
+        company: user?.company || '',
+        sector: user?.sector || '',
+        plan: user?.plan || '',
+        createdAt: user?.createdAt || null,
+        trialEndsAt: user?.trialEndsAt || null,
+      },
+      profile: {
+        siret: localStorage.getItem('feelsyst_siret_'+(user?.id||'')) || '',
+        website: localStorage.getItem('feelsyst_web_'+(user?.id||'')) || '',
+        phone: localStorage.getItem('feelsyst_phone_'+(user?.id||'')) || '',
+        description: localStorage.getItem('feelsyst_desc_'+(user?.id||'')) || '',
+      },
+      agentConfigs: JSON.parse(localStorage.getItem('feelsyst_agentcfg_'+(user?.id||'')) || '{}'),
+      conversations: {},
+      memories: JSON.parse(localStorage.getItem('feelsyst_memories_'+(user?.id||'')) || '[]'),
+      messageCount: msgCount,
+      notifications: {
+        quota: document.getElementById('notifQuota')?.checked,
+        weekly: document.getElementById('notifWeekly')?.checked,
+        trial: document.getElementById('notifTrial')?.checked,
+        news: document.getElementById('notifNews')?.checked,
+        payment: document.getElementById('notifPayment')?.checked,
+        sound: document.getElementById('notifSound')?.checked,
+        voice: document.getElementById('notifVoice')?.checked,
+      },
+    };
+    // Récupérer les conversations de tous les agents
+    AGENTS.forEach(a => {
+      const hist = localStorage.getItem(`feelsyst_hist_${user?.id}_${a.id}`);
+      if (hist) data.conversations[a.id] = JSON.parse(hist);
     });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Erreur de création de session');
-    if (d.url) { location.href = d.url; }
-    else { throw new Error('Aucune URL de redirection reçue'); }
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `feelsyst_export_${user?.email || 'user'}_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Export RGPD téléchargé','ok');
   } catch(e) {
-    showToast(e.message, 'err');
-    btn.textContent = originalText;
-    btn.disabled = false;
+    showToast('Erreur lors de l'export','err');
   }
 }
-function exportData() { showToast('Export RGPD bientôt disponible','err'); }
-function confirmDelete() { if(confirm('Supprimer définitivement votre compte ? Cette action est irréversible.')) showToast('Contactez contact@feelsyst.com pour la suppression','err'); }
+async function confirmDelete() {
+  if (!confirm('Supprimer définitivement votre compte ? Cette action est irréversible.
+
+Toutes vos données (profil, conversations, mémoires, factures) seront supprimées.')) return;
+  const confirmText = prompt('Pour confirmer, tapez "SUPPRIMER" en majuscules :');
+  if (confirmText !== 'SUPPRIMER') {
+    showToast('Suppression annulée','err');
+    return;
+  }
+  try {
+    const token = localStorage.getItem('feelsyst_token');
+    const r = await fetch('/api/account', {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+    if (r.ok) {
+      // Nettoyer le localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('feelsyst_')) localStorage.removeItem(key);
+      });
+      showToast('Compte supprimé. Redirection...','ok');
+      setTimeout(() => { window.location.href = '/'; }, 2000);
+    } else {
+      const d = await r.json();
+      showToast(d.error || 'Erreur de suppression','err');
+    }
+  } catch(e) {
+    showToast('Erreur de connexion. Réessayez.','err');
+  }
+}
 
 // ════════════════════════════════════
 // MÉMOIRE PARTAGÉE
 // ════════════════════════════════════
 async function loadMemory() {
   const token = localStorage.getItem('feelsyst_token');
-  const r = await fetch('/api/memory',{headers:{'Authorization':`Bearer ${token}`}}).catch(()=>null);
-  if(!r||!r.ok){document.getElementById('memoryList').innerHTML='<div style="font-size:12px;color:var(--muted)">Aucune mémoire — fonctionnalité bientôt disponible.</div>';return;}
-  const {memories=[]} = await r.json();
+  // Essayer d'abord le localStorage (fallback immédiat)
+  const localMem = JSON.parse(localStorage.getItem('feelsyst_memories_'+(user?.id||'')) || '[]');
+  if (localMem.length) {
+    renderMemories(localMem);
+  } else {
+    document.getElementById('memoryList').innerHTML = '<div style="font-size:12px;color:var(--muted)">Aucune mémoire enregistrée. Ajoutez des informations sur votre entreprise ci-dessous.</div>';
+  }
+  // Essayer l'API en arrière-plan
+  try {
+    const r = await fetch('/api/memory',{headers:{'Authorization':`Bearer ${token}`}});
+    if (r.ok) {
+      const {memories=[]} = await r.json();
+      if (memories.length) {
+        localStorage.setItem('feelsyst_memories_'+(user?.id||''), JSON.stringify(memories));
+        renderMemories(memories);
+      }
+    }
+  } catch(e) { /* API indisponible, localStorage suffit */ }
+}
+
+function renderMemories(memories) {
   document.getElementById('memoryList').innerHTML = memories.length
-    ? memories.map(m=>`<div class="mem-item"><span class="mem-cat">${m.category}</span><span class="mem-text">${escHtml((m.content||'').slice(0,80))}</span><button class="mem-rm" onclick="deleteMemory('${m.id}')">×</button></div>`).join('')
-    : '<div style="font-size:12px;color:var(--muted)">Aucune mémoire enregistrée.</div>';
+    ? memories.map((m,i)=>`<div class="mem-item"><span class="mem-cat">${m.category}</span><span class="mem-text">${escHtml((m.content||'').slice(0,80))}</span><button class="mem-rm" onclick="deleteMemory('${m.id||i}')">×</button></div>`).join('')
+    : '<div style="font-size:12px;color:var(--muted)">Aucune mémoire enregistrée. Ajoutez des informations sur votre entreprise ci-dessous.</div>';
 }
 
 async function addMemory() {
+  const perms = getPlanPerms();
+  if (perms.maxMemory === 0) { showToast('La mémoire partagée nécessite le plan Starter ou Pro','err'); return; }
   const cat = document.getElementById('memCat').value;
   const txt = document.getElementById('memInput').value.trim();
   if(!txt) return;
-  const token = localStorage.getItem('feelsyst_token');
-  const r = await fetch('/api/memory',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({category:cat,content:txt})});
-  if(r.ok){document.getElementById('memInput').value='';await loadMemory();showToast('Mémoire enregistrée','ok');}
-  else showToast('Erreur','err');
+  // Vérifier la limite pour Starter
+  const memKey = 'feelsyst_memories_'+(user?.id||'');
+  const currentMem = JSON.parse(localStorage.getItem(memKey) || '[]');
+  if (perms.maxMemory > 0 && currentMem.length >= perms.maxMemory) {
+    showToast(`Limite de ${perms.maxMemory} entrées atteinte. Passez au plan Pro pour illimité.`,'err');
+    return;
+  }
+  // Sauvegarder d'abord en localStorage (toujours disponible)
+  const memKey = 'feelsyst_memories_'+(user?.id||'');
+  const memories = JSON.parse(localStorage.getItem(memKey) || '[]');
+  const newMem = { id: 'local_'+Date.now(), category: cat, content: txt, createdAt: new Date().toISOString() };
+  memories.push(newMem);
+  localStorage.setItem(memKey, JSON.stringify(memories));
+  document.getElementById('memInput').value='';
+  renderMemories(memories);
+  showToast('Mémoire enregistrée','ok');
+  // Essayer l'API en arrière-plan
+  try {
+    const token = localStorage.getItem('feelsyst_token');
+    const r = await fetch('/api/memory',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({category:cat,content:txt})});
+    if(r.ok) await loadMemory();
+  } catch(e) { /* API indisponible, localStorage suffit */ }
 }
 
 async function deleteMemory(id) {
-  const token = localStorage.getItem('feelsyst_token');
-  const r = await fetch(`/api/memory?id=${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
-  if(r.ok){await loadMemory();showToast('Supprimé','ok');}
+  // Supprimer du localStorage d'abord
+  const memKey = 'feelsyst_memories_'+(user?.id||'');
+  let memories = JSON.parse(localStorage.getItem(memKey) || '[]');
+  memories = memories.filter(m => m.id !== id);
+  localStorage.setItem(memKey, JSON.stringify(memories));
+  renderMemories(memories);
+  showToast('Supprimé','ok');
+  // Essayer l'API en arrière-plan
+  try {
+    const token = localStorage.getItem('feelsyst_token');
+    const r = await fetch(`/api/memory?id=${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
+    if(r.ok) await loadMemory();
+  } catch(e) { /* API indisponible, localStorage suffit */ }
 }
 
 // ════════════════════════════════════
@@ -1253,11 +1336,21 @@ function saveMsgCount() {
   try{const k='feelsyst_msg_'+(user?.id||'x');const m=new Date().toISOString().slice(0,7);localStorage.setItem(k,JSON.stringify({count:msgCount,month:m}));}catch{}
 }
 function loadConvHistory(agentId) {
-  try{return JSON.parse(localStorage.getItem(`feelsyst_hist_${user?.id}_${agentId}`)||'[]').map(m=>({...m,time:m.time?new Date(m.time):new Date()}));}catch{return [];}
+  try {
+    const perms = getPlanPerms();
+    if (perms.maxHistory === 0) return []; // Découverte: pas d'historique
+    const hist = JSON.parse(localStorage.getItem(`feelsyst_hist_${user?.id}_${agentId}`)||'[]');
+    return hist.map(m=>({...m,time:m.time?new Date(m.time):new Date()}));
+  } catch { return []; }
 }
 function saveHistory() {
   if(!user||!currentAgent) return;
-  try{localStorage.setItem(`feelsyst_hist_${user.id}_${currentAgent.id}`,JSON.stringify(history.slice(-30).map(m=>({role:m.role,content:m.content,time:m.time}))));}catch{}
+  try {
+    const perms = getPlanPerms();
+    const limit = perms.maxHistory > 0 ? perms.maxHistory : (perms.maxHistory === -1 ? history.length : 0);
+    const toSave = perms.maxHistory === 0 ? [] : history.slice(-limit).map(m=>({role:m.role,content:m.content,time:m.time}));
+    localStorage.setItem(`feelsyst_hist_${user.id}_${currentAgent.id}`,JSON.stringify(toSave));
+  } catch {}
 }
 
 // ════════════════════════════════════
@@ -1265,6 +1358,8 @@ function saveHistory() {
 // ════════════════════════════════════
 function triggerUpload(){document.getElementById('fileInput').click();}
 function handleFile(input){
+  const perms = getPlanPerms();
+  if (!perms.canUpload) { showToast('L'upload de fichiers nécessite le plan Pro','err'); input.value=''; return; }
   const f=input.files[0];if(!f)return;
   if(f.size>5*1024*1024){showToast('Fichier trop volumineux (max 5 Mo)','err');return;}
   const r=new FileReader();
@@ -1293,16 +1388,53 @@ function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 function fmtTime(d){if(!d)return '';return new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
 function showToast(msg,type='ok'){const w=document.getElementById('toastWrap');const e=document.createElement('div');e.className=`toast ${type}`;e.innerHTML=`${type==='ok'?'✅':'❌'} ${msg}`;w.appendChild(e);setTimeout(()=>e.remove(),3500);}
-function showTrialExpired(){
-  document.getElementById('loader').style.display = 'none';
-  document.getElementById('topbar').style.display = 'flex';
-  document.getElementById('appBody').style.display = 'flex';
-  document.getElementById('msgs').innerHTML=`<div class="welcome"><div class="welcome-ico">⏰</div><h2>Essai terminé</h2><p>Choisissez un plan pour continuer.</p><div class="suggestions"><div class="suggestion" onclick="openSettings('abonnement')">Voir les plans →</div></div></div>`;
+function showTrialExpired(){document.getElementById('msgs').innerHTML=`<div class="welcome"><div class="welcome-ico">⏰</div><h2>Essai terminé</h2><p>Choisissez un plan pour continuer.</p><div class="suggestions"><div class="suggestion" onclick="openSettings('abonnement')">Voir les plans →</div></div></div>`;}
+
+// ── Force mot de passe ──
+function checkPwdStrength(val) {
+  const bars = ['dashBar1','dashBar2','dashBar3','dashBar4'];
+  const label = document.getElementById('dashPwdLabel');
+  let s = 0;
+  if (val.length >= 8) s++;
+  if (val.length >= 12) s++;
+  if (/[A-Z]/.test(val) && /[0-9]/.test(val)) s++;
+  if (/[^A-Za-z0-9]/.test(val)) s++;
+  const cls = ['','weak','fair','good','good'];
+  const txt = ['','Faible','Moyen','Bon','Excellent'];
+  const col = ['','var(--red)','var(--yellow)','var(--green)','var(--green)'];
+  bars.forEach((id,i)=>{const b=document.getElementById(id);b.style.background=i<s?col[s]:'var(--border)';});
+  label.textContent = val.length>0?txt[s]:''; label.style.color=col[s];
+}
+
+// ── Changement mot de passe ──
+async function changePassword() {
+  const current = document.getElementById('pwdCurrent').value;
+  const newPwd = document.getElementById('pwdNew').value;
+  const confirm = document.getElementById('pwdConfirm').value;
+  if (!current || !newPwd || !confirm) { showToast('Tous les champs sont requis','err'); return; }
+  if (newPwd.length < 8) { showToast('Nouveau mot de passe trop court (min. 8 caractères)','err'); return; }
+  if (newPwd !== confirm) { showToast('Les mots de passe ne correspondent pas','err'); return; }
+  try {
+    const r = await fetch('/api/password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('feelsyst_token')}` },
+      body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
+    });
+    const d = await r.json();
+    if (r.ok) { showToast('Mot de passe modifié avec succès','ok'); document.getElementById('pwdCurrent').value=''; document.getElementById('pwdNew').value=''; document.getElementById('pwdConfirm').value=''; checkPwdStrength(''); }
+    else { showToast(d.error || 'Erreur','err'); }
+  } catch(e) { showToast('Erreur de connexion','err'); }
+}
+
+// ── 2FA ──
+async function toggle2FA() {
+  showToast('La 2FA sera disponible prochainement. Contactez contact@feelsyst.com pour l'activer manuellement.','err');
 }
 function updateQuota(){
   const l={trial:500,starter:500,pro:2000,unlimited:-1};
   const lim=l[user?.plan]||500;
   if(lim<0){document.getElementById('quotaText').textContent=msgCount+' msg';}
+  else if(user.plan==='trial'){document.getElementById('quotaText').textContent=`${msgCount}/30 msg`;}
   else{
     const p=Math.min(Math.round((msgCount/lim)*100),100);
     document.getElementById('quotaText').textContent=`${msgCount}/${lim}`;
@@ -1311,279 +1443,6 @@ function updateQuota(){
   }
   document.getElementById('rpMsgs').textContent=msgCount;
 }
-
-// ════════════════════════════════════
-// SÉCURITÉ — MOT DE PASSE
-// ════════════════════════════════════
-async function changePassword() {
-  const current = document.getElementById('pwdCurrent').value;
-  const neu     = document.getElementById('pwdNew').value;
-  const confirm = document.getElementById('pwdConfirm').value;
-  const errEl   = document.getElementById('pwdError');
-
-  if (!current || !neu || !confirm) {
-    errEl.textContent = 'Tous les champs sont requis.'; errEl.style.display = 'block'; return;
-  }
-  if (neu.length < 8) {
-    errEl.textContent = 'Le mot de passe doit faire au moins 8 caractères.'; errEl.style.display = 'block'; return;
-  }
-  if (neu !== confirm) {
-    errEl.textContent = 'Les mots de passe ne correspondent pas.'; errEl.style.display = 'block'; return;
-  }
-
-  errEl.style.display = 'none';
-  const token = localStorage.getItem('feelsyst_token');
-  try {
-    const r = await fetch('/api/password', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ currentPassword: current, newPassword: neu })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Erreur');
-    document.getElementById('pwdCurrent').value = '';
-    document.getElementById('pwdNew').value = '';
-    document.getElementById('pwdConfirm').value = '';
-    showToast('Mot de passe modifié avec succès', 'ok');
-  } catch(e) {
-    errEl.textContent = e.message; errEl.style.display = 'block';
-  }
-}
-
-// ════════════════════════════════════
-// SÉCURITÉ — 2FA
-// ════════════════════════════════════
-let _2faSecret = null;
-
-async function start2FA() {
-  const token = localStorage.getItem('feelsyst_token');
-  try {
-    const r = await fetch('/api/2fa/setup', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Erreur');
-    _2faSecret = d.secret;
-    document.getElementById('2faQr').innerHTML = `<img src="${d.qrCodeUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4px" alt="QR Code 2FA">`;
-    document.getElementById('2faSetup').style.display = 'block';
-    document.getElementById('2faBtn').style.display = 'none';
-  } catch(e) {
-    showToast(e.message, 'err');
-  }
-}
-
-function cancel2FA() {
-  _2faSecret = null;
-  document.getElementById('2faSetup').style.display = 'none';
-  document.getElementById('2faBtn').style.display = 'inline-flex';
-  document.getElementById('2faCode').value = '';
-}
-
-async function verify2FA() {
-  const code = document.getElementById('2faCode').value.trim();
-  if (!/^\d{6}$/.test(code)) { showToast('Code invalide (6 chiffres)', 'err'); return; }
-  const token = localStorage.getItem('feelsyst_token');
-  try {
-    const r = await fetch('/api/2fa/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ secret: _2faSecret, code: code })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Code invalide');
-    document.getElementById('2faStatus').textContent = 'Activé';
-    document.getElementById('2faStatus').style.color = 'var(--green)';
-    document.getElementById('2faSetup').style.display = 'none';
-    document.getElementById('2faBtn').textContent = 'Désactiver';
-    document.getElementById('2faBtn').style.display = 'inline-flex';
-    document.getElementById('2faBtn').onclick = disable2FA;
-    showToast('2FA activé avec succès', 'ok');
-  } catch(e) {
-    showToast(e.message, 'err');
-  }
-}
-
-async function disable2FA() {
-  if (!confirm('Désactiver l'authentification à deux facteurs ?')) return;
-  const token = localStorage.getItem('feelsyst_token');
-  try {
-    const r = await fetch('/api/2fa', { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-    if (!r.ok) throw new Error('Erreur');
-    document.getElementById('2faStatus').textContent = 'Désactivé';
-    document.getElementById('2faStatus').style.color = 'var(--red)';
-    document.getElementById('2faBtn').textContent = 'Activer';
-    document.getElementById('2faBtn').onclick = start2FA;
-    showToast('2FA désactivé', 'ok');
-  } catch(e) {
-    showToast('Erreur lors de la désactivation', 'err');
-  }
-}
-
-// ════════════════════════════════════
-// NOTIFICATIONS — PERSISTANCE
-// ════════════════════════════════════
-function saveNotifications() {
-  const prefs = {
-    quota:   document.getElementById('notifQuota').checked,
-    weekly:  document.getElementById('notifWeekly').checked,
-    trial:   document.getElementById('notifTrial').checked,
-    news:    document.getElementById('notifNews').checked,
-    payment: document.getElementById('notifPayment').checked,
-    sound:   document.getElementById('notifSound').checked,
-    voice:   document.getElementById('notifVoice').checked,
-  };
-  localStorage.setItem('feelsyst_notif_' + (user?.id || 'x'), JSON.stringify(prefs));
-  showToast('Préférences enregistrées', 'ok');
-  closeSettings();
-}
-
-function loadNotifications() {
-  try {
-    const prefs = JSON.parse(localStorage.getItem('feelsyst_notif_' + (user?.id || 'x')) || '{}');
-    if ('quota'   in prefs) document.getElementById('notifQuota').checked   = prefs.quota;
-    if ('weekly'  in prefs) document.getElementById('notifWeekly').checked  = prefs.weekly;
-    if ('trial'   in prefs) document.getElementById('notifTrial').checked  = prefs.trial;
-    if ('news'    in prefs) document.getElementById('notifNews').checked    = prefs.news;
-    if ('payment' in prefs) document.getElementById('notifPayment').checked = prefs.payment;
-    if ('sound'   in prefs) document.getElementById('notifSound').checked  = prefs.sound;
-    if ('voice'   in prefs) document.getElementById('notifVoice').checked  = prefs.voice;
-  } catch(e) {}
-}
-
-// ════════════════════════════════════
-// CONSOMMATION — barre 0% fix
-// ════════════════════════════════════
-function updateAbonnementTab() {
-  const limits = {trial:500,starter:500,pro:2000,unlimited:-1};
-  const names  = {trial:'Trial',starter:'Starter 29€/mois',pro:'Pro 79€/mois',unlimited:'Illimité 179€/mois'};
-  const limit  = limits[user.plan]||500;
-  const pct    = limit>0 ? Math.min(Math.round((msgCount/limit)*100),100) : 0;
-
-  // Plan card
-  document.getElementById('currentPlanCard').innerHTML = `
-    <div class="plan-card-sm current">
-      <div><div class="plan-name-sm">${names[user.plan]||user.plan}</div>
-      <div class="plan-price-sm">${user.plan==='trial'&&user.trialEndsAt?'Expire le '+new Date(user.trialEndsAt).toLocaleDateString('fr-FR'):'Renouvellement mensuel'}</div></div>
-      ${user.plan==='trial'?'<button class="sp-btn sp-btn-primary" onclick="openSettings('abonnement')">Upgrader</button>':''}
-    </div>`;
-
-  // Usage text
-  const lbl = limit>0?`${msgCount} / ${limit} messages`:msgCount+' messages (illimité)';
-  document.getElementById('usageLbl').textContent = lbl;
-  document.getElementById('usagePct').textContent = limit>0?pct+'%':'';
-
-  // Usage bar — FIX: min-width pour que le texte reste visible même à 0%
-  const fill = document.getElementById('usageFill');
-  const displayPct = limit>0 ? pct : 0;
-  fill.style.width = Math.max(displayPct, 3) + '%';
-  fill.textContent = limit>0 ? pct+'%' : '∞';
-  fill.style.whiteSpace = 'nowrap';
-
-  // Alert at 80%
-  if (pct>=80 && limit>0) {
-    document.getElementById('usageAlert').style.display='block';
-    document.getElementById('usageAlert').textContent = `⚠ Alerte à 80% (${Math.round(limit*.8)} messages) — Pensez à upgrader.`;
-  } else {
-    document.getElementById('usageAlert').style.display='none';
-  }
-}
-
-// ════════════════════════════════════
-// MÉMOIRE — injection dans le contexte conversation
-// ════════════════════════════════════
-async function fetchMemories() {
-  const token = localStorage.getItem('feelsyst_token');
-  try {
-    const r = await fetch('/api/memory', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (!r.ok) return [];
-    const d = await r.json();
-    return d.memories || [];
-  } catch(e) { return []; }
-}
-
-// Override sendMessage pour injecter les mémoires
-const _originalSendMessage = sendMessage;
-sendMessage = async function() {
-  if (!currentAgent || isLoading) return;
-  const input = document.getElementById('msgInput');
-  const text = input.value.trim();
-  if (!text && !pendingFile) return;
-  input.value = ''; autoResize(input);
-
-  // Récupérer les mémoires
-  const memories = await fetchMemories();
-  const memoryContext = memories.length > 0 
-    ? '\n\n[INFORMATIONS ENTREPRISE]\n' + memories.map(m => `- ${m.category}: ${m.content}`).join('\n')
-    : '';
-
-  const userContent = pendingFile
-    ? [{type:pendingFile.mediaType.startsWith('image/')?'image':'document',
-        source:{type:'base64',media_type:pendingFile.mediaType,data:pendingFile.base64}},
-       {type:'text',text:(text||'Analyse ce fichier.') + memoryContext}]
-    : text + memoryContext;
-
-  history.push({role:'user',content:pendingFile?text||'[Fichier joint]':text,time:new Date()});
-  if (pendingFile) removeFile();
-  saveHistory();
-  renderMessages();
-  showTyping();
-  isLoading = true;
-  document.getElementById('sendBtn').disabled = true;
-
-  try {
-    const apiMsgs = history.slice(0,-1).map(m=>({role:m.role,content:typeof m.content==='string'?m.content:m.content}))
-      .concat([{role:'user',content:userContent}]);
-
-    const r = await fetch('/api/proxy-ai', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('feelsyst_token')}`},
-      body:JSON.stringify({
-        agent:currentAgent.id, messages:apiMsgs, max_tokens:1000,
-        userContext:{company:user?.company||'',sector:user?.sector||'',firstname:user?.firstname||'',plan:user?.plan||''},
-      }),
-    });
-    removeTyping();
-
-    if (r.status===401||r.status===403) {
-      const d = await r.json();
-      if (d.trialExpired) {
-        if (user && user.plan !== 'trial') {
-          user.trialEndsAt = null;
-          showToast('Mise à jour de votre plan…','ok');
-          return;
-        }
-        showTrialExpired();
-      }
-      else { localStorage.removeItem('feelsyst_token'); location.href='auth.html'; }
-      return;
-    }
-    if (!r.ok) { const e=await r.json(); showToast(e.error||'Erreur agent','err'); history.pop(); renderMessages(); return; }
-
-    const data = await r.json();
-    const reply = data.content?.[0]?.text || 'Désolé, erreur de traitement.';
-    history.push({role:'assistant',content:reply,time:new Date()});
-    msgCount++; saveMsgCount(); saveHistory(); updateQuota();
-    renderMessages();
-  } catch(e) {
-    removeTyping();
-    showToast('Erreur de connexion','err');
-    history.pop(); renderMessages();
-  } finally {
-    isLoading = false;
-    document.getElementById('sendBtn').disabled = false;
-    document.getElementById('msgInput').focus();
-  }
-};
-
-// ════════════════════════════════════
-// OUVERTURE SETTINGS — charger les notifs
-// ════════════════════════════════════
-const _originalOpenSettings = openSettings;
-openSettings = function(tab) {
-  _originalOpenSettings(tab);
-  loadNotifications();
-};
 
 // Keyboard
 document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});

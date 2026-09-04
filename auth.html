@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -644,12 +644,8 @@ input[type="radio"] { display: none; }
           <label class="plan-option" onclick="setPlan('pro')">
             <input type="radio" name="plan" value="pro">
             <div class="plan-opt-name">Pro</div>
-            <div class="plan-opt-price">79 €/mois</div>
-          </label>
-          <label class="plan-option" onclick="setPlan('unlimited')">
-            <input type="radio" name="plan" value="unlimited">
-            <div class="plan-opt-name">Illimité</div>
-            <div class="plan-opt-price">179 €/mois</div>
+            <div class="plan-opt-price"><span style="text-decoration:line-through;opacity:.6">79 €</span> 59 €/mois</div>
+            <div style="font-size:11px;color:var(--green);margin-top:4px">+ Personnalisation agents, upload fichiers, analytics</div>
           </label>
         </div>
       </div>
@@ -753,7 +749,7 @@ function setPlan(plan) {
   if (radio) radio.closest('.plan-option').classList.add('selected');
 
   // Mettre à jour le texte du bouton
-  const labels = { trial:'Créer mon compte gratuit →', starter:'Continuer vers le paiement →', pro:'Continuer vers le paiement →', unlimited:'Continuer vers le paiement →' };
+  const labels = { trial:'Créer mon compte gratuit →', starter:'Continuer vers le paiement →', pro:'Continuer vers le paiement (59€/mois) →' };
   const btnText = document.querySelector('#registerBtn .btn-text');
   if (btnText) btnText.textContent = labels[plan] || 'Créer mon compte →';
 }
