@@ -210,6 +210,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
 .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* ERROR SCREEN */
+.error-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:998;padding:40px;text-align:center;}
+.error-screen.visible{display:flex;}
+.error-ico{font-size:48px;}
+.error-screen h2{font-family:var(--display);font-size:20px;font-weight:700;}
+.error-screen p{font-size:14px;color:var(--muted);max-width:400px;line-height:1.6;}
+.error-actions{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center;}
+
 /* MOBILE */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:6px 2px;padding-bottom:calc(6px + env(safe-area-inset-bottom));gap:2px;z-index:50;overflow-x:auto;scrollbar-width:none;}
 .mobile-nav::-webkit-scrollbar{display:none;}
@@ -255,6 +263,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
 <div class="full-loader" id="loader">
   <div class="spinner"></div>
   <div style="font-size:14px;color:var(--muted)">Connexion à votre équipe IA…</div>
+</div>
+
+<!-- ERROR SCREEN -->
+<div class="error-screen" id="errorScreen">
+  <div class="error-ico">⚠️</div>
+  <h2 id="errorTitle">Problème de connexion</h2>
+  <p id="errorDesc">Impossible de se connecter au serveur. Vérifiez votre connexion internet et réessayez.</p>
+  <div class="error-actions">
+    <button class="sp-btn sp-btn-primary" onclick="retryInit()">🔄 Réessayer</button>
+    <button class="sp-btn sp-btn-ghost" onclick="goToAuth()">🔐 Se reconnecter</button>
+  </div>
 </div>
 
 <!-- TOPBAR -->
@@ -779,56 +798,118 @@ let msgCount = 0, pendingFile = null;
 let currentAgentConfigTab = 'aria';
 
 // ════════════════════════════════════
-// INIT
+// INIT — CORRIGÉ AVEC TIMEOUT ET GESTION D'ERREURS
 // ════════════════════════════════════
 window.addEventListener('load', async () => {
   const params = new URLSearchParams(location.search);
   const imp = params.get('impersonate_token');
   if (imp) { localStorage.setItem('feelsyst_token', imp); history.pushState({}, '', location.pathname); }
-  const token = localStorage.getItem('feelsyst_token');
-  if (!token) { location.href = 'auth.html'; return; }
-  try {
-    const r = await fetch('/api/me', { headers:{'Authorization':`Bearer ${token}`} });
-    if (!r.ok) { localStorage.removeItem('feelsyst_token'); location.href = 'auth.html'; return; }
-    user = (await r.json()).user;
-    initUI();
-  } catch(e) {
-    showToast('Erreur de connexion','err');
-    setTimeout(()=>{ location.href='auth.html'; }, 2000);
-  }
+  await initApp();
 });
 
-function initUI() {
+async function initApp() {
+  const token = localStorage.getItem('feelsyst_token');
+  if (!token) { goToAuth(); return; }
+
+  try {
+    // Timeout de 10 secondes sur le fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const r = await fetch('/api/me', {
+      headers: { 'Authorization': `Bearer ${token}` },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (!r.ok) {
+      if (r.status === 401 || r.status === 403) {
+        localStorage.removeItem('feelsyst_token');
+        goToAuth();
+        return;
+      }
+      throw new Error(`HTTP ${r.status}`);
+    }
+
+    const data = await r.json();
+    if (!data || !data.user) {
+      throw new Error('Réponse API invalide');
+    }
+    user = data.user;
+
+    // Vérifier que user a les propriétés minimales requises
+    if (!user.plan) user.plan = 'starter';
+    if (!user.id) user.id = 'local_' + Date.now();
+
+    initUI();
+  } catch (e) {
+    console.error('Erreur init:', e);
+    // En cas d'erreur réseau, proposer de réessayer ou de se reconnecter
+    if (e.name === 'AbortError') {
+      showErrorScreen('⏱️ Délai dépassé', 'Le serveur met trop de temps à répondre. Vérifiez votre connexion internet.');
+    } else if (e.message && e.message.includes('Failed to fetch')) {
+      showErrorScreen('📡 Hors ligne', 'Impossible de joindre le serveur. Vérifiez votre connexion internet.');
+    } else {
+      showErrorScreen('⚠️ Erreur', e.message || 'Une erreur est survenue lors de la connexion.');
+    }
+  }
+}
+
+function showErrorScreen(title, desc) {
   document.getElementById('loader').style.display = 'none';
-  // Afficher le bandeau upgrade si plan insuffisant
+  document.getElementById('errorTitle').textContent = title;
+  document.getElementById('errorDesc').textContent = desc;
+  document.getElementById('errorScreen').classList.add('visible');
+}
+
+function retryInit() {
+  document.getElementById('errorScreen').classList.remove('visible');
+  document.getElementById('loader').style.display = 'flex';
+  initApp();
+}
+
+function goToAuth() {
+  location.href = 'auth.html';
+}
+
+function initUI() {
+  // Toujours cacher le loader et l'écran d'erreur
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('errorScreen').classList.remove('visible');
+
   const perms = getPlanPerms();
   const upgradeBanner = document.getElementById('agentUpgradeBanner');
   if (upgradeBanner && !perms.canCustomize) upgradeBanner.style.display = 'block';
+
   document.getElementById('topbar').style.display = 'flex';
   document.getElementById('appBody').style.display = 'flex';
 
-  const init = (user.firstname || user.email || '?')[0].toUpperCase();
+  const init = (user?.firstname || user?.email || '?')[0].toUpperCase();
   document.getElementById('userAv').textContent = init;
-  document.getElementById('userName').textContent = user.firstname || user.email;
+  document.getElementById('userName').textContent = user?.firstname || user?.email || 'Utilisateur';
   const pb = document.getElementById('planBadge');
-  pb.textContent = user.plan; pb.className = 'plan-badge badge-'+user.plan;
-  if (user.plan === 'trial') pb.textContent = 'Découverte';
+  pb.textContent = user?.plan || 'starter';
+  pb.className = 'plan-badge badge-' + (user?.plan || 'starter');
+  if (user?.plan === 'trial') pb.textContent = 'Découverte';
 
   msgCount = loadMsgCount();
   updateQuota();
   buildAgentLists();
   buildRightPanel();
 
-  if (user.plan === 'trial' && user.trialEndsAt) {
-    const d = Math.ceil((new Date(user.trialEndsAt) - Date.now())/86400000);
+  if (user?.plan === 'trial' && user?.trialEndsAt) {
+    const d = Math.ceil((new Date(user.trialEndsAt) - Date.now()) / 86400000);
     if (d >= 0 && d <= 3) {
       document.getElementById('trialBanner').classList.remove('hidden');
-      document.getElementById('trialText').textContent = `⏰ Votre essai expire dans ${d} jour${d>1?'s':''}. Choisissez un plan pour continuer.`;
+      document.getElementById('trialText').textContent = `⏰ Votre essai expire dans ${d} jour${d > 1 ? 's' : ''}. Choisissez un plan pour continuer.`;
     }
   }
 
   const lastAgent = localStorage.getItem('feelsyst_last_agent');
-  if (lastAgent) { const a = AGENTS.find(x=>x.id===lastAgent); if(a) selectAgent(a); }
+  if (lastAgent) {
+    const a = AGENTS.find(x => x.id === lastAgent);
+    if (a) selectAgent(a);
+  }
 }
 
 // ════════════════════════════════════
@@ -873,9 +954,9 @@ function buildRightPanel() {
       <div class="rp-dot" style="background:${a.accent}"></div>
       <span>${a.emoji} ${a.name}</span>
     </div>`).join('');
-  document.getElementById('rpPlan').textContent = user.plan === 'trial' ? 'Découverte' : user.plan;
+  document.getElementById('rpPlan').textContent = user?.plan === 'trial' ? 'Découverte' : (user?.plan || 'starter');
   document.getElementById('rpMsgs').textContent = msgCount;
-  if (user.plan==='trial'||user.plan==='starter') document.getElementById('upgradeCard').style.display='block';
+  if (user?.plan === 'trial' || user?.plan === 'starter') document.getElementById('upgradeCard').style.display = 'block';
 }
 
 // ════════════════════════════════════
@@ -883,7 +964,6 @@ function buildRightPanel() {
 // ════════════════════════════════════
 function selectAgent(agent) {
   if (!agent) return;
-  // Vérifier si l'agent est accessible avec le plan actuel
   const perms = getPlanPerms();
   if (!perms.agents.includes(agent.id)) {
     showToast(`L'agent ${agent.name} nécessite le plan Starter ou Pro. Upgrader pour y accéder.`, 'err');
@@ -895,12 +975,12 @@ function selectAgent(agent) {
 
   document.documentElement.style.setProperty('--accent', agent.accent);
   document.documentElement.style.setProperty('--accent-rgb', agent.rgb);
-  document.documentElement.style.setProperty('--accent2', agent.accent+'cc');
+  document.documentElement.style.setProperty('--accent2', agent.accent + 'cc');
 
-  document.querySelectorAll('.ag-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.mb-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sb-'+agent.id)?.classList.add('active');
-  document.getElementById('mb-'+agent.id)?.classList.add('active');
+  document.querySelectorAll('.ag-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mb-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sb-' + agent.id)?.classList.add('active');
+  document.getElementById('mb-' + agent.id)?.classList.add('active');
 
   document.getElementById('chatHeader').classList.remove('hidden');
   document.getElementById('chIco').textContent = agent.emoji;
@@ -912,13 +992,12 @@ function selectAgent(agent) {
   input.disabled = false;
   document.getElementById('sendBtn').disabled = false;
 
-  const caps = AGENT_CAPS[agent.id]||{};
-  const perms = getPlanPerms();
+  const caps = AGENT_CAPS[agent.id] || {};
   const ub = document.getElementById('uploadBtn');
   const canUpload = caps.readImg && perms.canUpload;
   ub.disabled = !canUpload;
   if (!perms.canUpload) {
-    ub.title = 'L'upload de fichiers nécessite le plan Pro';
+    ub.title = "L'upload de fichiers nécessite le plan Pro";
     ub.style.opacity = '0.3';
   } else {
     ub.title = caps.readImg ? 'Joindre une image ou un PDF' : `${agent.name} ne peut pas analyser de fichiers`;
@@ -943,19 +1022,19 @@ function renderMessages() {
         <h2>Bonjour, je suis ${currentAgent.name}</h2>
         <p>${currentAgent.desc}</p>
         <div class="suggestions">
-          ${currentAgent.suggestions.map(s=>`<div class="suggestion" onclick="useSuggestion('${s.replace(/'/g,"\\'")}')">${s}</div>`).join('')}
+          ${currentAgent.suggestions.map(s => `<div class="suggestion" onclick="useSuggestion('${s.replace(/'/g, "\'")}')">${s}</div>`).join('')}
         </div>
       </div>`;
     return;
   }
-  c.innerHTML = history.map((m,i) => `
-    <div class="msg ${m.role==='user'?'user':'agent'}">
-      <div class="msg-av">${m.role==='user'?(user?.firstname||'?')[0].toUpperCase():currentAgent.emoji}</div>
+  c.innerHTML = history.map((m, i) => `
+    <div class="msg ${m.role === 'user' ? 'user' : 'agent'}">
+      <div class="msg-av">${m.role === 'user' ? (user?.firstname || '?')[0].toUpperCase() : currentAgent.emoji}</div>
       <div class="msg-body">
         <div class="msg-bubble">${escHtml(m.content)}</div>
         <div class="msg-actions">
           <button class="ma-btn" onclick="copyMsg(${i})">Copier</button>
-          ${m.role==='assistant'?`<button class="ma-btn" onclick="downloadMsg(${i})">⬇</button>`:''}
+          ${m.role === 'assistant' ? `<button class="ma-btn" onclick="downloadMsg(${i})">⬇</button>` : ''}
         </div>
         <div class="msg-time">${fmtTime(m.time)}</div>
       </div>
@@ -971,12 +1050,12 @@ async function sendMessage() {
   input.value = ''; autoResize(input);
 
   const userContent = pendingFile
-    ? [{type:pendingFile.mediaType.startsWith('image/')?'image':'document',
-        source:{type:'base64',media_type:pendingFile.mediaType,data:pendingFile.base64}},
-       {type:'text',text:text||'Analyse ce fichier.'}]
+    ? [{ type: pendingFile.mediaType.startsWith('image/') ? 'image' : 'document',
+        source: { type: 'base64', media_type: pendingFile.mediaType, data: pendingFile.base64 } },
+       { type: 'text', text: text || 'Analyse ce fichier.' }]
     : text;
 
-  history.push({role:'user',content:pendingFile?text||'[Fichier joint]':text,time:new Date()});
+  history.push({ role: 'user', content: pendingFile ? text || '[Fichier joint]' : text, time: new Date() });
   if (pendingFile) removeFile();
   saveHistory();
   renderMessages();
@@ -985,35 +1064,44 @@ async function sendMessage() {
   document.getElementById('sendBtn').disabled = true;
 
   try {
-    const apiMsgs = history.slice(0,-1).map(m=>({role:m.role,content:typeof m.content==='string'?m.content:m.content}))
-      .concat([{role:'user',content:userContent}]);
+    const apiMsgs = history.slice(0, -1).map(m => ({ role: m.role, content: typeof m.content === 'string' ? m.content : m.content }))
+      .concat([{ role: 'user', content: userContent }]);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     const r = await fetch('/api/proxy-ai', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('feelsyst_token')}`},
-      body:JSON.stringify({
-        agent:currentAgent.id, messages:apiMsgs, max_tokens:1000,
-        userContext:{company:user?.company||'',sector:user?.sector||'',firstname:user?.firstname||'',plan:user?.plan||''},
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('feelsyst_token')}` },
+      body: JSON.stringify({
+        agent: currentAgent.id, messages: apiMsgs, max_tokens: 1000,
+        userContext: { company: user?.company || '', sector: user?.sector || '', firstname: user?.firstname || '', plan: user?.plan || '' },
       }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
     removeTyping();
 
-    if (r.status===401||r.status===403) {
+    if (r.status === 401 || r.status === 403) {
       const d = await r.json();
       if (d.trialExpired) showTrialExpired();
-      else { localStorage.removeItem('feelsyst_token'); location.href='auth.html'; }
+      else { localStorage.removeItem('feelsyst_token'); goToAuth(); }
       return;
     }
-    if (!r.ok) { const e=await r.json(); showToast(e.error||'Erreur agent','err'); history.pop(); renderMessages(); return; }
+    if (!r.ok) { const e = await r.json(); showToast(e.error || 'Erreur agent', 'err'); history.pop(); renderMessages(); return; }
 
     const data = await r.json();
     const reply = data.content?.[0]?.text || 'Désolé, erreur de traitement.';
-    history.push({role:'assistant',content:reply,time:new Date()});
+    history.push({ role: 'assistant', content: reply, time: new Date() });
     msgCount++; saveMsgCount(); saveHistory(); updateQuota();
     renderMessages();
-  } catch(e) {
+  } catch (e) {
     removeTyping();
-    showToast('Erreur de connexion','err');
+    if (e.name === 'AbortError') {
+      showToast('Délai dépassé. Le serveur met trop de temps à répondre.', 'err');
+    } else {
+      showToast('Erreur de connexion', 'err');
+    }
     history.pop(); renderMessages();
   } finally {
     isLoading = false;
@@ -1028,7 +1116,6 @@ async function sendMessage() {
 function openSettings(tab = 'profil') {
   if (!user) return;
   const perms = getPlanPerms();
-  // Masquer l'onglet Agents IA si pas Pro
   document.querySelectorAll('.sp-tab').forEach(t => {
     if (t.textContent.includes('Agents IA') && !perms.canCustomize) {
       t.style.display = 'none';
@@ -1036,22 +1123,21 @@ function openSettings(tab = 'profil') {
       t.style.display = '';
     }
   });
-  // Rediriger vers profil si on essaie d'ouvrir Agents IA sans droit
   if (tab === 'agents' && !perms.canCustomize) {
-    showToast('La personnalisation des agents est réservée au plan Pro','err');
+    showToast('La personnalisation des agents est réservée au plan Pro', 'err');
     tab = 'profil';
   }
-  document.getElementById('pFirstname').value = user.firstname || '';
-  document.getElementById('pLastname').value  = (user.lastname) || '';
-  document.getElementById('pEmail').value     = user.email || '';
-  document.getElementById('pCompany').value   = user.company || '';
-  document.getElementById('pSiret').value     = localStorage.getItem('feelsyst_siret_'+user.id) || '';
-  document.getElementById('pWeb').value       = localStorage.getItem('feelsyst_web_'+user.id) || '';
-  document.getElementById('pPhone').value     = localStorage.getItem('feelsyst_phone_'+user.id) || '';
-  document.getElementById('pDesc').value      = localStorage.getItem('feelsyst_desc_'+user.id) || '';
+  document.getElementById('pFirstname').value = user?.firstname || '';
+  document.getElementById('pLastname').value = user?.lastname || '';
+  document.getElementById('pEmail').value = user?.email || '';
+  document.getElementById('pCompany').value = user?.company || '';
+  document.getElementById('pSiret').value = localStorage.getItem('feelsyst_siret_' + (user?.id || '')) || '';
+  document.getElementById('pWeb').value = localStorage.getItem('feelsyst_web_' + (user?.id || '')) || '';
+  document.getElementById('pPhone').value = localStorage.getItem('feelsyst_phone_' + (user?.id || '')) || '';
+  document.getElementById('pDesc').value = localStorage.getItem('feelsyst_desc_' + (user?.id || '')) || '';
 
   const sEl = document.getElementById('pSector');
-  Array.from(sEl.options).forEach(o=>{ if(o.text===user.sector||o.value===user.sector) o.selected=true; });
+  Array.from(sEl.options).forEach(o => { if (o.text === user?.sector || o.value === user?.sector) o.selected = true; });
 
   updateAbonnementTab();
   loadAgentConfigs();
@@ -1061,109 +1147,112 @@ function openSettings(tab = 'profil') {
 }
 
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
-function closeSettingsIfOutside(e) { if(e.target===document.getElementById('settingsOverlay')) closeSettings(); }
-function openAgentSettings() { if(currentAgent){ openSettings('agents'); switchAgentConfigTab(currentAgent.id); } }
+function closeSettingsIfOutside(e) { if (e.target === document.getElementById('settingsOverlay')) closeSettings(); }
+function openAgentSettings() { if (currentAgent) { openSettings('agents'); switchAgentConfigTab(currentAgent.id); } }
 
 function switchTab(tab) {
-  document.querySelectorAll('.sp-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.sp-tab-content').forEach(t=>t.classList.remove('active'));
-  const tabs = ['profil','securite','abonnement','notifications','agents','memoire'];
+  document.querySelectorAll('.sp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sp-tab-content').forEach(t => t.classList.remove('active'));
+  const tabs = ['profil', 'securite', 'abonnement', 'notifications', 'agents', 'memoire'];
   const idx = tabs.indexOf(tab);
-  if (idx>=0) document.querySelectorAll('.sp-tab')[idx]?.classList.add('active');
-  document.getElementById('tab-'+tab)?.classList.add('active');
+  if (idx >= 0) document.querySelectorAll('.sp-tab')[idx]?.classList.add('active');
+  document.getElementById('tab-' + tab)?.classList.add('active');
 }
 
 function switchAgentConfigTab(agentId) {
   currentAgentConfigTab = agentId;
-  document.querySelectorAll('.agent-tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.agent-config-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('acttab-'+agentId)?.classList.add('active');
-  document.getElementById('cfg-'+agentId)?.classList.add('active');
+  document.querySelectorAll('.agent-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.agent-config-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('acttab-' + agentId)?.classList.add('active');
+  document.getElementById('cfg-' + agentId)?.classList.add('active');
 }
 
 function updateAbonnementTab() {
-  const limits = {trial:30,starter:200,pro:800};
-  const names  = {trial:'Découverte 0€/7j · 30 msg',starter:'Starter 29€/mois',pro:'Pro 59€/mois'};
-  const limit  = limits[user.plan]||500;
-  const pct    = limit>0 ? Math.min(Math.round((msgCount/limit)*100),100) : 0;
+  const limits = { trial: 30, starter: 200, pro: 800 };
+  const names = { trial: 'Découverte 0€/7j · 30 msg', starter: 'Starter 29€/mois', pro: 'Pro 59€/mois' };
+  const limit = limits[user?.plan] || 500;
+  const pct = limit > 0 ? Math.min(Math.round((msgCount / limit) * 100), 100) : 0;
   document.getElementById('currentPlanCard').innerHTML = `
     <div class="plan-card-sm current">
-      <div><div class="plan-name-sm">${names[user.plan]||user.plan}</div>
-      <div class="plan-price-sm">${user.trialEndsAt?'Expire le '+new Date(user.trialEndsAt).toLocaleDateString('fr-FR'):''}</div></div>
-      ${user.plan==='trial'?'<button class="sp-btn sp-btn-primary" onclick="openSettings(\'abonnement\')">Upgrader</button>':''}
+      <div><div class="plan-name-sm">${names[user?.plan] || user?.plan || 'Starter'}</div>
+      <div class="plan-price-sm">${user?.trialEndsAt ? 'Expire le ' + new Date(user.trialEndsAt).toLocaleDateString('fr-FR') : ''}</div></div>
+      ${user?.plan === 'trial' ? '<button class="sp-btn sp-btn-primary" onclick="openSettings('abonnement')">Upgrader</button>' : ''}
     </div>`;
-  const lbl = limit>0?`${msgCount} / ${limit} messages`:msgCount+' messages (illimité)';
+  const lbl = limit > 0 ? `${msgCount} / ${limit} messages` : msgCount + ' messages (illimité)';
   document.getElementById('usageLbl').textContent = lbl;
-  document.getElementById('usagePct').textContent = limit>0?pct+'%':'';
+  document.getElementById('usagePct').textContent = limit > 0 ? pct + '%' : '';
   const fill = document.getElementById('usageFill');
-  fill.style.width = (limit>0?pct:5)+'%';
-  fill.textContent = limit>0?pct+'%':'';
-  if (pct>=80) {
-    document.getElementById('usageAlert').style.display='block';
-    document.getElementById('usageAlert').textContent = `⚠ Alerte à 80% (${Math.round(limit*.8)} messages) — Pensez à upgrader.`;
+  fill.style.width = (limit > 0 ? pct : 5) + '%';
+  fill.textContent = limit > 0 ? pct + '%' : '';
+  if (pct >= 80) {
+    document.getElementById('usageAlert').style.display = 'block';
+    document.getElementById('usageAlert').textContent = `⚠ Alerte à 80% (${Math.round(limit * .8)} messages) — Pensez à upgrader.`;
   }
 }
 
 async function saveProfile() {
   const firstname = document.getElementById('pFirstname').value.trim();
-  const company   = document.getElementById('pCompany').value.trim();
-  const sector    = document.getElementById('pSector').value;
-  localStorage.setItem('feelsyst_siret_'+user.id,  document.getElementById('pSiret').value);
-  localStorage.setItem('feelsyst_web_'+user.id,    document.getElementById('pWeb').value);
-  localStorage.setItem('feelsyst_phone_'+user.id,  document.getElementById('pPhone').value);
-  localStorage.setItem('feelsyst_desc_'+user.id,   document.getElementById('pDesc').value);
+  const company = document.getElementById('pCompany').value.trim();
+  const sector = document.getElementById('pSector').value;
+  localStorage.setItem('feelsyst_siret_' + (user?.id || ''), document.getElementById('pSiret').value);
+  localStorage.setItem('feelsyst_web_' + (user?.id || ''), document.getElementById('pWeb').value);
+  localStorage.setItem('feelsyst_phone_' + (user?.id || ''), document.getElementById('pPhone').value);
+  localStorage.setItem('feelsyst_desc_' + (user?.id || ''), document.getElementById('pDesc').value);
   try {
-    const r = await fetch('/api/profile',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${localStorage.getItem('feelsyst_token')}`},body:JSON.stringify({firstname,company,sector})});
+    const r = await fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('feelsyst_token')}` }, body: JSON.stringify({ firstname, company, sector }) });
     const d = await r.json();
-    if(!r.ok) throw new Error(d.error);
-    user.firstname=d.user.firstname; user.company=d.user.company; user.sector=d.user.sector;
-    document.getElementById('userName').textContent = user.firstname||user.email;
-    document.getElementById('userAv').textContent   = (user.firstname||'?')[0].toUpperCase();
-    closeSettings(); showToast('Profil mis à jour','ok');
-  } catch(e){showToast('Erreur: '+e.message,'err');}
+    if (!r.ok) throw new Error(d.error);
+    user.firstname = d.user?.firstname;
+    user.company = d.user?.company;
+    user.sector = d.user?.sector;
+    document.getElementById('userName').textContent = user?.firstname || user?.email;
+    document.getElementById('userAv').textContent = (user?.firstname || '?')[0].toUpperCase();
+    closeSettings(); showToast('Profil mis à jour', 'ok');
+  } catch (e) { showToast('Erreur: ' + e.message, 'err'); }
 }
 
-function saveNotifications() { showToast('Préférences enregistrées','ok'); closeSettings(); }
+function saveNotifications() { showToast('Préférences enregistrées', 'ok'); closeSettings(); }
 
 function saveAgentConfig() {
   const perms = getPlanPerms();
   if (!perms.canCustomize) {
-    showToast('La personnalisation des agents nécessite le plan Pro','err');
+    showToast('La personnalisation des agents nécessite le plan Pro', 'err');
     return;
   }
   const cfgs = {};
-  AGENTS.forEach(a=>{
+  AGENTS.forEach(a => {
     const els = document.querySelectorAll(`#cfg-${a.id} input, #cfg-${a.id} select, #cfg-${a.id} textarea`);
-    const c={};
-    els.forEach(el=>{ if(el.type==='checkbox') c[el.id]=el.checked; else c[el.id]=el.value; });
+    const c = {};
+    els.forEach(el => { if (el.type === 'checkbox') c[el.id] = el.checked; else c[el.id] = el.value; });
     cfgs[a.id] = c;
   });
-  localStorage.setItem('feelsyst_agentcfg_'+user.id, JSON.stringify(cfgs));
-  showToast('Configurations agents enregistrées','ok');
+  localStorage.setItem('feelsyst_agentcfg_' + (user?.id || ''), JSON.stringify(cfgs));
+  showToast('Configurations agents enregistrées', 'ok');
 }
 
 function loadAgentConfigs() {
-  const saved = JSON.parse(localStorage.getItem('feelsyst_agentcfg_'+user.id)||'{}');
-  AGENTS.forEach(a=>{
-    const c = saved[a.id]||{};
-    Object.entries(c).forEach(([id,val])=>{
+  const saved = JSON.parse(localStorage.getItem('feelsyst_agentcfg_' + (user?.id || '')) || '{}');
+  AGENTS.forEach(a => {
+    const c = saved[a.id] || {};
+    Object.entries(c).forEach(([id, val]) => {
       const el = document.getElementById(id);
-      if(!el) return;
-      if(el.type==='checkbox') el.checked=!!val;
-      else el.value=val||'';
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = !!val;
+      else el.value = val || '';
     });
   });
 }
 
 function resetAgentConfig() {
-  document.querySelectorAll(`#cfg-${currentAgentConfigTab} input, #cfg-${currentAgentConfigTab} select, #cfg-${currentAgentConfigTab} textarea`).forEach(el=>{
-    if(el.type==='checkbox') el.checked=el.defaultChecked||false;
-    else el.value='';
+  document.querySelectorAll(`#cfg-${currentAgentConfigTab} input, #cfg-${currentAgentConfigTab} select, #cfg-${currentAgentConfigTab} textarea`).forEach(el => {
+    if (el.type === 'checkbox') el.checked = el.defaultChecked || false;
+    else el.value = '';
   });
-  showToast('Configuration réinitialisée','ok');
+  showToast('Configuration réinitialisée', 'ok');
 }
 
-function upgradePlan(plan) { location.href='auth.html?plan='+plan; }
+function upgradePlan(plan) { location.href = 'auth.html?plan=' + plan; }
+
 function exportData() {
   try {
     const data = {
@@ -1180,14 +1269,14 @@ function exportData() {
         trialEndsAt: user?.trialEndsAt || null,
       },
       profile: {
-        siret: localStorage.getItem('feelsyst_siret_'+(user?.id||'')) || '',
-        website: localStorage.getItem('feelsyst_web_'+(user?.id||'')) || '',
-        phone: localStorage.getItem('feelsyst_phone_'+(user?.id||'')) || '',
-        description: localStorage.getItem('feelsyst_desc_'+(user?.id||'')) || '',
+        siret: localStorage.getItem('feelsyst_siret_' + (user?.id || '')) || '',
+        website: localStorage.getItem('feelsyst_web_' + (user?.id || '')) || '',
+        phone: localStorage.getItem('feelsyst_phone_' + (user?.id || '')) || '',
+        description: localStorage.getItem('feelsyst_desc_' + (user?.id || '')) || '',
       },
-      agentConfigs: JSON.parse(localStorage.getItem('feelsyst_agentcfg_'+(user?.id||'')) || '{}'),
+      agentConfigs: JSON.parse(localStorage.getItem('feelsyst_agentcfg_' + (user?.id || '')) || '{}'),
       conversations: {},
-      memories: JSON.parse(localStorage.getItem('feelsyst_memories_'+(user?.id||'')) || '[]'),
+      memories: JSON.parse(localStorage.getItem('feelsyst_memories_' + (user?.id || '')) || '[]'),
       messageCount: msgCount,
       notifications: {
         quota: document.getElementById('notifQuota')?.checked,
@@ -1199,32 +1288,30 @@ function exportData() {
         voice: document.getElementById('notifVoice')?.checked,
       },
     };
-    // Récupérer les conversations de tous les agents
     AGENTS.forEach(a => {
       const hist = localStorage.getItem(`feelsyst_hist_${user?.id}_${a.id}`);
       if (hist) data.conversations[a.id] = JSON.parse(hist);
     });
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `feelsyst_export_${user?.email || 'user'}_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `feelsyst_export_${user?.email || 'user'}_${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('Export RGPD téléchargé','ok');
-  } catch(e) {
-    showToast('Erreur lors de l'export','err');
+    showToast('Export RGPD téléchargé', 'ok');
+  } catch (e) {
+    showToast("Erreur lors de l'export", 'err');
   }
 }
-async function confirmDelete() {
-  if (!confirm('Supprimer définitivement votre compte ? Cette action est irréversible.
 
-Toutes vos données (profil, conversations, mémoires, factures) seront supprimées.')) return;
+async function confirmDelete() {
+  if (!confirm('Supprimer définitivement votre compte ? Cette action est irréversible.\n\nToutes vos données (profil, conversations, mémoires, factures) seront supprimées.')) return;
   const confirmText = prompt('Pour confirmer, tapez "SUPPRIMER" en majuscules :');
   if (confirmText !== 'SUPPRIMER') {
-    showToast('Suppression annulée','err');
+    showToast('Suppression annulée', 'err');
     return;
   }
   try {
@@ -1234,18 +1321,17 @@ Toutes vos données (profil, conversations, mémoires, factures) seront supprim�
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
     if (r.ok) {
-      // Nettoyer le localStorage
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('feelsyst_')) localStorage.removeItem(key);
       });
-      showToast('Compte supprimé. Redirection...','ok');
+      showToast('Compte supprimé. Redirection...', 'ok');
       setTimeout(() => { window.location.href = '/'; }, 2000);
     } else {
       const d = await r.json();
-      showToast(d.error || 'Erreur de suppression','err');
+      showToast(d.error || 'Erreur de suppression', 'err');
     }
-  } catch(e) {
-    showToast('Erreur de connexion. Réessayez.','err');
+  } catch (e) {
+    showToast('Erreur de connexion. Réessayez.', 'err');
   }
 }
 
@@ -1254,156 +1340,157 @@ Toutes vos données (profil, conversations, mémoires, factures) seront supprim�
 // ════════════════════════════════════
 async function loadMemory() {
   const token = localStorage.getItem('feelsyst_token');
-  // Essayer d'abord le localStorage (fallback immédiat)
-  const localMem = JSON.parse(localStorage.getItem('feelsyst_memories_'+(user?.id||'')) || '[]');
+  const localMem = JSON.parse(localStorage.getItem('feelsyst_memories_' + (user?.id || '')) || '[]');
   if (localMem.length) {
     renderMemories(localMem);
   } else {
     document.getElementById('memoryList').innerHTML = '<div style="font-size:12px;color:var(--muted)">Aucune mémoire enregistrée. Ajoutez des informations sur votre entreprise ci-dessous.</div>';
   }
-  // Essayer l'API en arrière-plan
   try {
-    const r = await fetch('/api/memory',{headers:{'Authorization':`Bearer ${token}`}});
+    const r = await fetch('/api/memory', { headers: { 'Authorization': `Bearer ${token}` } });
     if (r.ok) {
-      const {memories=[]} = await r.json();
+      const { memories = [] } = await r.json();
       if (memories.length) {
-        localStorage.setItem('feelsyst_memories_'+(user?.id||''), JSON.stringify(memories));
+        localStorage.setItem('feelsyst_memories_' + (user?.id || ''), JSON.stringify(memories));
         renderMemories(memories);
       }
     }
-  } catch(e) { /* API indisponible, localStorage suffit */ }
+  } catch (e) { /* API indisponible, localStorage suffit */ }
 }
 
 function renderMemories(memories) {
   document.getElementById('memoryList').innerHTML = memories.length
-    ? memories.map((m,i)=>`<div class="mem-item"><span class="mem-cat">${m.category}</span><span class="mem-text">${escHtml((m.content||'').slice(0,80))}</span><button class="mem-rm" onclick="deleteMemory('${m.id||i}')">×</button></div>`).join('')
+    ? memories.map((m, i) => `<div class="mem-item"><span class="mem-cat">${m.category}</span><span class="mem-text">${escHtml((m.content || '').slice(0, 80))}</span><button class="mem-rm" onclick="deleteMemory('${m.id || i}')">×</button></div>`).join('')
     : '<div style="font-size:12px;color:var(--muted)">Aucune mémoire enregistrée. Ajoutez des informations sur votre entreprise ci-dessous.</div>';
 }
 
 async function addMemory() {
   const perms = getPlanPerms();
-  if (perms.maxMemory === 0) { showToast('La mémoire partagée nécessite le plan Starter ou Pro','err'); return; }
+  if (perms.maxMemory === 0) { showToast('La mémoire partagée nécessite le plan Starter ou Pro', 'err'); return; }
   const cat = document.getElementById('memCat').value;
   const txt = document.getElementById('memInput').value.trim();
-  if(!txt) return;
-  // Vérifier la limite pour Starter
-  const memKey = 'feelsyst_memories_'+(user?.id||'');
+  if (!txt) return;
+  const memKey = 'feelsyst_memories_' + (user?.id || '');
   const currentMem = JSON.parse(localStorage.getItem(memKey) || '[]');
   if (perms.maxMemory > 0 && currentMem.length >= perms.maxMemory) {
-    showToast(`Limite de ${perms.maxMemory} entrées atteinte. Passez au plan Pro pour illimité.`,'err');
+    showToast(`Limite de ${perms.maxMemory} entrées atteinte. Passez au plan Pro pour illimité.`, 'err');
     return;
   }
-  // Sauvegarder d'abord en localStorage (toujours disponible)
-  const memKey = 'feelsyst_memories_'+(user?.id||'');
   const memories = JSON.parse(localStorage.getItem(memKey) || '[]');
-  const newMem = { id: 'local_'+Date.now(), category: cat, content: txt, createdAt: new Date().toISOString() };
+  const newMem = { id: 'local_' + Date.now(), category: cat, content: txt, createdAt: new Date().toISOString() };
   memories.push(newMem);
   localStorage.setItem(memKey, JSON.stringify(memories));
-  document.getElementById('memInput').value='';
+  document.getElementById('memInput').value = '';
   renderMemories(memories);
-  showToast('Mémoire enregistrée','ok');
-  // Essayer l'API en arrière-plan
+  showToast('Mémoire enregistrée', 'ok');
   try {
     const token = localStorage.getItem('feelsyst_token');
-    const r = await fetch('/api/memory',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({category:cat,content:txt})});
-    if(r.ok) await loadMemory();
-  } catch(e) { /* API indisponible, localStorage suffit */ }
+    const r = await fetch('/api/memory', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ category: cat, content: txt }) });
+    if (r.ok) await loadMemory();
+  } catch (e) { /* API indisponible, localStorage suffit */ }
 }
 
 async function deleteMemory(id) {
-  // Supprimer du localStorage d'abord
-  const memKey = 'feelsyst_memories_'+(user?.id||'');
+  const memKey = 'feelsyst_memories_' + (user?.id || '');
   let memories = JSON.parse(localStorage.getItem(memKey) || '[]');
   memories = memories.filter(m => m.id !== id);
   localStorage.setItem(memKey, JSON.stringify(memories));
   renderMemories(memories);
-  showToast('Supprimé','ok');
-  // Essayer l'API en arrière-plan
+  showToast('Supprimé', 'ok');
   try {
     const token = localStorage.getItem('feelsyst_token');
-    const r = await fetch(`/api/memory?id=${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
-    if(r.ok) await loadMemory();
-  } catch(e) { /* API indisponible, localStorage suffit */ }
+    const r = await fetch(`/api/memory?id=${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+    if (r.ok) await loadMemory();
+  } catch (e) { /* API indisponible, localStorage suffit */ }
 }
 
 // ════════════════════════════════════
 // PERSISTANCE
 // ════════════════════════════════════
 function loadMsgCount() {
-  try{const k='feelsyst_msg_'+(user?.id||'x');const s=JSON.parse(localStorage.getItem(k)||'{}');const m=new Date().toISOString().slice(0,7);return s.month===m?s.count||0:0;}catch{return 0;}
+  try {
+    const k = 'feelsyst_msg_' + (user?.id || 'x');
+    const s = JSON.parse(localStorage.getItem(k) || '{}');
+    const m = new Date().toISOString().slice(0, 7);
+    return s.month === m ? s.count || 0 : 0;
+  } catch { return 0; }
 }
 function saveMsgCount() {
-  try{const k='feelsyst_msg_'+(user?.id||'x');const m=new Date().toISOString().slice(0,7);localStorage.setItem(k,JSON.stringify({count:msgCount,month:m}));}catch{}
+  try {
+    const k = 'feelsyst_msg_' + (user?.id || 'x');
+    const m = new Date().toISOString().slice(0, 7);
+    localStorage.setItem(k, JSON.stringify({ count: msgCount, month: m }));
+  } catch { }
 }
 function loadConvHistory(agentId) {
   try {
     const perms = getPlanPerms();
-    if (perms.maxHistory === 0) return []; // Découverte: pas d'historique
-    const hist = JSON.parse(localStorage.getItem(`feelsyst_hist_${user?.id}_${agentId}`)||'[]');
-    return hist.map(m=>({...m,time:m.time?new Date(m.time):new Date()}));
+    if (perms.maxHistory === 0) return [];
+    const hist = JSON.parse(localStorage.getItem(`feelsyst_hist_${user?.id}_${agentId}`) || '[]');
+    return hist.map(m => ({ ...m, time: m.time ? new Date(m.time) : new Date() }));
   } catch { return []; }
 }
 function saveHistory() {
-  if(!user||!currentAgent) return;
+  if (!user || !currentAgent) return;
   try {
     const perms = getPlanPerms();
     const limit = perms.maxHistory > 0 ? perms.maxHistory : (perms.maxHistory === -1 ? history.length : 0);
-    const toSave = perms.maxHistory === 0 ? [] : history.slice(-limit).map(m=>({role:m.role,content:m.content,time:m.time}));
-    localStorage.setItem(`feelsyst_hist_${user.id}_${currentAgent.id}`,JSON.stringify(toSave));
-  } catch {}
+    const toSave = perms.maxHistory === 0 ? [] : history.slice(-limit).map(m => ({ role: m.role, content: m.content, time: m.time }));
+    localStorage.setItem(`feelsyst_hist_${user.id}_${currentAgent.id}`, JSON.stringify(toSave));
+  } catch { }
 }
 
 // ════════════════════════════════════
 // UPLOAD / DOWNLOAD
 // ════════════════════════════════════
-function triggerUpload(){document.getElementById('fileInput').click();}
-function handleFile(input){
+function triggerUpload() { document.getElementById('fileInput').click(); }
+function handleFile(input) {
   const perms = getPlanPerms();
-  if (!perms.canUpload) { showToast('L'upload de fichiers nécessite le plan Pro','err'); input.value=''; return; }
-  const f=input.files[0];if(!f)return;
-  if(f.size>5*1024*1024){showToast('Fichier trop volumineux (max 5 Mo)','err');return;}
-  const r=new FileReader();
-  r.onload=e=>{pendingFile={base64:e.target.result.split(',')[1],mediaType:f.type||'application/octet-stream',name:f.name};document.getElementById('fileName').textContent=f.name;document.getElementById('filePreview').style.display='flex';showToast('Fichier joint : '+f.name,'ok');};
-  r.readAsDataURL(f);input.value='';
+  if (!perms.canUpload) { showToast("L'upload de fichiers nécessite le plan Pro", 'err'); input.value = ''; return; }
+  const f = input.files[0]; if (!f) return;
+  if (f.size > 5 * 1024 * 1024) { showToast('Fichier trop volumineux (max 5 Mo)', 'err'); return; }
+  const r = new FileReader();
+  r.onload = e => { pendingFile = { base64: e.target.result.split(',')[1], mediaType: f.type || 'application/octet-stream', name: f.name }; document.getElementById('fileName').textContent = f.name; document.getElementById('filePreview').style.display = 'flex'; showToast('Fichier joint : ' + f.name, 'ok'); };
+  r.readAsDataURL(f); input.value = '';
 }
-function removeFile(){pendingFile=null;document.getElementById('filePreview').style.display='none';}
-function downloadMsg(i){
-  const m=history[i];if(!m)return;
-  const b=new Blob([m.content],{type:'text/plain;charset=utf-8'});
-  const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`${currentAgent?.name||'agent'}_${new Date().toISOString().slice(0,10)}.txt`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+function removeFile() { pendingFile = null; document.getElementById('filePreview').style.display = 'none'; }
+function downloadMsg(i) {
+  const m = history[i]; if (!m) return;
+  const b = new Blob([m.content], { type: 'text/plain;charset=utf-8' });
+  const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `${currentAgent?.name || 'agent'}_${new Date().toISOString().slice(0, 10)}.txt`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u);
 }
 
 // ════════════════════════════════════
 // HELPERS
 // ════════════════════════════════════
-function clearChat(){history=[];if(currentAgent)localStorage.removeItem(`feelsyst_hist_${user?.id}_${currentAgent.id}`);renderMessages();}
-function logout(){localStorage.removeItem('feelsyst_token');location.href='auth.html';}
-function useSuggestion(t){const i=document.getElementById('msgInput');i.value=t;autoResize(i);i.focus();}
-function copyMsg(i){navigator.clipboard.writeText(history[i]?.content||'');showToast('Copié','ok');}
-function showTyping(){const c=document.getElementById('msgs');const d=document.createElement('div');d.className='typing';d.id='typing';d.innerHTML=`<div class="typing-av">${currentAgent.emoji}</div><div class="typing-dots"><span></span><span></span><span></span></div>`;c.appendChild(d);scrollBottom();}
-function removeTyping(){document.getElementById('typing')?.remove();}
-function scrollBottom(){const c=document.getElementById('msgs');setTimeout(()=>{c.scrollTop=c.scrollHeight;},50);}
-function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
-function fmtTime(d){if(!d)return '';return new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
-function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
-function showToast(msg,type='ok'){const w=document.getElementById('toastWrap');const e=document.createElement('div');e.className=`toast ${type}`;e.innerHTML=`${type==='ok'?'✅':'❌'} ${msg}`;w.appendChild(e);setTimeout(()=>e.remove(),3500);}
-function showTrialExpired(){document.getElementById('msgs').innerHTML=`<div class="welcome"><div class="welcome-ico">⏰</div><h2>Essai terminé</h2><p>Choisissez un plan pour continuer.</p><div class="suggestions"><div class="suggestion" onclick="openSettings('abonnement')">Voir les plans →</div></div></div>`;}
+function clearChat() { history = []; if (currentAgent) localStorage.removeItem(`feelsyst_hist_${user?.id}_${currentAgent.id}`); renderMessages(); }
+function logout() { localStorage.removeItem('feelsyst_token'); goToAuth(); }
+function useSuggestion(t) { const i = document.getElementById('msgInput'); i.value = t; autoResize(i); i.focus(); }
+function copyMsg(i) { navigator.clipboard.writeText(history[i]?.content || ''); showToast('Copié', 'ok'); }
+function showTyping() { const c = document.getElementById('msgs'); const d = document.createElement('div'); d.className = 'typing'; d.id = 'typing'; d.innerHTML = `<div class="typing-av">${currentAgent.emoji}</div><div class="typing-dots"><span></span><span></span><span></span></div>`; c.appendChild(d); scrollBottom(); }
+function removeTyping() { document.getElementById('typing')?.remove(); }
+function scrollBottom() { const c = document.getElementById('msgs'); setTimeout(() => { c.scrollTop = c.scrollHeight; }, 50); }
+function escHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'); }
+function fmtTime(d) { if (!d) return ''; return new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function showToast(msg, type = 'ok') { const w = document.getElementById('toastWrap'); const e = document.createElement('div'); e.className = `toast ${type}`; e.innerHTML = `${type === 'ok' ? '✅' : '❌'} ${msg}`; w.appendChild(e); setTimeout(() => e.remove(), 3500); }
+function showTrialExpired() { document.getElementById('msgs').innerHTML = `<div class="welcome"><div class="welcome-ico">⏰</div><h2>Essai terminé</h2><p>Choisissez un plan pour continuer.</p><div class="suggestions"><div class="suggestion" onclick="openSettings('abonnement')">Voir les plans →</div></div></div>`; }
 
 // ── Force mot de passe ──
 function checkPwdStrength(val) {
-  const bars = ['dashBar1','dashBar2','dashBar3','dashBar4'];
+  const bars = ['dashBar1', 'dashBar2', 'dashBar3', 'dashBar4'];
   const label = document.getElementById('dashPwdLabel');
   let s = 0;
   if (val.length >= 8) s++;
   if (val.length >= 12) s++;
   if (/[A-Z]/.test(val) && /[0-9]/.test(val)) s++;
   if (/[^A-Za-z0-9]/.test(val)) s++;
-  const cls = ['','weak','fair','good','good'];
-  const txt = ['','Faible','Moyen','Bon','Excellent'];
-  const col = ['','var(--red)','var(--yellow)','var(--green)','var(--green)'];
-  bars.forEach((id,i)=>{const b=document.getElementById(id);b.style.background=i<s?col[s]:'var(--border)';});
-  label.textContent = val.length>0?txt[s]:''; label.style.color=col[s];
+  const cls = ['', 'weak', 'fair', 'good', 'good'];
+  const txt = ['', 'Faible', 'Moyen', 'Bon', 'Excellent'];
+  const col = ['', 'var(--red)', 'var(--yellow)', 'var(--green)', 'var(--green)'];
+  bars.forEach((id, i) => { const b = document.getElementById(id); b.style.background = i < s ? col[s] : 'var(--border)'; });
+  label.textContent = val.length > 0 ? txt[s] : ''; label.style.color = col[s];
 }
 
 // ── Changement mot de passe ──
@@ -1411,9 +1498,9 @@ async function changePassword() {
   const current = document.getElementById('pwdCurrent').value;
   const newPwd = document.getElementById('pwdNew').value;
   const confirm = document.getElementById('pwdConfirm').value;
-  if (!current || !newPwd || !confirm) { showToast('Tous les champs sont requis','err'); return; }
-  if (newPwd.length < 8) { showToast('Nouveau mot de passe trop court (min. 8 caractères)','err'); return; }
-  if (newPwd !== confirm) { showToast('Les mots de passe ne correspondent pas','err'); return; }
+  if (!current || !newPwd || !confirm) { showToast('Tous les champs sont requis', 'err'); return; }
+  if (newPwd.length < 8) { showToast('Nouveau mot de passe trop court (min. 8 caractères)', 'err'); return; }
+  if (newPwd !== confirm) { showToast('Les mots de passe ne correspondent pas', 'err'); return; }
   try {
     const r = await fetch('/api/password', {
       method: 'PUT',
@@ -1421,32 +1508,32 @@ async function changePassword() {
       body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
     });
     const d = await r.json();
-    if (r.ok) { showToast('Mot de passe modifié avec succès','ok'); document.getElementById('pwdCurrent').value=''; document.getElementById('pwdNew').value=''; document.getElementById('pwdConfirm').value=''; checkPwdStrength(''); }
-    else { showToast(d.error || 'Erreur','err'); }
-  } catch(e) { showToast('Erreur de connexion','err'); }
+    if (r.ok) { showToast('Mot de passe modifié avec succès', 'ok'); document.getElementById('pwdCurrent').value = ''; document.getElementById('pwdNew').value = ''; document.getElementById('pwdConfirm').value = ''; checkPwdStrength(''); }
+    else { showToast(d.error || 'Erreur', 'err'); }
+  } catch (e) { showToast('Erreur de connexion', 'err'); }
 }
 
 // ── 2FA ──
 async function toggle2FA() {
-  showToast('La 2FA sera disponible prochainement. Contactez contact@feelsyst.com pour l'activer manuellement.','err');
+  showToast("La 2FA sera disponible prochainement. Contactez contact@feelsyst.com pour l'activer manuellement.", 'err');
 }
-function updateQuota(){
-  const l={trial:500,starter:500,pro:2000,unlimited:-1};
-  const lim=l[user?.plan]||500;
-  if(lim<0){document.getElementById('quotaText').textContent=msgCount+' msg';}
-  else if(user.plan==='trial'){document.getElementById('quotaText').textContent=`${msgCount}/30 msg`;}
-  else{
-    const p=Math.min(Math.round((msgCount/lim)*100),100);
-    document.getElementById('quotaText').textContent=`${msgCount}/${lim}`;
-    const f=document.getElementById('quotaFill');
-    f.style.width=p+'%';f.className='quota-fill'+(p>90?' danger':p>70?' warn':'');
+function updateQuota() {
+  const l = { trial: 500, starter: 500, pro: 2000, unlimited: -1 };
+  const lim = l[user?.plan] || 500;
+  if (lim < 0) { document.getElementById('quotaText').textContent = msgCount + ' msg'; }
+  else if (user?.plan === 'trial') { document.getElementById('quotaText').textContent = `${msgCount}/30 msg`; }
+  else {
+    const p = Math.min(Math.round((msgCount / lim) * 100), 100);
+    document.getElementById('quotaText').textContent = `${msgCount}/${lim}`;
+    const f = document.getElementById('quotaFill');
+    f.style.width = p + '%'; f.className = 'quota-fill' + (p > 90 ? ' danger' : p > 70 ? ' warn' : '');
   }
-  document.getElementById('rpMsgs').textContent=msgCount;
+  document.getElementById('rpMsgs').textContent = msgCount;
 }
 
 // Keyboard
-document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
-document.getElementById('msgInput').addEventListener('input',function(){autoResize(this);});
+document.getElementById('msgInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+document.getElementById('msgInput').addEventListener('input', function () { autoResize(this); });
 </script>
 </body>
 </html>
