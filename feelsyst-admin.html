@@ -329,6 +329,9 @@
   .badge-red    { background: rgba(252,92,92,0.15);   color: var(--red); }
   .badge-purple { background: rgba(124,92,252,0.15);  color: var(--accent); }
   .badge-gray   { background: rgba(107,107,138,0.15); color: var(--muted); }
+  .day-btn { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:var(--card); border:1px solid var(--border); cursor:pointer; font-size:12px; font-weight:600; color:var(--muted); transition:all .15s; }
+  .day-btn.active, .day-btn:has(input:checked) { background:rgba(124,92,252,.15); border-color:var(--accent); color:var(--accent); }
+  .day-btn:hover { border-color:var(--accent); color:var(--accent); }
 
   /* ── FORMS ── */
   .form-group { margin-bottom: 16px; }
@@ -713,6 +716,9 @@
       <button class="nav-item" onclick="showSection('broadcast')">
         <span class="nav-icon">📣</span> Broadcast
       </button>
+      <button class="nav-item" onclick="showSection('rex-auto')">
+        <span class="nav-icon">🤖</span> Rex Auto
+      </button>
       <button class="nav-item" onclick="showSection('logs')">
         <span class="nav-icon">📋</span> Logs
       </button>
@@ -997,6 +1003,189 @@
         </div>
       </div>
 
+      <!-- ════════════════════════════════════ REX AUTO ══ -->
+      <div class="section" id="sec-rex-auto">
+        <div class="page-title">🤖 Prospection Automatique Rex</div>
+        <div class="page-sub">Rex prospecte et envoie des emails B2B chaque semaine automatiquement, sans intervention humaine.</div>
+
+        <div class="two-col">
+
+          <!-- CONFIGURATION -->
+          <div class="table-wrap" style="padding:20px">
+
+            <!-- Activation -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+              <div>
+                <div style="font-family:var(--display);font-size:15px;font-weight:700">Activation Rex Auto</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px">Rex prospecte et envoie les emails chaque semaine</div>
+              </div>
+              <button class="toggle on" id="rexToggle" onclick="toggleRexAuto()" style="width:44px;height:24px"></button>
+            </div>
+
+            <!-- Planning hebdomadaire -->
+            <div style="margin-bottom:16px">
+              <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">📅 Jour(s) d'envoi</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px" id="daySelector">
+                <label class="day-btn active"><input type="checkbox" value="1" checked style="display:none"> Lun</label>
+                <label class="day-btn"><input type="checkbox" value="2" style="display:none"> Mar</label>
+                <label class="day-btn"><input type="checkbox" value="3" style="display:none"> Mer</label>
+                <label class="day-btn"><input type="checkbox" value="4" style="display:none"> Jeu</label>
+                <label class="day-btn"><input type="checkbox" value="5" style="display:none"> Ven</label>
+                <label class="day-btn"><input type="checkbox" value="6" style="display:none"> Sam</label>
+                <label class="day-btn"><input type="checkbox" value="0" style="display:none"> Dim</label>
+              </div>
+            </div>
+
+            <div class="two-col" style="margin-bottom:16px">
+              <div class="form-group">
+                <label>⏰ Heure d'envoi</label>
+                <input type="time" id="rexTime" value="08:00" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;width:100%">
+              </div>
+              <div class="form-group">
+                <label>📧 Emails / semaine</label>
+                <input type="number" id="rexVolume" value="50" min="5" max="500" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;width:100%">
+              </div>
+            </div>
+
+            <!-- Cible -->
+            <div style="margin-bottom:16px">
+              <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px">🎯 Cible de prospection</div>
+              <div class="form-group">
+                <label>Secteur cible</label>
+                <select id="rexSector">
+                  <option value="">Tous les secteurs</option>
+                  <option value="e-commerce">E-commerce & Retail</option>
+                  <option value="saas">SaaS & Tech</option>
+                  <option value="conseil">Conseil & Consulting</option>
+                  <option value="immobilier">Immobilier</option>
+                  <option value="restauration">Restauration & Food</option>
+                  <option value="sante">Santé & Bien-être</option>
+                  <option value="artisanat">Artisanat & BTP</option>
+                  <option value="industrie">Industrie</option>
+                  <option value="finance">Finance & Assurance</option>
+                </select>
+              </div>
+              <div class="two-col">
+                <div class="form-group">
+                  <label>Zone géographique</label>
+                  <input id="rexZone" placeholder="France, Paris, Lyon…">
+                </div>
+                <div class="form-group">
+                  <label>Taille entreprise</label>
+                  <select id="rexSize">
+                    <option value="TPE">TPE (1-10)</option>
+                    <option value="PME" selected>PME (10-250)</option>
+                    <option value="ETI">ETI (250+)</option>
+                    <option value="Tous">Toutes tailles</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Template email -->
+            <div style="margin-bottom:16px">
+              <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px">✉️ Template d'email</div>
+              <div class="form-group">
+                <label>Sujet — Variables : {{company}}</label>
+                <input id="rexSubject" placeholder="{{company}} — une idée pour développer votre activité" value="{{company}} — une idée pour développer votre activité">
+              </div>
+              <div class="form-group">
+                <label>Corps — Variables : {{prenom}}, {{company}}, {{secteur}}</label>
+                <textarea id="rexTemplate" style="min-height:160px;font-family:monospace;font-size:12px">Bonjour {{prenom}},
+
+J'ai remarqué que {{company}} est actif dans le secteur {{secteur}}.
+
+Nous aidons des entreprises comme la vôtre à automatiser leur prospection, marketing et gestion administrative grâce à des agents IA spécialisés.
+
+Nos clients constatent en moyenne 3h de temps gagné par jour.
+
+Seriez-vous disponible pour un échange de 15 minutes cette semaine ?
+
+Bien à vous,
+Salim Hafif
+Feelsyst — https://feelsyst.com</textarea>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary" onclick="saveRexConfig()">💾 Enregistrer la configuration</button>
+              <button class="btn btn-ghost" onclick="runRexNow()">▶ Lancer maintenant</button>
+            </div>
+          </div>
+
+          <!-- PANNEAU DROIT -->
+          <div style="display:flex;flex-direction:column;gap:16px">
+
+            <!-- Statut -->
+            <div class="table-wrap" style="padding:20px">
+              <div style="font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:14px">📊 Statut</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;font-size:13px">
+                  <span style="color:var(--muted)">Statut</span>
+                  <span id="rexStatus" style="color:var(--green);font-weight:600">● Actif</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px">
+                  <span style="color:var(--muted)">Prochain envoi</span>
+                  <span id="rexNextRun" style="font-weight:600">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px">
+                  <span style="color:var(--muted)">Dernière campagne</span>
+                  <span id="rexLastRun" style="color:var(--muted)">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px">
+                  <span style="color:var(--muted)">Total envoyé (mois)</span>
+                  <span id="rexTotalMonth" style="font-weight:600;color:var(--accent)">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Webhook cron-job.org -->
+            <div class="table-wrap" style="padding:20px">
+              <div style="font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:8px">🔗 Automatisation</div>
+              <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px">Pour automatiser sans intervention humaine, configurez ce webhook sur <strong>cron-job.org</strong> (gratuit) :</p>
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:monospace;font-size:11px;word-break:break-all;color:var(--green)" id="webhookUrl">
+                https://feelsyst.com/api/prospect?action=rex_auto&key=REX_AUTO_SECRET
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" onclick="copyWebhook()">📋 Copier</button>
+                <a href="https://cron-job.org" target="_blank" class="btn btn-ghost btn-sm">Ouvrir cron-job.org →</a>
+              </div>
+              <div style="margin-top:12px;background:rgba(34,211,165,.07);border:1px solid rgba(34,211,165,.2);border-radius:8px;padding:12px;font-size:12px;color:#b8b8cc">
+                <strong style="color:var(--green)">Configuration cron-job.org :</strong><br>
+                1. Créez un compte gratuit sur cron-job.org<br>
+                2. Nouveau cronjob → URL = ci-dessus<br>
+                3. Planification = selon votre emploi du temps<br>
+                4. Méthode = GET · Activer · Sauvegarder
+              </div>
+            </div>
+
+            <!-- Emploi du temps visuel -->
+            <div class="table-wrap" style="padding:20px">
+              <div style="font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:12px">📅 Emploi du temps</div>
+              <div id="scheduleViz" style="display:flex;flex-direction:column;gap:6px"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Historique campagnes -->
+        <div class="table-wrap" style="margin-top:24px">
+          <div class="table-header">
+            <h3>📋 Historique des campagnes Rex</h3>
+            <button class="btn btn-ghost btn-sm" onclick="loadRexHistory()">↻ Actualiser</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Secteur</th><th>Zone</th><th>Envoyés</th><th>Erreurs</th><th>Statut</th></tr>
+            </thead>
+            <tbody id="rexHistoryBody">
+              <tr><td colspan="6" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
       <!-- ════════════════════════════════════ LOGS ══ -->
       <div class="section" id="sec-logs">
         <div class="page-title">Logs admin</div>
@@ -1174,6 +1363,7 @@ function refreshCurrent() {
     case 'finance':    loadFinance();    break;
     case 'agents':     loadAgents();     break;
     case 'broadcast':  /* pas de chargement requis */ break;
+    case 'rex-auto':   loadRexAuto(); break;
     case 'logs':       loadLogs();       break;
   }
 }
@@ -1184,7 +1374,7 @@ function refreshCurrent() {
 const sectionTitles = {
   dashboard: 'Dashboard', alerts: 'Alertes', clients: 'Clients',
   prospects: 'Prospects Rex', tickets: 'Support Lumi',
-  finance: 'Finance', agents: 'Agents IA', broadcast: 'Broadcast', logs: 'Logs admin',
+  finance: 'Finance', agents: 'Agents IA', broadcast: 'Broadcast', 'rex-auto': 'Rex Auto — Prospection', logs: 'Logs admin',
 };
 
 function showSection(name) {
@@ -2028,6 +2218,255 @@ function toast(msg, type = 'success') {
   wrap.appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
+
+// ══════════════════════════════════════════════════════════════
+// REX AUTO — PROSPECTION AUTOMATIQUE
+// ══════════════════════════════════════════════════════════════
+
+const REX_CONFIG_KEY = 'feelsyst_rex_auto_config';
+const REX_AUTO_SECRET = 'rex_auto_' + (SUPABASE_URL || '').slice(-8);
+
+function loadRexAuto() {
+  const cfg = getRexConfig();
+  applyRexConfigToUI(cfg);
+  loadRexHistory();
+  updateScheduleViz(cfg);
+  updateNextRun(cfg);
+  // Mettre à jour l'URL du webhook
+  document.getElementById('webhookUrl').textContent =
+    `https://feelsyst.com/api/prospect?action=rex_auto&key=${REX_AUTO_SECRET}&sector=${cfg.sector||''}&zone=${encodeURIComponent(cfg.zone||'')}&size=${cfg.size||'PME'}&volume=${cfg.volume||50}`;
+}
+
+function getRexConfig() {
+  try {
+    return JSON.parse(localStorage.getItem(REX_CONFIG_KEY) || '{}');
+  } catch { return {}; }
+}
+
+function applyRexConfigToUI(cfg) {
+  if (cfg.time) document.getElementById('rexTime').value = cfg.time;
+  if (cfg.volume) document.getElementById('rexVolume').value = cfg.volume;
+  if (cfg.sector) document.getElementById('rexSector').value = cfg.sector;
+  if (cfg.zone) document.getElementById('rexZone').value = cfg.zone;
+  if (cfg.size) document.getElementById('rexSize').value = cfg.size;
+  if (cfg.subject) document.getElementById('rexSubject').value = cfg.subject;
+  if (cfg.template) document.getElementById('rexTemplate').value = cfg.template;
+
+  // Jours
+  if (cfg.days) {
+    document.querySelectorAll('#daySelector input').forEach(inp => {
+      inp.checked = cfg.days.includes(parseInt(inp.value));
+      inp.closest('.day-btn').classList.toggle('active', inp.checked);
+    });
+  }
+
+  // Toggle
+  const toggle = document.getElementById('rexToggle');
+  toggle.classList.toggle('on', cfg.enabled !== false);
+
+  // Status
+  const statusEl = document.getElementById('rexStatus');
+  if (cfg.enabled === false) {
+    statusEl.textContent = '● Inactif';
+    statusEl.style.color = 'var(--muted)';
+  } else {
+    statusEl.textContent = '● Actif';
+    statusEl.style.color = 'var(--green)';
+  }
+}
+
+function toggleRexAuto() {
+  const cfg = getRexConfig();
+  cfg.enabled = !(cfg.enabled !== false);
+  localStorage.setItem(REX_CONFIG_KEY, JSON.stringify(cfg));
+  const toggle = document.getElementById('rexToggle');
+  toggle.classList.toggle('on', cfg.enabled);
+  const statusEl = document.getElementById('rexStatus');
+  statusEl.textContent = cfg.enabled ? '● Actif' : '● Inactif';
+  statusEl.style.color = cfg.enabled ? 'var(--green)' : 'var(--muted)';
+  toast(cfg.enabled ? 'Rex Auto activé ✅' : 'Rex Auto désactivé', 'success');
+}
+
+function saveRexConfig() {
+  const days = [];
+  document.querySelectorAll('#daySelector input:checked').forEach(inp => days.push(parseInt(inp.value)));
+
+  const cfg = {
+    enabled:  document.getElementById('rexToggle').classList.contains('on'),
+    days:     days.length ? days : [1], // Lundi par défaut
+    time:     document.getElementById('rexTime').value || '08:00',
+    volume:   parseInt(document.getElementById('rexVolume').value) || 50,
+    sector:   document.getElementById('rexSector').value,
+    zone:     document.getElementById('rexZone').value,
+    size:     document.getElementById('rexSize').value,
+    subject:  document.getElementById('rexSubject').value,
+    template: document.getElementById('rexTemplate').value,
+    savedAt:  new Date().toISOString(),
+  };
+
+  localStorage.setItem(REX_CONFIG_KEY, JSON.stringify(cfg));
+  updateScheduleViz(cfg);
+  updateNextRun(cfg);
+
+  // Mettre à jour le webhook URL
+  document.getElementById('webhookUrl').textContent =
+    `https://feelsyst.com/api/prospect?action=rex_auto&key=${REX_AUTO_SECRET}&sector=${cfg.sector||''}&zone=${encodeURIComponent(cfg.zone||'')}&size=${cfg.size||'PME'}&volume=${cfg.volume||50}`;
+
+  // Sauvegarder aussi dans Supabase agent_configs pour persistence serveur
+  fetch(`${SUPABASE_URL}/rest/v1/agent_configs?agent=eq.rex`, {
+    method: 'PATCH',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body: JSON.stringify({ auto_config: JSON.stringify(cfg) }),
+  }).catch(() => {}); // non bloquant
+
+  toast('Configuration Rex Auto enregistrée ✅', 'success');
+}
+
+function updateScheduleViz(cfg) {
+  const days = cfg.days || [1];
+  const dayNames = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const vol = cfg.volume || 50;
+  const perDay = Math.round(vol / Math.max(days.length, 1));
+  const time = cfg.time || '08:00';
+
+  const viz = document.getElementById('scheduleViz');
+  if (!viz) return;
+
+  viz.innerHTML = [0,1,2,3,4,5,6].map(d => {
+    const isActive = days.includes(d);
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(37,42,61,.4);">
+        <div style="width:32px;text-align:center;font-size:12px;font-weight:600;color:${isActive?'var(--accent)':'var(--muted)'}">
+          ${dayNames[d]}
+        </div>
+        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+          ${isActive ? `<div style="height:100%;width:100%;background:linear-gradient(90deg,var(--accent),#fc5c7d);border-radius:3px"></div>` : ''}
+        </div>
+        <div style="font-size:11px;color:${isActive?'var(--text)':'var(--muted)'};min-width:80px;text-align:right">
+          ${isActive ? `${time} · ${perDay} emails` : '—'}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateNextRun(cfg) {
+  const el = document.getElementById('rexNextRun');
+  if (!el || cfg.enabled === false) { if(el) el.textContent = 'Inactif'; return; }
+  const days = cfg.days || [1];
+  const time = cfg.time || '08:00';
+  const [h, m] = time.split(':').map(Number);
+  const now = new Date();
+  let next = null;
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + i);
+    d.setHours(h, m, 0, 0);
+    if (days.includes(d.getDay())) { next = d; break; }
+  }
+  if (next) {
+    el.textContent = next.toLocaleDateString('fr-FR', {weekday:'short',day:'2-digit',month:'short'}) + ' à ' + time;
+  }
+}
+
+async function runRexNow() {
+  const cfg = getRexConfig();
+  const sector = cfg.sector || document.getElementById('rexSector').value;
+  const zone   = cfg.zone   || document.getElementById('rexZone').value   || 'France';
+  const size   = cfg.size   || document.getElementById('rexSize').value   || 'PME';
+  const volume = cfg.volume || parseInt(document.getElementById('rexVolume').value) || 20;
+  const subject  = cfg.subject  || document.getElementById('rexSubject').value;
+  const template = cfg.template || document.getElementById('rexTemplate').value;
+
+  if (!confirm(`Lancer une campagne Rex maintenant ?
+• Secteur : ${sector||'Tous'}
+• Zone : ${zone}
+• Volume : ${volume} emails`)) return;
+
+  toast('⏳ Rex génère les prospects…', 'success');
+
+  try {
+    // 1. Générer les prospects
+    const r1 = await fetch('/api/prospect', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${ADMIN_TOKEN}` },
+      body: JSON.stringify({ action:'generate', sector, zone, size, volume }),
+    });
+    const d1 = await r1.json();
+    if (!r1.ok || !d1.prospects?.length) { toast('Erreur génération prospects', 'error'); return; }
+    toast(`✅ ${d1.prospects.length} prospects générés — envoi des emails…`, 'success');
+
+    // 2. Envoyer les emails
+    const r2 = await fetch('/api/prospect', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${ADMIN_TOKEN}` },
+      body: JSON.stringify({ action:'send', prospects: d1.prospects, subject, template }),
+    });
+    const d2 = await r2.json();
+    if (!r2.ok) { toast('Erreur envoi emails', 'error'); return; }
+
+    // 3. Logger dans admin_logs
+    await sbPost('admin_logs', {
+      action: 'rex_auto.manual_run',
+      target_type: 'rex_auto',
+      details: { sector, zone, size, volume, sent: d2.sent, errors: d2.errors?.length || 0 },
+    });
+
+    // 4. Mettre à jour le statut
+    document.getElementById('rexLastRun').textContent = 'Il y a un instant';
+    const totalEl = document.getElementById('rexTotalMonth');
+    totalEl.textContent = parseInt(totalEl.textContent || '0') + d2.sent;
+
+    toast(`🎉 ${d2.sent} emails envoyés avec succès !`, 'success');
+    loadRexHistory();
+
+  } catch(e) { toast('Erreur: ' + e.message, 'error'); }
+}
+
+async function loadRexHistory() {
+  try {
+    const logs = await sb('admin_logs', '?action=eq.rex_auto.manual_run&order=created_at.desc&limit=20');
+    const tbody = document.getElementById('rexHistoryBody');
+    if (!logs?.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="empty-icon">🤖</div><p>Aucune campagne Rex lancée</p></td></tr>';
+      return;
+    }
+    tbody.innerHTML = logs.map(l => {
+      const d = l.details || {};
+      return `<tr>
+        <td style="color:var(--muted)">${fmtDate(l.created_at)}</td>
+        <td>${d.sector || '—'}</td>
+        <td>${d.zone || '—'}</td>
+        <td style="font-family:var(--font-mono);color:var(--green)">${d.sent || 0}</td>
+        <td style="font-family:var(--font-mono);color:${d.errors?'var(--red)':'var(--muted)'}">${d.errors || 0}</td>
+        <td><span class="badge badge-green">Complété</span></td>
+      </tr>`;
+    }).join('');
+
+    // Total mois
+    const thisMonth = new Date().toISOString().slice(0,7);
+    const totalMonth = logs
+      .filter(l => l.created_at?.startsWith(thisMonth))
+      .reduce((s,l) => s + (l.details?.sent||0), 0);
+    document.getElementById('rexTotalMonth').textContent = totalMonth;
+
+  } catch(e) {
+    document.getElementById('rexHistoryBody').innerHTML = `<tr><td colspan="6" style="color:var(--red);padding:16px">Erreur: ${e.message}</td></tr>`;
+  }
+}
+
+function copyWebhook() {
+  const url = document.getElementById('webhookUrl').textContent;
+  navigator.clipboard.writeText(url);
+  toast('URL copiée !', 'success');
+}
+
+// Écouter les changements de jours pour mettre à jour les styles
+document.addEventListener('change', e => {
+  if (e.target.closest('#daySelector')) {
+    const lb = e.target.closest('.day-btn');
+    if (lb) lb.classList.toggle('active', e.target.checked);
+  }
+});
 
 // ══════════════════════════════════════════════════════════════
 // BOOT
