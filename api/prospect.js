@@ -1,4 +1,3 @@
-// v2 — Supabase
 // api/prospect.js — Rex prospection automatique — Migré Supabase
 // Génération IA + envoi emails + sauvegarde persistante
 
@@ -36,7 +35,7 @@ module.exports = async (req, res) => {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
+          model: 'claude-sonnet-4-20250514',
           max_tokens: 2000,
           system: `Tu es Rex, agent commercial expert en prospection B2B. Génère une liste de ${Math.min(volume, 50)} entreprises fictives mais réalistes pour la prospection commerciale dans le secteur demandé en France. Réponds UNIQUEMENT en JSON valide avec ce format exact sans aucun texte avant/après: {"prospects":[{"company":"Nom Entreprise","contact":"Prénom Nom","email":"prenom.nom@domaine.fr","sector":"secteur précis","title":"Titre du contact","city":"Ville","size":"TPE/PME/ETI"}]}`,
           messages: [{
@@ -195,5 +194,157 @@ module.exports = async (req, res) => {
     return res.status(200).json({ success: true, prospect: data });
   }
 
-  return res.status(400).json({ error: 'Action inconnue. Actions disponibles: generate, send, list, update_status' });
+  // ============================================================
+  // ACTION : rex_auto — Déclenché par cron-job.org via webhook GET
+  // URL : /api/prospect?action=rex_auto&key=SECRET&sector=...&zone=...&volume=...
+  // ============================================================
+  if (action === 'rex_auto') {
+    const { key, sector = '', zone = 'France', size = 'PME', volume = '50' } = req.query || req.body || {};
+
+    // Vérifier la clé secrète (protection du webhook)
+    const REX_SECRET_PREFIX = 'rex_auto_';
+    const expectedKey = REX_SECRET_PREFIX + (process.env.SUPABASE_URL || '').slice(-8);
+    if (key !== expectedKey) {
+      console.warn('rex_auto: clé invalide reçue:', key);
+      return res.status(401).json({ error: 'Clé invalide' });
+    }
+
+    const vol = Math.min(parseInt(volume) || 50, 200); // max 200 par run
+    console.log(`🤖 Rex Auto démarré: secteur=${sector}, zone=${zone}, volume=${vol}`);
+
+    try {
+      // 1. Générer les prospects via Claude
+      const genResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.CLAUDE_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 2000,
+          system: `Tu es Rex, agent commercial expert en prospection B2B. Génère une liste de ${vol} entreprises françaises réalistes pour prospection dans le secteur demandé. Réponds UNIQUEMENT en JSON: {"prospects":[{"company":"Nom","contact":"Prénom Nom","email":"prenom.nom@domaine.fr","sector":"secteur","title":"Titre","city":"Ville","size":"${size}"}]}`,
+          messages: [{ role: 'user', content: `Génère ${vol} prospects B2B: secteur="${sector||'PME généraliste'}", zone="${zone}", taille="${size}"` }],
+        }),
+      });
+
+      const genData = await genResponse.json();
+      const rawText = (genData.content?.[0]?.text || '').replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(rawText);
+      const prospects = parsed.prospects || [];
+
+      if (!prospects.length) {
+        return res.status(200).json({ success: true, sent: 0, message: 'Aucun prospect généré' });
+      }
+
+      // 2. Sauvegarder les prospects en base
+      const toInsert = prospects.map(p => ({
+        company_name: p.company,
+        contact_name: p.contact,
+        email: p.email,
+        sector: p.sector || sector,
+        location: p.city || zone,
+        status: 'new',
+        source: 'rex_auto',
+        notes: `Taille: ${p.size || size} | Titre: ${p.title || ''}`,
+      }));
+
+      await supabase.from('prospects')
+        .upsert(toInsert, { onConflict: 'email', ignoreDuplicates: true });
+
+      // 3. Récupérer le template email depuis agent_configs si disponible
+      const { data: rexCfg } = await supabase
+        .from('agent_configs')
+        .select('auto_config')
+        .eq('agent', 'rex')
+        .single();
+
+      let emailSubject = `{{company}} — une idée pour développer votre activité`;
+      let emailTemplate = `Bonjour {{prenom}},
+
+J'ai remarqué que {{company}} est actif dans le secteur {{secteur}}.
+
+Nous aidons des entreprises comme la vôtre à automatiser leur prospection et leur gestion grâce à des agents IA spécialisés.
+
+Seriez-vous disponible pour un échange de 15 minutes cette semaine ?
+
+Bien à vous,
+Salim Hafif
+Feelsyst — https://feelsyst.com`;
+
+      if (rexCfg?.auto_config) {
+        try {
+          const cfg = JSON.parse(rexCfg.auto_config);
+          if (cfg.subject)  emailSubject  = cfg.subject;
+          if (cfg.template) emailTemplate = cfg.template;
+        } catch {}
+      }
+
+      // 4. Envoyer les emails via Brevo
+      const BREVO_KEY = process.env.BREVO_API_KEY;
+      let sent = 0;
+      const errors = [];
+      const delay = ms => new Promise(r => setTimeout(r, ms));
+
+      if (BREVO_KEY) {
+        for (const p of prospects) {
+          try {
+            const firstname = (p.contact || '').split(' ')[0] || 'Bonjour';
+            const body = emailTemplate
+              .replace(/\{\{prenom\}\}/g, firstname)
+              .replace(/\{\{company\}\}/g, p.company || '')
+              .replace(/\{\{secteur\}\}/g, p.sector || sector || '');
+            const subj = emailSubject
+              .replace(/\{\{company\}\}/g, p.company || '');
+
+            const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'api-key': BREVO_KEY },
+              body: JSON.stringify({
+                sender: { name: 'Salim — Feelsyst', email: 'contact@feelsyst.com' },
+                to: [{ email: p.email, name: p.contact }],
+                subject: subj,
+                textContent: body,
+              }),
+            });
+
+            if (brevoRes.ok) {
+              sent++;
+              await supabase.from('prospects')
+                .update({ status: 'contacted', outreach_email_sent: true, outreach_sent_at: new Date().toISOString() })
+                .eq('email', p.email);
+            } else {
+              errors.push({ email: p.email, status: brevoRes.status });
+            }
+            await delay(500); // Throttle Brevo
+          } catch (e) {
+            errors.push({ email: p.email, error: e.message });
+          }
+        }
+      }
+
+      // 5. Logger dans admin_logs
+      await supabase.from('admin_logs').insert([{
+        action: 'rex_auto.manual_run',
+        target_type: 'rex_auto',
+        details: { sector, zone, size, volume: vol, generated: prospects.length, sent, errors: errors.length },
+      }]);
+
+      console.log(`✅ Rex Auto terminé: ${sent}/${prospects.length} emails envoyés`);
+      return res.status(200).json({
+        success: true,
+        generated: prospects.length,
+        sent,
+        errors: errors.length,
+        message: `${sent} emails envoyés sur ${prospects.length} prospects générés`,
+      });
+
+    } catch (e) {
+      console.error('Rex Auto error:', e);
+      return res.status(500).json({ error: 'Erreur Rex Auto: ' + e.message });
+    }
+  }
+
+  return res.status(400).json({ error: 'Action inconnue. Actions disponibles: generate, send, list, update_status, rex_auto' });
 };
