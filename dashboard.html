@@ -33,7 +33,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
 .badge-trial{background:rgba(245,200,66,.15);color:var(--yellow);}
 .badge-starter{background:rgba(124,92,252,.15);color:#a78bfa;}
 .badge-pro{background:rgba(34,211,165,.15);color:var(--green);}
-.badge-unlimited{background:rgba(252,92,125,.15);color:#fc5c7d;}
 .icon-btn{width:32px;height:32px;background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:15px;transition:all .15s;flex-shrink:0;text-decoration:none;border:1px solid var(--border);}
 .icon-btn:hover{color:var(--text);border-color:var(--accent);}
 
@@ -280,7 +279,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
 <div class="topbar" id="topbar" style="display:none">
   <a href="/" class="logo">Feelsyst</a>
   <div class="quota-bar" id="quotaBar">
-    <span id="quotaText">0/500</span>
+    <span id="quotaText">0/30</span>
     <div class="quota-track"><div class="quota-fill" id="quotaFill" style="width:0%"></div></div>
   </div>
   <div class="spacer"></div>
@@ -486,7 +485,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
         <div class="sp-section">
           <div class="sp-section-title">📊 Consommation</div>
           <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-            <span id="usageLbl">0 / 500 messages</span>
+            <span id="usageLbl">0 / 30 messages</span>
             <span id="usagePct" style="color:var(--muted)">0%</span>
           </div>
           <div class="usage-bar"><div class="usage-fill" id="usageFill" style="width:0%">0%</div></div>
@@ -756,7 +755,6 @@ const PLAN_PERMS = {
   trial:   { agents: ['aria','nova','rex','vera','lumi'], maxHistory: 0, maxMemory: 0, canUpload: false, canCustomize: false, canAnalytics: false },
   starter: { agents: ['aria','nova','rex','vera','lumi','lex','pulse','atlas'], maxHistory: 10, maxMemory: 3, canUpload: false, canCustomize: false, canAnalytics: false },
   pro:     { agents: ['aria','nova','rex','vera','lumi','lex','pulse','atlas'], maxHistory: -1, maxMemory: -1, canUpload: true, canCustomize: true, canAnalytics: true },
-  unlimited:{agents: ['aria','nova','rex','vera','lumi','lex','pulse','atlas'], maxHistory: -1, maxMemory: -1, canUpload: true, canCustomize: true, canAnalytics: true },
 };
 
 function getPlanPerms() {
@@ -839,6 +837,8 @@ async function initApp() {
 
     // Vérifier que user a les propriétés minimales requises
     if (!user.plan) user.plan = 'starter';
+    // Normalisation legacy : l'ancien plan "Illimité" a été retiré du catalogue, les comptes existants basculent sur Pro
+    if (user.plan === 'unlimited' || user.plan === 'illimite' || user.plan === 'illimité') user.plan = 'pro';
     if (!user.id) user.id = 'local_' + Date.now();
 
     initUI();
@@ -868,6 +868,7 @@ function retryInit() {
   initApp();
 }
 
+function gotoUpgrade() { openSettings('abonnement'); }
 function goToAuth() {
   location.href = 'auth.html';
 }
@@ -1170,13 +1171,13 @@ function switchAgentConfigTab(agentId) {
 function updateAbonnementTab() {
   const limits = { trial: 30, starter: 200, pro: 800 };
   const names = { trial: 'Découverte 0€/7j · 30 msg', starter: 'Starter 29€/mois', pro: 'Pro 59€/mois' };
-  const limit = limits[user?.plan] || 500;
+  const limit = limits[user?.plan] || 200;
   const pct = limit > 0 ? Math.min(Math.round((msgCount / limit) * 100), 100) : 0;
   document.getElementById('currentPlanCard').innerHTML = `
     <div class="plan-card-sm current">
       <div><div class="plan-name-sm">${names[user?.plan] || user?.plan || 'Starter'}</div>
       <div class="plan-price-sm">${user?.trialEndsAt ? 'Expire le ' + new Date(user.trialEndsAt).toLocaleDateString('fr-FR') : ''}</div></div>
-      ${user?.plan === 'trial' ? '<button class="sp-btn sp-btn-primary" onclick="openSettings('abonnement')">Upgrader</button>' : ''}
+      ${user?.plan === 'trial' ? '<button class="sp-btn sp-btn-primary" onclick="gotoUpgrade()">Upgrader</button>' : ''}
     </div>`;
   const lbl = limit > 0 ? `${msgCount} / ${limit} messages` : msgCount + ' messages (illimité)';
   document.getElementById('usageLbl').textContent = lbl;
@@ -1518,8 +1519,8 @@ async function toggle2FA() {
   showToast("La 2FA sera disponible prochainement. Contactez contact@feelsyst.com pour l'activer manuellement.", 'err');
 }
 function updateQuota() {
-  const l = { trial: 500, starter: 500, pro: 2000, unlimited: -1 };
-  const lim = l[user?.plan] || 500;
+  const l = { trial: 30, starter: 200, pro: 800 };
+  const lim = l[user?.plan] || 200;
   if (lim < 0) { document.getElementById('quotaText').textContent = msgCount + ' msg'; }
   else if (user?.plan === 'trial') { document.getElementById('quotaText').textContent = `${msgCount}/30 msg`; }
   else {
