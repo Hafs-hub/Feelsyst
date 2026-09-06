@@ -86,5 +86,58 @@ module.exports = async (req, res) => {
     return res.status(200).json({ success: true, client: data });
   }
 
+  // ── POST : test d'envoi email Brevo (diagnostic) ──
+  if (req.method === 'POST') {
+    const { action, email } = req.body || {};
+
+    if (action === 'test_email') {
+      const BREVO_KEY = process.env.BREVO_API_KEY;
+      const results = {
+        brevo_key_present: !!BREVO_KEY,
+        brevo_key_length: BREVO_KEY ? BREVO_KEY.length : 0,
+        target_email: email || 'contact@feelsyst.com',
+        timestamp: new Date().toISOString(),
+      };
+
+      if (!BREVO_KEY) {
+        return res.status(200).json({ ...results, success: false, error: 'BREVO_API_KEY absente des variables Vercel' });
+      }
+
+      try {
+        const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'api-key': BREVO_KEY },
+          body: JSON.stringify({
+            sender: { name: 'Feelsyst Test', email: 'contact@feelsyst.com' },
+            to: [{ email: email || 'contact@feelsyst.com', name: 'Test Admin' }],
+            subject: '✅ Test email Feelsyst — Brevo fonctionne',
+            textContent: `Test d'envoi depuis Feelsyst.
+
+Date: ${new Date().toISOString()}
+Serveur: Vercel
+BREVO_KEY présente: oui
+
+Si vous recevez cet email, la configuration Brevo est correcte.`,
+          }),
+        });
+
+        const brevoData = await brevoRes.json();
+        results.brevo_status = brevoRes.status;
+        results.brevo_response = brevoData;
+        results.success = brevoRes.ok;
+
+        if (!brevoRes.ok) {
+          results.error = `Brevo ${brevoRes.status}: ${JSON.stringify(brevoData)}`;
+        }
+
+        return res.status(200).json(results);
+      } catch (e) {
+        return res.status(200).json({ ...results, success: false, error: e.message, stack: e.stack?.slice(0, 200) });
+      }
+    }
+
+    return res.status(400).json({ error: 'Action inconnue' });
+  }
+
   return res.status(405).json({ error: 'Méthode non autorisée' });
 };

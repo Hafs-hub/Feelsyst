@@ -7,11 +7,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+// Plans disponibles : Découverte (trial), Starter, Pro
 const STRIPE_LINKS = {
-  starter:   'https://buy.stripe.com/pay/price_1TgL8mAeed9sYBiokS3BJgG0',
-  pro:       'https://buy.stripe.com/pay/price_1TgLALAeed9sYBiouz0mxBsd',
-  unlimited: 'https://buy.stripe.com/pay/price_1TgLB0Aeed9sYBioFYaYx8RI',
-  custom:    'https://buy.stripe.com/pay/price_1TgLBtAeed9sYBio4mRzpovS',
+  starter: 'https://buy.stripe.com/pay/price_1TgL8mAeed9sYBiokS3BJgG0',
+  pro:     'https://buy.stripe.com/pay/price_1TgLALAeed9sYBiouz0mxBsd',
 };
 
 function hashPassword(password) {
@@ -39,30 +38,51 @@ async function sendWelcomeEmail(userData) {
 
   console.log(`📧 Envoi email de bienvenue à ${userData.email}...`);
 
+  // Pricing cohérent avec index.html (3 plans : trial, starter, pro)
   const planNames = {
-    trial:     'Découverte (7 jours gratuits)',
-    starter:   'Starter',
-    pro:       'Pro',
-    unlimited: 'Illimité',
+    trial:   'Découverte — 0€ · 7 jours · 30 messages · 5 agents',
+    starter: 'Starter — 29€/mois · 200 messages · 8 agents',
+    pro:     'Pro — 59€/mois · 800 messages · 8 agents + personnalisation',
+  };
+  // Quotas cohérents avec PLAN_PERMS du dashboard
+  const planQuotas = {
+    trial: 30, starter: 200, pro: 800,
+  };
+  // Agents disponibles par plan (cohérent avec index.html)
+  const planAgents = {
+    trial:   ['aria', 'nova', 'rex', 'vera', 'lumi'], // 5 agents
+    starter: ['aria', 'nova', 'rex', 'vera', 'lumi', 'lex', 'pulse', 'atlas'], // 8 agents
+    pro:     ['aria', 'nova', 'rex', 'vera', 'lumi', 'lex', 'pulse', 'atlas'], // 8 agents
   };
 
+  const quota = planQuotas[userData.plan] > 0 ? planQuotas[userData.plan] + ' messages inclus' : 'Messages illimités';
   const emailBody = `Bonjour ${userData.firstname},
 
 Je suis Rex, votre agent commercial IA chez Feelsyst. 🤝
 
-Votre compte a été créé avec succès ! Voici vos informations :
+Votre compte a été créé avec succès !
 
 • Plan : ${planNames[userData.plan] || userData.plan}
+• Quota : ${quota}
 • Entreprise : ${userData.company}
 • Secteur : ${userData.sector}
 
 ${userData.plan === 'trial'
-  ? 'Vous disposez de 7 jours pour tester nos agents IA en conditions réelles. Pas de carte bancaire requise.'
+  ? 'Vous disposez de 7 jours et 30 messages pour tester nos agents IA. Pas de carte bancaire requise.'
   : 'Votre abonnement est actif. Vos agents IA sont prêts à travailler pour vous.'}
 
 Accédez à votre tableau de bord : https://feelsyst.com/dashboard.html
 
-Vos 8 agents IA qui vous attendent :
+${userData.plan === 'trial'
+    ? `Vos 5 agents IA disponibles pendant l'essai :
+🧠 Aria — Stratégie & Veille marché
+✨ Nova — Marketing & Création de contenu
+💼 Rex — Ventes & Prospection (c'est moi !)
+📊 Vera — Finance & Facturation
+💬 Lumi — Support client 24h/7j
+
+Passez au plan Starter pour accéder à Lex, Pulse et Atlas.`
+    : `Vos 8 agents IA qui vous attendent :
 🧠 Aria — Stratégie & Veille marché
 ✨ Nova — Marketing & Création de contenu
 💼 Rex — Ventes & Prospection (c'est moi !)
@@ -70,7 +90,7 @@ Vos 8 agents IA qui vous attendent :
 💬 Lumi — Support client 24h/7j
 ⚖️ Lex — Juridique & Conformité RGPD
 📈 Pulse — Analytics & Reporting
-🎓 Atlas — Onboarding & Formation
+🎓 Atlas — Onboarding & Formation`}
 
 À très vite,
 Rex — Agent Commercial IA Feelsyst`;
@@ -108,7 +128,10 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Méthode non autorisée' });
 
   try {
-    const { firstname, lastname, email, company, sector, password, plan = 'trial' } = req.body;
+    const { firstname, lastname, email, company, sector, password } = req.body;
+    // Valider le plan (uniquement trial, starter, pro)
+    const rawPlan = req.body.plan || 'trial';
+    const plan = ['trial', 'starter', 'pro'].includes(rawPlan) ? rawPlan : 'trial';
 
     // Validation
     if (!firstname || !lastname || !email || !company || !sector || !password) {
@@ -183,7 +206,7 @@ module.exports = async (req, res) => {
       console.error('❌ Erreur envoi email bienvenue:', emailErr.message);
     }
 
-    const paymentUrl = plan !== 'trial' ? STRIPE_LINKS[plan] : null;
+    const paymentUrl = STRIPE_LINKS[plan] || null; // null pour trial
 
     return res.status(200).json({
       success: true,
