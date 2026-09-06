@@ -277,6 +277,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    flex-wrap: wrap;
   }
 
   .table-header h3 {
@@ -284,7 +285,14 @@
     font-weight: 600;
   }
 
-  .table-actions { display: flex; gap: 8px; align-items: center; }
+  .table-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  /* Wraps every <table> at runtime (see boot script) so it can scroll
+     horizontally on its own without the header scrolling with it. */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
   table {
     width: 100%;
@@ -651,10 +659,42 @@
 
   select option { background: var(--card); }
 
+  /* ── MOBILE NAV ── */
+  .menu-toggle {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    font-size: 16px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 90;
+  }
+
   @media (max-width: 768px) {
-    .sidebar { transform: translateX(-100%); }
-    .main { margin-left: 0; }
+    .sidebar { transform: translateX(-100%); transition: transform 0.2s ease; }
+    body.sidebar-open .sidebar { transform: translateX(0); }
+    .main { margin-left: 0; min-width: 0; }
     .two-col { grid-template-columns: 1fr; }
+    .menu-toggle { display: flex; }
+    body.sidebar-open .sidebar-overlay { display: block; }
+    .content { padding: 18px; }
+    .topbar { padding: 0 14px; }
+    .topbar-title { font-size: 14px; }
+    .refresh-btn, .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .kpi-value { font-size: 22px; }
   }
 </style>
 </head>
@@ -678,6 +718,7 @@
 
 <!-- ── APP ── -->
 <div id="app" style="display:none;width:100%;display:none">
+  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -732,7 +773,10 @@
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
-      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div style="display:flex;align-items:center">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      </div>
       <div class="topbar-right">
         <span id="topAlertBadge" class="alert-badge" style="display:none" onclick="showSection('alerts')"></span>
         <button class="refresh-btn" onclick="refreshCurrent()">↻ Actualiser</button>
@@ -1388,6 +1432,22 @@ function showSection(name) {
   });
   document.getElementById('topbarTitle').textContent = sectionTitles[name] || name;
   refreshCurrent();
+  closeSidebar();
+}
+
+function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+// Enveloppe chaque <table> dans .table-wrap avec un conteneur scrollable,
+// pour que les colonnes qui dépassent défilent horizontalement au lieu
+// d'être coupées sur petit écran.
+function wrapTablesForScroll() {
+  document.querySelectorAll('.table-wrap > table').forEach(t => {
+    const wrap = document.createElement('div');
+    wrap.className = 'table-scroll';
+    t.parentNode.insertBefore(wrap, t);
+    wrap.appendChild(t);
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2471,7 +2531,72 @@ document.addEventListener('change', e => {
 // ══════════════════════════════════════════════════════════════
 // BOOT
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// DIAGNOSTIC EMAIL BREVO
+// ══════════════════════════════════════════════════════════════
+async function testBrevoEmail() {
+  const email = document.getElementById('testEmailAddr').value.trim();
+  if (!email) { toast('Entrez un email de test', 'error'); return; }
+
+  const resultDiv = document.getElementById('testEmailResult');
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<div style="color:var(--muted);font-size:13px">⏳ Test en cours…</div>';
+
+  try {
+    const r = await fetch('/api/clients', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ADMIN_TOKEN}`,
+      },
+      body: JSON.stringify({ action: 'test_email', email }),
+    });
+    const data = await r.json();
+
+    const rows = [
+      ['BREVO_API_KEY présente', data.brevo_key_present ? '✅ Oui' : '❌ Non', data.brevo_key_present ? 'var(--green)' : 'var(--red)'],
+      ['Longueur clé', data.brevo_key_length || 0, 'var(--text)'],
+      ['Statut Brevo API', data.brevo_status || '—', data.brevo_status === 201 ? 'var(--green)' : 'var(--red)'],
+      ['Résultat envoi', data.success ? '✅ Email envoyé' : '❌ Échec', data.success ? 'var(--green)' : 'var(--red)'],
+    ];
+
+    let html = `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px">`;
+    rows.forEach(([label, val, color]) => {
+      html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(37,42,61,.5)">
+        <span style="color:var(--muted)">${label}</span>
+        <span style="color:${color};font-weight:600">${val}</span>
+      </div>`;
+    });
+
+    if (data.error) {
+      html += `<div style="margin-top:10px;padding:10px;background:rgba(252,92,92,.08);border-radius:7px;font-size:12px;color:var(--red);font-family:monospace;word-break:break-all">${data.error}</div>`;
+    }
+
+    if (data.brevo_response) {
+      html += `<div style="margin-top:8px;font-size:11px;color:var(--muted)">Réponse Brevo: ${JSON.stringify(data.brevo_response)}</div>`;
+    }
+
+    if (data.success) {
+      html += `<div style="margin-top:10px;padding:10px;background:rgba(34,211,165,.08);border-radius:7px;font-size:13px;color:var(--green)">✅ Email envoyé à ${email}. Vérifiez votre boîte (et les spams).</div>`;
+    }
+
+    html += '</div>';
+    resultDiv.innerHTML = html;
+
+    if (!data.success && !data.brevo_key_present) {
+      resultDiv.innerHTML += `<div style="margin-top:10px;padding:12px;background:rgba(252,92,92,.07);border:1px solid rgba(252,92,92,.2);border-radius:8px;font-size:13px;color:var(--red)">
+        ⚠️ <strong>BREVO_API_KEY absente</strong><br>
+        Allez dans <strong>Vercel → Settings → Environment Variables</strong> et vérifiez que la variable s'appelle exactement <code>BREVO_API_KEY</code>. Puis redéployez.
+      </div>`;
+    }
+
+  } catch(e) {
+    resultDiv.innerHTML = `<div style="color:var(--red);font-size:13px">Erreur réseau: ${e.message}</div>`;
+  }
+}
+
 window.addEventListener('load', () => {
+  wrapTablesForScroll();
   const saved = localStorage.getItem('feelsyst_admin_token');
   if (saved === '#"Feelsyst-admin.hafs"0-1#') {
     document.getElementById('loginWrap').style.display = 'none';
