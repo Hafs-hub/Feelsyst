@@ -69,7 +69,7 @@ Votre compte a été créé avec succès !
 
 ${userData.plan === 'trial'
   ? 'Vous disposez de 7 jours et 30 messages pour tester nos agents IA. Pas de carte bancaire requise.'
-  : 'Votre abonnement est actif. Vos agents IA sont prêts à travailler pour vous.'}
+  : 'Il ne reste plus qu\'une étape : finalisez votre paiement pour activer votre abonnement. Vos agents IA seront prêts dès la confirmation.'}
 
 Accédez à votre tableau de bord : https://feelsyst.com/dashboard.html
 
@@ -158,9 +158,15 @@ module.exports = async (req, res) => {
     }
 
     // Créer le client
-    const trialEndsAt = plan === 'trial'
-      ? new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()
-      : null;
+    // IMPORTANT : un plan payant (starter/pro) ne doit JAMAIS être activé ici.
+    // Tant que Stripe n'a pas confirmé le paiement (webhook checkout.session.completed),
+    // le compte reste en 'trial'. C'est le webhook, seule source de vérité, qui
+    // passera plan/status sur la valeur payante après paiement réel.
+    const trialEndsAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
+    const accountPlan = 'trial';
+    // On garde trace du plan demandé pour l'email de bienvenue et pour choisir
+    // le bon lien Stripe, mais il n'est jamais persisté comme plan actif du compte.
+    const requestedPlan = plan;
 
     const { data: newClient, error: insertError } = await supabase
       .from('clients')
@@ -169,8 +175,8 @@ module.exports = async (req, res) => {
         full_name: `${firstname.trim()} ${lastname.trim()}`,
         company_name: company.trim(),
         sector,
-        plan,
-        status: plan === 'trial' ? 'trial' : 'active',
+        plan: accountPlan,
+        status: 'trial',
         trial_ends_at: trialEndsAt,
         password_hash: hashPassword(password),
       }])
@@ -198,7 +204,7 @@ module.exports = async (req, res) => {
         email: normalizedEmail,
         company: company.trim(),
         sector,
-        plan,
+        plan: requestedPlan,
       });
       emailSent = true;
     } catch (emailErr) {
@@ -219,7 +225,8 @@ module.exports = async (req, res) => {
         email: normalizedEmail,
         company: company.trim(),
         sector,
-        plan,
+        plan: accountPlan, // reflète l'état réel en base ('trial' tant que non payé)
+        requestedPlan,     // plan choisi, activé uniquement après paiement Stripe confirmé
         trialEndsAt,
         createdAt: newClient.created_at,
       },
