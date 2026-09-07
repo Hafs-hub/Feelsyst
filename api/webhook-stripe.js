@@ -9,18 +9,9 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-const PLAN_PRICES = {
-  starter: 29,
-  pro: 79,
-  unlimited: 179,
-  custom: 399,
-};
-
 const PLAN_NAMES = {
   starter: 'Pack Starter',
   pro: 'Pack Pro',
-  unlimited: 'Pack Illimité',
-  custom: 'Agent IA Personnalisé',
 };
 
 // ============================================================
@@ -41,10 +32,7 @@ function getPlanFromStripe(session) {
   const metadata = session.metadata || {};
   if (metadata.plan) return metadata.plan;
   const amount = (session.amount_total || 0) / 100;
-  if (amount <= 30) return 'starter';
-  if (amount <= 80) return 'pro';
-  if (amount <= 180) return 'unlimited';
-  return 'custom';
+  return amount <= 40 ? 'starter' : 'pro';
 }
 
 // ============================================================
