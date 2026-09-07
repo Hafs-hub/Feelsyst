@@ -2448,7 +2448,7 @@ async function runRexNow() {
     // 1. Générer les prospects
     const r1 = await fetch('/api/prospect', {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${ADMIN_TOKEN}` },
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${ADMIN_PWD_CONST()}` },
       body: JSON.stringify({ action:'generate', sector, zone, size, volume }),
     });
     const d1 = await r1.json();
@@ -2458,7 +2458,7 @@ async function runRexNow() {
     // 2. Envoyer les emails
     const r2 = await fetch('/api/prospect', {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${ADMIN_TOKEN}` },
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${ADMIN_PWD_CONST()}` },
       body: JSON.stringify({ action:'send', prospects: d1.prospects, subject, template }),
     });
     const d2 = await r2.json();
@@ -2543,11 +2543,11 @@ async function testBrevoEmail() {
   resultDiv.innerHTML = '<div style="color:var(--muted);font-size:13px">⏳ Test en cours…</div>';
 
   try {
-    const r = await fetch('/api/clients', {
+    const r = await fetch('/api/admin/clients', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ADMIN_TOKEN}`,
+        'Authorization': `Bearer ${ADMIN_PWD_CONST()}`,
       },
       body: JSON.stringify({ action: 'test_email', email }),
     });

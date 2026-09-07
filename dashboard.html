@@ -239,6 +239,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
 .toast{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 15px;font-size:13px;display:flex;align-items:center;gap:8px;animation:fadeUp .2s ease;min-width:200px;}
 .toast.ok{border-left:3px solid var(--green);}
 .toast.err{border-left:3px solid var(--red);}
+.toast.info{border-left:3px solid #4a9eff;}
 
 /* Tabs content */
 .sp-tab-content{display:none;}
@@ -758,7 +759,7 @@ const PLAN_PERMS = {
 };
 
 function getPlanPerms() {
-  return PLAN_PERMS[user?.plan] || PLAN_PERMS.trial;
+  return PLAN_PERMS[user?.plan] || PLAN_PERMS.starter;
 }
 
 const AGENTS = [
@@ -1143,6 +1144,7 @@ function openSettings(tab = 'profil') {
   updateAbonnementTab();
   loadAgentConfigs();
   loadMemory();
+  loadNotificationPrefs();
   switchTab(tab);
   document.getElementById('settingsOverlay').classList.add('open');
 }
@@ -1212,7 +1214,27 @@ async function saveProfile() {
   } catch (e) { showToast('Erreur: ' + e.message, 'err'); }
 }
 
-function saveNotifications() { showToast('Préférences enregistrées', 'ok'); closeSettings(); }
+function saveNotifications() {
+  const prefs = {
+    quota: document.getElementById('notifQuota')?.checked,
+    weekly: document.getElementById('notifWeekly')?.checked,
+    trial: document.getElementById('notifTrial')?.checked,
+    news: document.getElementById('notifNews')?.checked,
+    payment: document.getElementById('notifPayment')?.checked,
+    sound: document.getElementById('notifSound')?.checked,
+    voice: document.getElementById('notifVoice')?.checked,
+  };
+  localStorage.setItem('feelsyst_notifprefs_' + (user?.id || ''), JSON.stringify(prefs));
+  showToast('Préférences enregistrées', 'ok');
+  closeSettings();
+}
+function loadNotificationPrefs() {
+  const raw = localStorage.getItem('feelsyst_notifprefs_' + (user?.id || ''));
+  const defaults = { quota: true, weekly: true, trial: false, news: false, payment: true, sound: true, voice: false };
+  const prefs = raw ? { ...defaults, ...JSON.parse(raw) } : defaults;
+  const map = { notifQuota: 'quota', notifWeekly: 'weekly', notifTrial: 'trial', notifNews: 'news', notifPayment: 'payment', notifSound: 'sound', notifVoice: 'voice' };
+  Object.entries(map).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.checked = !!prefs[key]; });
+}
 
 function saveAgentConfig() {
   const perms = getPlanPerms();
@@ -1252,7 +1274,27 @@ function resetAgentConfig() {
   showToast('Configuration réinitialisée', 'ok');
 }
 
-function upgradePlan(plan) { location.href = 'auth.html?plan=' + plan; }
+function upgradePlan(plan) {
+  if (!user) return;
+  if (user.plan === plan) { showToast('Vous êtes déjà sur ce plan.', 'info'); return; }
+
+  const STRIPE_LINKS = {
+    starter: 'https://buy.stripe.com/pay/price_1TgL8mAeed9sYBiokS3BJgG0',
+    pro:     'https://buy.stripe.com/pay/price_1TgLALAeed9sYBiouz0mxBsd',
+  };
+
+  // Depuis l'essai (trial), aucun abonnement existant à gérer : c'est le même
+  // chemin de paiement que l'inscription, donc on peut envoyer directement vers Stripe.
+  if (user.plan === 'trial' && STRIPE_LINKS[plan]) {
+    const emailParam = user.email ? '?prefilled_email=' + encodeURIComponent(user.email) : '';
+    window.location.href = STRIPE_LINKS[plan] + emailParam;
+    return;
+  }
+
+  // Changer entre deux plans payants nécessiterait d'annuler/proratiser l'abonnement
+  // Stripe déjà actif côté serveur — pas encore automatisé, pour éviter un double abonnement.
+  showToast("Le changement entre plans payants n'est pas encore automatisé. Contactez contact@feelsyst.com pour changer de plan.", 'info');
+}
 
 function exportData() {
   try {
@@ -1475,7 +1517,7 @@ function scrollBottom() { const c = document.getElementById('msgs'); setTimeout(
 function escHtml(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'); }
 function fmtTime(d) { if (!d) return ''; return new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
-function showToast(msg, type = 'ok') { const w = document.getElementById('toastWrap'); const e = document.createElement('div'); e.className = `toast ${type}`; e.innerHTML = `${type === 'ok' ? '✅' : '❌'} ${msg}`; w.appendChild(e); setTimeout(() => e.remove(), 3500); }
+function showToast(msg, type = 'ok') { const w = document.getElementById('toastWrap'); const e = document.createElement('div'); e.className = `toast ${type}`; const icon = type === 'ok' ? '✅' : type === 'info' ? 'ℹ️' : '❌'; e.innerHTML = `${icon} ${msg}`; w.appendChild(e); setTimeout(() => e.remove(), 3500); }
 function showTrialExpired() { document.getElementById('msgs').innerHTML = `<div class="welcome"><div class="welcome-ico">⏰</div><h2>Essai terminé</h2><p>Choisissez un plan pour continuer.</p><div class="suggestions"><div class="suggestion" onclick="openSettings('abonnement')">Voir les plans →</div></div></div>`; }
 
 // ── Force mot de passe ──
@@ -1516,7 +1558,7 @@ async function changePassword() {
 
 // ── 2FA ──
 async function toggle2FA() {
-  showToast("La 2FA sera disponible prochainement. Contactez contact@feelsyst.com pour l'activer manuellement.", 'err');
+  showToast("La 2FA sera disponible prochainement. Contactez contact@feelsyst.com pour l'activer manuellement.", 'info');
 }
 function updateQuota() {
   const l = { trial: 30, starter: 200, pro: 800 };
