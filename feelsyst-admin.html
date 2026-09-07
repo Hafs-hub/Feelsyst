@@ -2214,10 +2214,10 @@ async function sendBroadcast() {
 
   msgEl.textContent = 'Envoi en cours…';
   try {
-    const r = await fetch(`${location.origin}/api/admin/broadcast`, {
+    const r = await fetch(`${location.origin}/api/clients`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ADMIN_PWD_CONST()}` },
-      body: JSON.stringify({ segment, plan, status, subject, body }),
+      body: JSON.stringify({ action: 'broadcast', segment, plan, status, subject, body }),
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Erreur broadcast');
@@ -2240,10 +2240,10 @@ function ADMIN_PWD_CONST() {
 async function impersonateClient(clientId, email) {
   if (!confirm(`Se connecter en tant que ${email} ? Une session de 2h sera créée.`)) return;
   try {
-    const r = await fetch(`${location.origin}/api/admin/impersonate`, {
+    const r = await fetch(`${location.origin}/api/clients`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ADMIN_PWD_CONST()}` },
-      body: JSON.stringify({ client_id: clientId }),
+      body: JSON.stringify({ action: 'impersonate', client_id: clientId }),
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Erreur impersonation');
@@ -2543,7 +2543,7 @@ async function testBrevoEmail() {
   resultDiv.innerHTML = '<div style="color:var(--muted);font-size:13px">⏳ Test en cours…</div>';
 
   try {
-    const r = await fetch('/api/admin/clients', {
+    const r = await fetch('/api/clients', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
