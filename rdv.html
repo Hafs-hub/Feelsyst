@@ -132,8 +132,8 @@
 
     <div class="hours">
       <h2>Horaires d'appel</h2>
-      <p class="big">Du lundi au vendredi, le matin uniquement</p>
-      <p>Exemple : lundi de 8h30 à 11h00. Aucun appel n'est possible après 11h00, quel que soit le jour.</p>
+      <p class="big">Du lundi au vendredi</p>
+      <p>8h30 – 11h30 le matin, puis 13h30 – 14h30 l'après-midi. Aucun appel en dehors de ces créneaux.</p>
     </div>
 
     <a href="index.html" class="back">← Retour à l'offre</a>
@@ -168,8 +168,8 @@
     </div>
 
     <div class="field">
-      <label for="creneau">Créneau souhaité (matin, lundi–vendredi, avant 11h)</label>
-      <input type="text" id="creneau" placeholder="Ex : mardi vers 9h30">
+      <label for="creneau">Créneau souhaité (lundi–vendredi, 8h30–11h30 ou 13h30–14h30)</label>
+      <input type="text" id="creneau" placeholder="Ex : mardi vers 9h30 ou jeudi vers 14h">
     </div>
 
     <div class="field">
@@ -218,7 +218,7 @@
       btn.textContent = 'Envoyer ma demande';
       console.error(error);
     } else {
-      statusEl.textContent = "Demande envoyée. On vous rappelle dans un créneau du matin, lundi–vendredi, avant 11h.";
+      statusEl.textContent = "Demande envoyée. On vous rappelle entre 8h30–11h30 ou 13h30–14h30, lundi–vendredi.";
       statusEl.className = 'status ok';
       form.reset();
       btn.textContent = 'Envoyé';
