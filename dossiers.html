@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Dossiers clients — Feelsyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0f1e; --bg-soft:#12162a; --line:#232840;
+    --text:#eef0fa; --text-dim:#9aa0bd;
+    --violet:#7c5cfc; --rose:#fc5c7d; --green:#5cfc9d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;}
+  h1,h2{font-family:'Syne',sans-serif;font-weight:700;}
+
+  #login-screen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .login-box{
+    background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;
+    padding:36px;max-width:360px;width:100%;
+  }
+  .login-box h1{font-size:1.3rem;margin-bottom:20px;}
+  .login-box input{
+    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;
+    padding:12px 14px;color:var(--text);font-size:0.95rem;margin-bottom:14px;
+  }
+  .login-box button{
+    width:100%;background:var(--violet);color:#fff;border:none;font-weight:600;
+    padding:13px;border-radius:8px;cursor:pointer;font-size:0.95rem;
+  }
+  .login-error{color:var(--rose);font-size:0.85rem;margin-top:10px;display:none;}
+
+  #app{display:none;max-width:900px;margin:0 auto;padding:32px 20px 80px;}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+  header h1{font-size:1.4rem;}
+  .count{color:var(--text-dim);font-size:0.9rem;}
+
+  .dossier{
+    background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;
+    padding:20px 22px;margin-bottom:14px;cursor:pointer;
+  }
+  .dossier .top{display:flex;justify-content:space-between;align-items:center;}
+  .dossier .entreprise{font-weight:600;font-size:1.05rem;}
+  .dossier .meta{color:var(--text-dim);font-size:0.85rem;margin-top:4px;}
+  .badge{
+    font-size:0.75rem;padding:4px 10px;border-radius:20px;
+    background:rgba(124,92,252,0.18);color:var(--violet);white-space:nowrap;
+  }
+  .badge.livre{background:rgba(92,252,157,0.15);color:var(--green);}
+  .badge.retour{background:rgba(252,92,125,0.15);color:var(--rose);}
+
+  .detail{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:18px;}
+  .detail.open{display:block;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:0.82rem;color:var(--text-dim);margin-bottom:6px;}
+  .field input, .field select, .field textarea{
+    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;
+    padding:10px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.92rem;
+  }
+  .field textarea{min-height:70px;resize:vertical;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .contact-info{
+    background:var(--bg);border:1px solid var(--line);border-radius:7px;
+    padding:14px 16px;margin-bottom:16px;font-size:0.88rem;color:var(--text-dim);
+  }
+  .contact-info div{margin-bottom:4px;}
+  .contact-info strong{color:var(--text);}
+  .save-btn{
+    background:var(--violet);color:#fff;border:none;font-weight:600;
+    padding:11px 20px;border-radius:7px;cursor:pointer;font-size:0.9rem;
+  }
+  .saved-msg{color:var(--green);font-size:0.85rem;margin-left:12px;display:none;}
+  .empty{color:var(--text-dim);text-align:center;padding:60px 0;}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Accès dossiers</h1>
+    <input type="password" id="pwd-input" placeholder="Mot de passe">
+    <button onclick="login()">Entrer</button>
+    <p class="login-error" id="login-error">Mot de passe incorrect.</p>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <h1>Dossiers clients</h1>
+    <span class="count" id="count"></span>
+  </header>
+  <div id="list"></div>
+</div>
+
+<script>
+  let ADMIN_PWD = '';
+  let dossiers = [];
+
+  function login() {
+    const pwd = document.getElementById('pwd-input').value;
+    ADMIN_PWD = pwd;
+    loadDossiers(true);
+  }
+
+  async function loadDossiers(fromLogin) {
+    const res = await fetch('/api/dossiers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: ADMIN_PWD, action: 'list' })
+    });
+
+    if (res.status === 401) {
+      if (fromLogin) document.getElementById('login-error').style.display = 'block';
+      return;
+    }
+
+    const data = await res.json();
+    dossiers = data.dossiers || [];
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    render();
+  }
+
+  function badgeClass(statut) {
+    if (statut === 'livré') return 'badge livre';
+    if (statut === 'retour reçu') return 'badge retour';
+    return 'badge';
+  }
+
+  function render() {
+    const list = document.getElementById('list');
+    document.getElementById('count').textContent = dossiers.length + ' dossier(s)';
+
+    if (dossiers.length === 0) {
+      list.innerHTML = '<p class="empty">Aucune demande pour le moment.</p>';
+      return;
+    }
+
+    list.innerHTML = dossiers.map((d, i) => `
+      <div class="dossier">
+        <div class="top" onclick="toggle(${i})">
+          <div>
+            <div class="entreprise">${escapeHtml(d.entreprise)}</div>
+            <div class="meta">${escapeHtml(d.contact_nom)} · ${new Date(d.created_at).toLocaleDateString('fr-FR')}</div>
+          </div>
+          <span class="${badgeClass(d.statut)}">${d.statut || 'nouveau'}</span>
+        </div>
+        <div class="detail" id="detail-${i}">
+          <div class="contact-info">
+            <div><strong>Email :</strong> ${escapeHtml(d.email)}</div>
+            <div><strong>Téléphone :</strong> ${escapeHtml(d.telephone)}</div>
+            <div><strong>Secteur :</strong> ${escapeHtml(d.secteur || '—')}</div>
+            <div><strong>Créneau souhaité :</strong> ${escapeHtml(d.creneau_souhaite || '—')}</div>
+            <div><strong>Message initial :</strong> ${escapeHtml(d.message || '—')}</div>
+          </div>
+
+          <div class="field">
+            <label>Besoin diagnostiqué à l'appel</label>
+            <textarea id="besoin-${i}">${escapeHtml(d.besoin_diagnostique || '')}</textarea>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Module Lumi utilisé</label>
+              <select id="agent-${i}">
+                ${['', 'Support client', 'Prospection', 'Finance', 'Juridique', 'Marketing', 'Analytics', 'Formation', 'Stratégie'].map(a =>
+                  `<option value="${a}" ${d.agent_assigne === a ? 'selected' : ''}>${a || '—'}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Statut</label>
+              <select id="statut-${i}">
+                ${['nouveau', 'appel fait', 'en cours', 'livré', 'retour reçu'].map(s =>
+                  `<option value="${s}" ${d.statut === s ? 'selected' : ''}>${s}</option>`
+                ).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Date de livraison prévue</label>
+              <input type="date" id="livraison-${i}" value="${d.date_livraison || ''}">
+            </div>
+            <div class="field">
+              <label>Date de point retour</label>
+              <input type="date" id="suivi-${i}" value="${d.date_suivi || ''}">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Notes internes</label>
+            <textarea id="notes-${i}">${escapeHtml(d.notes_internes || '')}</textarea>
+          </div>
+
+          <button class="save-btn" onclick="save(${i})">Enregistrer</button>
+          <span class="saved-msg" id="saved-${i}">Enregistré ✓</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function toggle(i) {
+    document.getElementById('detail-' + i).classList.toggle('open');
+  }
+
+  async function save(i) {
+    const d = dossiers[i];
+    const updates = {
+      besoin_diagnostique: document.getElementById('besoin-' + i).value,
+      agent_assigne: document.getElementById('agent-' + i).value,
+      statut: document.getElementById('statut-' + i).value,
+      date_livraison: document.getElementById('livraison-' + i).value || null,
+      date_suivi: document.getElementById('suivi-' + i).value || null,
+      notes_internes: document.getElementById('notes-' + i).value
+    };
+
+    const res = await fetch('/api/dossiers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: ADMIN_PWD, action: 'update', id: d.id, updates })
+    });
+
+    if (res.ok) {
+      Object.assign(dossiers[i], updates);
+      const savedMsg = document.getElementById('saved-' + i);
+      savedMsg.style.display = 'inline';
+      setTimeout(() => savedMsg.style.display = 'none', 2000);
+      render();
+      document.getElementById('detail-' + i).classList.add('open');
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+  }
+</script>
+
+</body>
+</html>

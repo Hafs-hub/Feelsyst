@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réserver mon appel — Feelsyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#0c0f1e;
+    --bg-soft:#12162a;
+    --line:#232840;
+    --text:#eef0fa;
+    --text-dim:#9aa0bd;
+    --violet:#7c5cfc;
+    --rose:#fc5c7d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em;}
+  a{color:var(--text-dim);text-decoration:none;}
+
+  header{
+    padding:24px 6vw;
+    border-bottom:1px solid var(--line);
+  }
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;}
+
+  main{
+    max-width:1080px;
+    margin:0 auto;
+    padding:7vh 6vw;
+    display:grid;
+    grid-template-columns:1fr 1.15fr;
+    gap:60px;
+  }
+
+  .side h1{font-size:clamp(1.7rem,3.4vw,2.3rem);margin-bottom:18px;}
+  .side p{color:var(--text-dim);margin-bottom:26px;}
+
+  .hours{
+    background:var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px 24px;
+    margin-bottom:20px;
+  }
+  .hours h2{font-size:1rem;margin-bottom:12px;color:var(--rose);font-family:'Inter',sans-serif;font-weight:600;}
+  .hours p{color:var(--text-dim);font-size:0.92rem;margin-bottom:0;}
+  .hours .big{color:var(--text);font-size:1.05rem;font-weight:500;margin-bottom:6px;}
+
+  .back{font-size:0.9rem;display:inline-block;margin-top:8px;}
+  .back:hover{color:var(--text);}
+
+  form{
+    background:var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:36px;
+  }
+  .field{margin-bottom:20px;}
+  label{
+    display:block;
+    font-size:0.88rem;
+    color:var(--text-dim);
+    margin-bottom:7px;
+  }
+  input, select, textarea{
+    width:100%;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:12px 14px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:0.96rem;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--violet);
+  }
+  textarea{resize:vertical;min-height:80px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+  button{
+    width:100%;
+    background:var(--violet);
+    color:#fff;
+    border:none;
+    font-weight:600;
+    font-size:1rem;
+    padding:15px;
+    border-radius:8px;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    margin-top:6px;
+  }
+  button:hover{background:#6c4de8;}
+  button:disabled{opacity:0.6;cursor:not-allowed;}
+
+  .status{
+    margin-top:16px;
+    font-size:0.9rem;
+    padding:12px 14px;
+    border-radius:7px;
+    display:none;
+  }
+  .status.ok{display:block;background:rgba(124,92,252,0.14);color:var(--text);}
+  .status.err{display:block;background:rgba(252,92,125,0.14);color:var(--text);}
+
+  @media (max-width:800px){
+    main{grid-template-columns:1fr;gap:36px;}
+  }
+</style>
+</head>
+<body>
+
+<header><a href="index.html" class="logo">Feelsyst</a></header>
+
+<main>
+  <div class="side">
+    <h1>Réservez votre appel de cadrage</h1>
+    <p>Laissez vos coordonnées, on vous rappelle dans le créneau qui vous arrange le mieux parmi nos disponibilités.</p>
+
+    <div class="hours">
+      <h2>Horaires d'appel</h2>
+      <p class="big">Du lundi au vendredi, le matin uniquement</p>
+      <p>Exemple : lundi de 8h30 à 11h00. Aucun appel n'est possible après 11h00, quel que soit le jour.</p>
+    </div>
+
+    <a href="index.html" class="back">← Retour à l'offre</a>
+  </div>
+
+  <form id="rdv-form">
+    <div class="field">
+      <label for="entreprise">Nom de l'entreprise</label>
+      <input type="text" id="entreprise" required>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="contact_nom">Votre nom</label>
+        <input type="text" id="contact_nom" required>
+      </div>
+      <div class="field">
+        <label for="secteur">Secteur d'activité</label>
+        <input type="text" id="secteur">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="field">
+        <label for="telephone">Téléphone</label>
+        <input type="tel" id="telephone" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="creneau">Créneau souhaité (matin, lundi–vendredi, avant 11h)</label>
+      <input type="text" id="creneau" placeholder="Ex : mardi vers 9h30">
+    </div>
+
+    <div class="field">
+      <label for="message">Votre besoin principal (optionnel)</label>
+      <textarea id="message" placeholder="Ex : trop de temps perdu sur le support client"></textarea>
+    </div>
+
+    <button type="submit" id="submit-btn">Envoyer ma demande</button>
+    <div class="status" id="status"></div>
+  </form>
+</main>
+
+<script>
+  // Remplacer par les identifiants du nouveau projet Supabase (agence)
+  const SUPABASE_URL = "https://VOTRE-PROJET.supabase.co";
+  const SUPABASE_ANON_KEY = "VOTRE_CLE_ANON";
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const form = document.getElementById('rdv-form');
+  const statusEl = document.getElementById('status');
+  const btn = document.getElementById('submit-btn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.textContent = 'Envoi en cours...';
+    statusEl.className = 'status';
+
+    const payload = {
+      entreprise: document.getElementById('entreprise').value.trim(),
+      contact_nom: document.getElementById('contact_nom').value.trim(),
+      secteur: document.getElementById('secteur').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      telephone: document.getElementById('telephone').value.trim(),
+      creneau_souhaite: document.getElementById('creneau').value.trim(),
+      message: document.getElementById('message').value.trim()
+    };
+
+    const { error } = await supabaseClient.from('prospects_agence').insert([payload]);
+
+    if (error) {
+      statusEl.textContent = "Une erreur est survenue. Réessayez ou contactez-nous directement.";
+      statusEl.className = 'status err';
+      btn.disabled = false;
+      btn.textContent = 'Envoyer ma demande';
+      console.error(error);
+    } else {
+      statusEl.textContent = "Demande envoyée. On vous rappelle dans un créneau du matin, lundi–vendredi, avant 11h.";
+      statusEl.className = 'status ok';
+      form.reset();
+      btn.textContent = 'Envoyé';
+    }
+  });
+</script>
+
+</body>
+</html>
